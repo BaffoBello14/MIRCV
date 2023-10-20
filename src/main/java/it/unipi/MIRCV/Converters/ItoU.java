@@ -1,4 +1,4 @@
-package it.unipi.MIRCV;
+package it.unipi.MIRCV.Converters;
 
 import java.util.ArrayList;
 import java.util.List;
