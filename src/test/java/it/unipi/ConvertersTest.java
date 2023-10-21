@@ -1,26 +1,30 @@
-package it.unipi.MIRCV.Converters;
+package it.unipi;
 
 import org.junit.jupiter.api.Test;
+
+import it.unipi.MIRCV.Converters.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestConverters {
+public class ConvertersTest {
     @Test
-    public void testConvertiInUnario() {
+    public void testConvertToUnary() {
         int[] input = {1, 5, 10, 15, 20};
-        byte[] expected = {(byte) 0b01111011,(byte)0b11111110,(byte)0b11111111,(byte)0b11111101,(byte)0b11111111, (byte)0b11111111, (byte)0b11000000};
-        byte[] result = ItoU.convertiInUnario(input);
+        byte[] expected = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
+            (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11000000};
+        byte[] result = UnaryConverter.convertToUnary(input);
         assertArrayEquals(expected, result);
     }
 
 
     @Test
-    public void testConvertiDaUnario() {
-        byte[] input = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111, (byte) 0b11111101, (byte) 0b11111111,
-                (byte)0b11111111, (byte)0b11111110};
+    public void testConvertFromUnary() {
+        byte[] input = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
+            (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11111110};
         int[] expected = {1, 5, 10, 15, 25};
-        int len=5;
+        int len = 5;
 
-        int[] result = ItoU.convertiDaUnario(input, len);
+        int[] result = UnaryConverter.convertFromUnary(input, len);
 
         assertArrayEquals(expected, result);
     }

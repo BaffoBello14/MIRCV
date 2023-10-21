@@ -3,31 +3,26 @@ package it.unipi.MIRCV.Converters;
 public class VariableByteEncoder {
 
     /**
-     * Codifica un valore intero utilizzando la codifica "Variable Byte".
+     * Encodes an integer value using Variable Byte encoding.
+     * The method involves representing an integer in base-128 where the most significant bit 
+     * of each byte determines if there's another byte after it.
      *
-     * @param value L'intero da codificare.
-     * @return Un array di byte che rappresenta il valore in codifica "Variable Byte".
+     * @param value The integer to encode.
+     * @return An array of bytes representing the encoded value.
      */
     public static byte[] encode(int value) {
-        // Calcola il numero di byte necessari per rappresentare il valore dato.
-        // Ogni byte può rappresentare 7 bit del valore, più 1 bit come segnalatore di continuazione.
+        // Calculate the number of bytes required to represent the value in base-128.
         int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
         byte[] encodedBytes = new byte[numBytes];
 
-        // Inizia dalla posizione del byte meno significativo e lavora all'indietro.
         for (int i = numBytes - 1; i >= 0; i--) {
-            // Estrai i 7 bit meno significativi del valore.
             byte currentByte = (byte) (value % 128);
-            
-            // Riduci il valore, rimuovendo i bit che abbiamo appena estratto.
             value /= 128;
             
-            // Se non siamo sull'ultimo byte, imposta il bit più significativo (segnalatore di continuazione) su 1.
+            // Set the most significant bit if there's another byte after the current one.
             if (i > 0) {
                 currentByte |= (byte) 128;
             }
-            
-            // Assegna il byte codificato all'array di output nella posizione corrente.
             encodedBytes[i] = currentByte;
         }
 
@@ -35,20 +30,16 @@ public class VariableByteEncoder {
     }
 
     /**
-     * Decodifica un valore intero da una rappresentazione "Variable Byte".
+     * Decodes a value encoded using Variable Byte encoding back into its integer representation.
      *
-     * @param encodedBytes L'array di byte in codifica "Variable Byte".
-     * @return L'intero decodificato.
+     * @param encodedBytes An array of bytes representing the encoded value.
+     * @return The decoded integer value.
      */
     public static int decode(byte[] encodedBytes) {
         int decodedValue = 0;
 
-        // Per ogni byte nell'array di input...
         for (byte b : encodedBytes) {
-            // Estrai i 7 bit meno significativi dal byte corrente.
-            int value = b & 0x7f;
-
-            // Aggiungi questi bit al valore decodificato, spostandoli nella posizione corretta.
+            int value = b & 0x7f; // Retrieve the 7 least significant bits.
             decodedValue = (decodedValue << 7) | value;
         }
 
@@ -58,30 +49,29 @@ public class VariableByteEncoder {
     public static void main(String[] args) {
         int[] testValues = {1, 127, 128, 255, 256, 16383, 16384, 2097151};
     
-        System.out.println("Test NewVariableByteEncoder:");
+        System.out.println("Test VariableByteEncoder:");
     
         for (int value : testValues) {
-            // Inizia a misurare il tempo per la codifica
+            // Measure the time taken to encode the value.
             long startTimeEncode = System.nanoTime();
             byte[] encoded = VariableByteEncoder.encode(value);
             long endTimeEncode = System.nanoTime();
-    
-            // Inizia a misurare il tempo per la decodifica
+
+            // Measure the time taken to decode the value.
             long startTimeDecode = System.nanoTime();
             int decoded = VariableByteEncoder.decode(encoded);
             long endTimeDecode = System.nanoTime();
     
-            // Calcola il tempo trascorso per la codifica e la decodifica
             long durationEncode = endTimeEncode - startTimeEncode;
             long durationDecode = endTimeDecode - startTimeDecode;
     
-            System.out.print("Valore originale: " + value + " -> Codificato: ");
+            System.out.print("Original value: " + value + " -> Encoded: ");
             for (byte b : encoded) {
                 System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " ");
             }
-            System.out.println("-> Decodificato: " + decoded);
-            System.out.println("Tempo di codifica: " + durationEncode + " nanosecondi");
-            System.out.println("Tempo di decodifica: " + durationDecode + " nanosecondi");
+            System.out.println("-> Decoded: " + decoded);
+            System.out.println("Encoding time: " + durationEncode + " nanoseconds");
+            System.out.println("Decoding time: " + durationDecode + " nanoseconds");
             System.out.println("-------------------------------------------------");
         }
     }
