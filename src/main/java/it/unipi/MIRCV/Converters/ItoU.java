@@ -60,14 +60,14 @@ public class ItoU {
         return buffer;
     }
 
-    public static int[] convertiDaUnario(byte[] unario) {
+    public static int[] convertiDaUnario(byte[] unario, int len) {
         // Crea una lista per conservare i numeri estratti dall'array di byte in codifica unaria.
         List<Integer> numeriList = new ArrayList<>();
     
         // Inizializza il contatore. Iniziamo da 1 poiché contiamo i '0's per determinare 
         // la fine della rappresentazione unaria di un numero.
         int count = 1;  
-    
+        int conversions=0;
         // Itera attraverso ogni byte nell'array di byte in input.
         for (byte b : unario) {
             // Utilizza una maschera per controllare ogni singolo bit del byte.
@@ -83,8 +83,11 @@ public class ItoU {
                 // unaria per il numero corrente.
                 else {
                     numeriList.add(count);   // Aggiungi il numero estratto alla lista.
+                    conversions++;
                     count = 1;  // Resetta il contatore per il prossimo numero.
                 }
+                if(conversions==len)
+                    break;
             }
         }
     
@@ -95,7 +98,7 @@ public class ItoU {
 
     public static void main(String[] args) {
         int[] numeri = {1, 127, 128, 255, 256, 16383, 16384, 2097151};  // Esempio di input
-        
+        int len=numeri.length;
         // Inizia a misurare il tempo per la conversione in unario
         long startTimeConvertiInUnario = System.nanoTime();
         byte[] unario = convertiInUnario(numeri);
@@ -115,7 +118,7 @@ public class ItoU {
     
         // Inizia a misurare il tempo per la conversione da unario
         long startTimeConvertiDaUnario = System.nanoTime();
-        int[] numeriRicavati = convertiDaUnario(unario);
+        int[] numeriRicavati = convertiDaUnario(unario, len);
         long endTimeConvertiDaUnario = System.nanoTime();
     
         // Calcola il tempo trascorso per la conversione da unario
