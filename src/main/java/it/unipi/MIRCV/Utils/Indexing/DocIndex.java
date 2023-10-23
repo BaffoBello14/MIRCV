@@ -1,44 +1,28 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 public class DocIndex {
-    private static long doc_id=0;
-    private String doc_no;
-    private String URL;
-    private long len;
-
-
-    public static void setDoc_id(long doc_id) {
-        DocIndex.doc_id = doc_id;
+    private HashMap<Integer,DocIndexEntry> documentIndex;
+    public DocIndex(){
+        documentIndex=new HashMap<>();
     }
 
-    public long getDoc_id() {
-        return doc_id;
+    public HashMap<Integer, DocIndexEntry> getDocumentIndex() {
+        return documentIndex;
     }
 
-    public String getDoc_no() {
-        return doc_no;
+    public void setDocumentIndex(HashMap<Integer, DocIndexEntry> documentIndex) {
+        this.documentIndex = documentIndex;
     }
-
-    public String getURL() {
-        return URL;
+    public void addDocument(int doc_id,int doc_no,int doc_size){
+        documentIndex.put(doc_id,new DocIndexEntry(doc_no,doc_size));
     }
-
-    public long getLen() {
-        return len;
+    public ArrayList<Integer> sortDocIndex(){
+        ArrayList<Integer>sortedDocIndex=new ArrayList<>(documentIndex.keySet());
+        Collections.sort(sortedDocIndex);
+        return sortedDocIndex;
     }
-
-
-
-    public void setDoc_no(String doc_no) {
-        this.doc_no = doc_no;
-    }
-
-    public void setURL(String URL) {
-        this.URL = URL;
-    }
-
-    public void setLen(long len) {
-        this.len = len;
-    }
-
 }
