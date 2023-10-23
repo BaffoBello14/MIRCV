@@ -96,36 +96,4 @@ public class Preprocess {
         }
         return stemmedTokens;
     }
-
-    /**
-     * Test function to process a TSV file and print the results.
-     */
-    public static void main(String[] args) {
-        String tsvFilePath = "prova.tsv";
-        int columnIndexToProcess = 1;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(tsvFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] columns = parseLine(line);
-
-                if (columns.length > columnIndexToProcess) {
-                    String text = columns[columnIndexToProcess];
-                    String cleanedText = cleanText(text);
-                    List<String> tokens = tokenize(cleanedText);
-                    List<String> tokensWithoutStopwords = removeStopwords(tokens);
-                    List<String> stemmedTokens = applyStemming(tokensWithoutStopwords);
-
-                    System.out.println("Testo originale: " + text);
-                    System.out.println("Testo pulito: " + cleanedText);
-                    System.out.println("Token: " + String.join(", ", tokens));
-                    System.out.println("Token senza stopwords: " + String.join(", ", tokensWithoutStopwords));
-                    System.out.println("Token con stemming: " + String.join(", ", stemmedTokens));
-                    System.out.println("---------------------------------------------");
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Errore durante la lettura del file TSV: " + e.getMessage());
-        }
-    }
 }

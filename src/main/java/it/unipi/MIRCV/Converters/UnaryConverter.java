@@ -100,34 +100,5 @@ public class UnaryConverter {
     }
 
 
-    public static void main(String[] args) {
-        int[] numbers = {1, 127, 128, 255, 256, 16383, 16384, 2097151}; 
-        int len = numbers.length;
-        long startConversionToUnaryTime = System.nanoTime();
-        byte[] unary = convertToUnary(numbers);
-        long endConversionToUnaryTime = System.nanoTime();
-        long durationConversionToUnary = endConversionToUnaryTime - startConversionToUnaryTime;
 
-        System.out.print("Unary representation as an array of bytes is: ");
-        for (byte b : unary) {
-            String binaryStr = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
-            System.out.print(binaryStr + " ");
-        }
-
-        System.out.println();
-        System.out.println("Conversion to unary time: " + durationConversionToUnary + " nanoseconds");
-
-        long startConversionFromUnaryTime = System.nanoTime();
-        int[] retrievedNumbers = convertFromUnary(unary, len);
-        long endConversionFromUnaryTime = System.nanoTime();
-        long durationConversionFromUnary = endConversionFromUnaryTime - startConversionFromUnaryTime;
-
-        System.out.print("Converting the byte array back to: ");
-        for (int n : retrievedNumbers) {
-            System.out.print(n + " ");
-        }
-
-        System.out.println();
-        System.out.println("Conversion from unary time: " + durationConversionFromUnary + " nanoseconds");
-    }    
 }

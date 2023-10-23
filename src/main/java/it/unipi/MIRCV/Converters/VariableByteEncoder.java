@@ -46,33 +46,5 @@ public class VariableByteEncoder {
         return decodedValue;
     }
 
-    public static void main(String[] args) {
-        int[] testValues = {1, 127, 128, 255, 256, 16383, 16384, 2097151};
     
-        System.out.println("Test VariableByteEncoder:");
-    
-        for (int value : testValues) {
-            // Measure the time taken to encode the value.
-            long startTimeEncode = System.nanoTime();
-            byte[] encoded = VariableByteEncoder.encode(value);
-            long endTimeEncode = System.nanoTime();
-
-            // Measure the time taken to decode the value.
-            long startTimeDecode = System.nanoTime();
-            int decoded = VariableByteEncoder.decode(encoded);
-            long endTimeDecode = System.nanoTime();
-    
-            long durationEncode = endTimeEncode - startTimeEncode;
-            long durationDecode = endTimeDecode - startTimeDecode;
-    
-            System.out.print("Original value: " + value + " -> Encoded: ");
-            for (byte b : encoded) {
-                System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " ");
-            }
-            System.out.println("-> Decoded: " + decoded);
-            System.out.println("Encoding time: " + durationEncode + " nanoseconds");
-            System.out.println("Decoding time: " + durationDecode + " nanoseconds");
-            System.out.println("-------------------------------------------------");
-        }
-    }
 }
