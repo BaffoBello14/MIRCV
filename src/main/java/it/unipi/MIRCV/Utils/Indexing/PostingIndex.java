@@ -23,4 +23,8 @@ public class PostingIndex {
     public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
+    @Override
+    public String toString(){
+        return "[doc_id-> "+doc_id+" freq-> "+frequency+"]";
+    }
 }

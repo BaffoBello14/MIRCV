@@ -34,9 +34,12 @@ package it.unipi.MIRCV;
 
 import it.unipi.MIRCV.Utils.Indexing.DocIndex;
 import it.unipi.MIRCV.Utils.Indexing.DocIndexEntry;
+import it.unipi.MIRCV.Utils.Indexing.Lexicon;
+import it.unipi.MIRCV.Utils.Indexing.LexiconEntry;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +47,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         DocIndex docIndex=new DocIndex();
+        Lexicon lexicon=new Lexicon();
+        lexicon.setLexicon(new HashMap<>());
         BufferedReader reader=new BufferedReader(new FileReader("prova.tsv"));
         String line;
         String [] docno;
@@ -55,6 +60,7 @@ public class Main {
             tokens=Preprocess.removeStopwords(tokens);
             List<String>tokenized=Preprocess.applyStemming(tokens);
             for(String word :tokenized){
+                lexicon.add(word,0,0,0,12,0,3);
                 System.out.print(word+" ");
             }
             System.out.println();
@@ -62,6 +68,10 @@ public class Main {
         }
         for (Map.Entry<Integer, DocIndexEntry> entry : docIndex.getDocumentIndex().entrySet() ){
             System.out.println("doc_id"+entry.getKey()+" doc_no|len "+entry.getValue());
+        }
+        lexicon.sortLexicon();
+        for (Map.Entry<String, LexiconEntry> entry : lexicon.getLexicon().entrySet() ){
+            System.out.println("term:"+entry.getKey()+"\t"+entry.getValue());
         }
     }
 }
