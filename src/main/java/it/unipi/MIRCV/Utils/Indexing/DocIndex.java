@@ -1,4 +1,4 @@
-package it.unipi.MIRCV.Utils;
+package it.unipi.MIRCV.Utils.Indexing;
 
 public class DocIndex {
     private static long doc_id=0;

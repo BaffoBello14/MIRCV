@@ -1,4 +1,4 @@
-package it.unipi.MIRCV.Utils;
+package it.unipi.MIRCV.Utils.Indexing;
 
 public class PostingIndex {
     private int doc_id;

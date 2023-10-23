@@ -1,11 +1,11 @@
-package it.unipi.MIRCV.Utils;
+package it.unipi.MIRCV.Utils.Indexing;
 
 public class LexiconEntry {
     private String term;
-    private long term_id;
     private long offset_doc_id;
     private long offset_frequency;
-    private int df;
+    private int df=0;
+
     private long num_posting;
 
     public String getTerm() {
@@ -15,15 +15,6 @@ public class LexiconEntry {
     public void setTerm(String term) {
         this.term = term;
     }
-
-    public long getTerm_id() {
-        return term_id;
-    }
-
-    public void setTerm_id(long term_id) {
-        this.term_id = term_id;
-    }
-
     public long getOffset_doc_id() {
         return offset_doc_id;
     }
