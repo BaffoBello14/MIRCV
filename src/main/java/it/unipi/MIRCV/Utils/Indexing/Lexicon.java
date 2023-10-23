@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Lexicon {
     private HashMap<String,LexiconEntry> lexicon=new HashMap<>();
+    private int MAX_LEN_OF_TERM=32;
 
     public HashMap<String, LexiconEntry> getLexicon() {
         return lexicon;
@@ -16,6 +17,9 @@ public class Lexicon {
         this.lexicon = lexicon;
     }
     public void add(String term,long offset_doc_id, long offset_frequency, long offset_skip_pointer, float term_upper_bound, long offset_last_doc_id, long num_posting){
+        if (term.length()>MAX_LEN_OF_TERM){
+            term=term.substring(0,MAX_LEN_OF_TERM);
+        }
         if(lexicon.containsKey(term)){
             lexicon.get(term).setTerm_upper_bound(Math.max(term_upper_bound,lexicon.get(term).getTerm_upper_bound()));
 
