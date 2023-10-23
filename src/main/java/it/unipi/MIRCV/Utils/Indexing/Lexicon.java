@@ -1,13 +1,15 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Lexicon {
     private HashMap<String,LexiconEntry> lexicon=new HashMap<>();
-    private int MAX_LEN_OF_TERM=32;
+    private static final int MAX_LEN_OF_TERM=32;
+    private static final int ENTRY_SIZE=MAX_LEN_OF_TERM+5*8+4;
 
     public HashMap<String, LexiconEntry> getLexicon() {
         return lexicon;
@@ -32,5 +34,28 @@ public class Lexicon {
         ArrayList<String>sorted=new ArrayList<>(lexicon.keySet());
         Collections.sort(sorted);
         return sorted;
+    }
+    public long writeToDisk(long position, FileChannel fileChannel){
+        try{
+            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_WRITE,position, (long) lexicon.size() *ENTRY_SIZE);
+            if(mappedByteBuffer==null){
+                return -1;
+            }
+            List<String> terms=sortLexicon();
+            for(String term : terms){
+                mappedByteBuffer.put(term.getBytes(StandardCharsets.UTF_8));
+                mappedByteBuffer.putLong(lexicon.get(term).getOffset_doc_id());
+                mappedByteBuffer.putLong(lexicon.get(term).getOffset_frequency());
+                mappedByteBuffer.putLong(lexicon.get(term).getOffset_skip_pointer());
+                mappedByteBuffer.putFloat(lexicon.get(term).getTerm_upper_bound());
+                mappedByteBuffer.putLong(lexicon.get(term).getOffset_last_doc_id());
+                mappedByteBuffer.putLong(lexicon.get(term).getNum_posting());
+
+            }
+            return position+ (long) lexicon.size() *ENTRY_SIZE;
+        }catch (IOException e){
+            System.out.println("problems in write to disk of lexicon");
+            return -1;
+        }
     }
 }

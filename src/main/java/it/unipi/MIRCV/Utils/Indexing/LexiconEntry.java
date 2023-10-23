@@ -6,6 +6,7 @@ public class LexiconEntry {
     private long offset_skip_pointer;
     private float term_upper_bound;
     private long offset_last_doc_id;
+    private long num_posting;
 
     public LexiconEntry(long offset_doc_id, long offset_frequency, long offset_skip_pointer, float term_upper_bound, long offset_last_doc_id, long num_posting) {
         this.offset_doc_id = offset_doc_id;
@@ -48,7 +49,7 @@ public class LexiconEntry {
         this.offset_last_doc_id = offset_last_doc_id;
     }
 
-    private long num_posting;
+
 
     public long getOffset_doc_id() {
         return offset_doc_id;
