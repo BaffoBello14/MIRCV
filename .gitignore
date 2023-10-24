@@ -1,63 +1,105 @@
-# Compiled class file
+### OS Specific ###
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.scc
+
+# Linux
+*.swp
+
+### Languages & Frameworks ###
+
+# Java / Maven
+target/
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
-*.zip
+*.log
 *.tar.gz
+*.properties
+*.nar
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+### IDEs & Editors ###
 
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+# JetBrains / IntelliJ / PyCharm / Rider
+.idea/
 *.iml
-*.ipr
 
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
 
-### Mac OS ###
-.DS_Store
+# Eclipse
+*.pydevproject
+.project
+.metadata
+bin/
+tmp/
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# Xcode (Se stai sviluppando anche per iOS/macOS)
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+profile
+*.moved-aside
+DerivedData
+
+# Visual Studio (Se stai sviluppando anche per Windows)
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.rptproj.user
+*.vbproj.user
+*.vshost.*
+*.pidb
+*.svclog
+
+### Other ###
+
+# Logs
+logs
+*.log
+log/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Test coverage & Instrumentation
+lib-cov
+coverage
+.nyc_output
+.grunt
+
+#
+data.dat
+prova.tsv
