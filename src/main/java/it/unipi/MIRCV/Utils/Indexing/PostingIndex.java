@@ -1,30 +1,54 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class PostingIndex {
-    private int doc_id;
-    private  int frequency;
-    public PostingIndex(int doc_id,int frequency){
-        this.doc_id=doc_id;
-        this.frequency=frequency;
+    private String term;
+    private ArrayList<Posting>postings=new ArrayList<>();
+    private ArrayList<SkippingBlock>blocks;
+    private SkippingBlock skippingBlockActual;
+    private Posting postingActual;
+    private Iterator<Posting> postingIterator;
+    private Iterator<SkippingBlock> skippingBlockIterator;
+    private boolean compression;
+
+    public void setCompression(boolean compression) {
+        this.compression = compression;
     }
 
-    public int getDoc_id() {
-        return doc_id;
+    public String getTerm() {
+        return term;
     }
 
-    public int getFrequency() {
-        return frequency;
+    public ArrayList<Posting> getPostings() {
+        return postings;
     }
 
-    public void setDoc_id(int doc_id) {
-        this.doc_id = doc_id;
+    public void setTerm(String term) {
+        this.term = term;
     }
+    public void addPostings(ArrayList<Posting> postings){
 
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
     }
-    @Override
-    public String toString(){
-        return "[doc_id-> "+doc_id+" freq-> "+frequency+"]";
+    public void openList(){
+        skippingBlockIterator= blocks.iterator();
+        postingIterator=postings.iterator();
+    }
+    public Posting next(){
+        if(!postingIterator.hasNext()){
+            if(!skippingBlockIterator.hasNext()){
+                postingActual=null;
+                return null;
+
+            }
+            skippingBlockActual=skippingBlockIterator.next();
+
+            postings.clear();
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+            postingIterator=postings.iterator();
+        }
+        postingActual=postingIterator.next();
+        return postingActual;
     }
 }

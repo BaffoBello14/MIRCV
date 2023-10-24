@@ -1,5 +1,8 @@
 package it.unipi.MIRCV.Converters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VariableByteEncoder {
 
     /**
@@ -28,6 +31,33 @@ public class VariableByteEncoder {
 
         return encodedBytes;
     }
+    public static byte[] encodeArray(int[] values) {
+        // Calculate the total number of bytes required to represent all the values in base-128.
+        int totalBytes = 0;
+        for (int value : values) {
+            totalBytes += (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
+        }
+
+        byte[] encodedBytes = new byte[totalBytes];
+        int currentIndex = 0;
+        for (int value : values) {
+            int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
+            for (int i = numBytes - 1; i >= 0; i--) {
+                byte currentByte = (byte) (value % 128);
+                value /= 128;
+
+                // Set the most significant bit if there's another byte after the current one.
+                if (i > 0) {
+                    currentByte |= (byte) 128;
+                }
+                encodedBytes[currentIndex] = currentByte;
+                currentIndex++;
+            }
+        }
+
+        return encodedBytes;
+    }
+
 
     /**
      * Decodes a value encoded using Variable Byte encoding back into its integer representation.
@@ -45,6 +75,35 @@ public class VariableByteEncoder {
 
         return decodedValue;
     }
+    public static int[] decodeArray(byte[] encodedBytes) {
+        List<Integer> decodedValues = new ArrayList<>();
+        int currentIndex = 0;
 
-    
+        while (currentIndex < encodedBytes.length) {
+            int decodedValue = 0;
+            int shift = 0;
+
+            byte currentByte;
+            do {
+                currentByte = encodedBytes[currentIndex];
+                int value = currentByte & 0x7f;
+                decodedValue |= (value << shift);
+                shift += 7;
+                currentIndex++;
+            } while ((currentByte & 0x80) != 0);
+
+            decodedValues.add(decodedValue);
+        }
+
+        // Convert the ArrayList of decoded values to an array.
+        int[] result = new int[decodedValues.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = decodedValues.get(i);
+        }
+
+        return result;
+    }
+
+
+
 }
