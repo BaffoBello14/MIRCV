@@ -73,5 +73,6 @@ public class Main {
         for (Map.Entry<String, LexiconEntry> entry : lexicon.getLexicon().entrySet() ){
             System.out.println("term:"+entry.getKey()+"\t"+entry.getValue());
         }
+
     }
 }
