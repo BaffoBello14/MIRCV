@@ -1,5 +1,12 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+
 public class LexiconEntry {
     private long offset_doc_id;
     private long offset_frequency;
@@ -7,6 +14,7 @@ public class LexiconEntry {
     private float term_upper_bound;
     private long offset_last_doc_id;
     private long num_posting;
+    public LexiconEntry(){}
 
     public LexiconEntry(long offset_doc_id, long offset_frequency, long offset_skip_pointer, float term_upper_bound, long offset_last_doc_id, long num_posting) {
         this.offset_doc_id = offset_doc_id;
@@ -76,4 +84,5 @@ public class LexiconEntry {
     public String toString(){
         return "doc_id_offset "+offset_doc_id+" freq_offset "+offset_frequency+" offset_skip_pointer "+offset_skip_pointer+" term_upper_bound "+term_upper_bound+" num_posting "+num_posting+" offset_last_doc_id "+offset_last_doc_id;
     }
+
 }

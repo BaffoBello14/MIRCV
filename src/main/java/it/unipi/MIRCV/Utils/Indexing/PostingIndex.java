@@ -12,9 +12,17 @@ public class PostingIndex {
     private Iterator<Posting> postingIterator;
     private Iterator<SkippingBlock> skippingBlockIterator;
     private boolean compression;
+    public void closeLists(){
+        postings.clear();
+        blocks.clear();
 
+    }
     public void setCompression(boolean compression) {
         this.compression = compression;
+    }
+
+    public Posting getPostingActual() {
+        return postingActual;
     }
 
     public String getTerm() {
@@ -28,10 +36,12 @@ public class PostingIndex {
     public void setTerm(String term) {
         this.term = term;
     }
-    public void addPostings(ArrayList<Posting> postings){
-
+    public void addPostings(ArrayList<Posting> postings2Add){
+        postings.addAll(postings2Add);
     }
     public void openList(){
+        //need to read blocks form lexicon
+        //blocks=get blocks from lexicon
         skippingBlockIterator= blocks.iterator();
         postingIterator=postings.iterator();
     }

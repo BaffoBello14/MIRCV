@@ -1,5 +1,7 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -7,12 +9,65 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Lexicon {
-    private HashMap<String,LexiconEntry> lexicon=new HashMap<>();
+    private static HashMap<String,LexiconEntry> lexicon=new HashMap<>();
     private static final int MAX_LEN_OF_TERM=32;
     private static final int ENTRY_SIZE=MAX_LEN_OF_TERM+5*8+4;
 
     public HashMap<String, LexiconEntry> getLexicon() {
         return lexicon;
+    }
+    public LexiconEntry getEntry(String term){
+        if(lexicon.containsKey(term)){
+            return lexicon.get(term);
+        }
+        LexiconEntry entry=find(term);
+        return entry;
+    }
+    public String readFromDisk(long offset, String path){
+        try{
+            File file = new File(path);
+            FileInputStream fileInputStream = new FileInputStream(file);
+            FileChannel fileChannel = fileInputStream.getChannel();
+            MappedByteBuffer buffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset,MAX_LEN_OF_TERM);
+            if(buffer==null)
+                return "";
+            byte [] termGot= new byte[MAX_LEN_OF_TERM];
+            String term=new String(termGot,StandardCharsets.UTF_8);
+            LexiconEntry entry=new LexiconEntry();
+            buffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset+MAX_LEN_OF_TERM,ENTRY_SIZE-MAX_LEN_OF_TERM);
+            //read
+
+
+
+            return term;
+
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("problem with the read from the disk lexicon");
+            return "";
+        }
+    }
+    public LexiconEntry find(String term){
+        LexiconEntry entry=new LexiconEntry();
+        long bot=CollectionStatistics.getTerms();
+        long top=0;
+        long mid=0;
+        long entrySize=Lexicon.ENTRY_SIZE;
+        String termFinded;
+        while(top<=bot){
+            mid= (long) (top+Math.ceil((top+bot)/2.0));
+            termFinded=readFromDisk(mid*entrySize,SPIMI.getPathToFinalLexicon());
+            if(termFinded.equals(term)){
+                return entry;
+            }
+            if(term.compareTo(termFinded)>0){
+                top=mid+1;
+                continue;
+            }
+            bot=mid-1;
+
+        }
+        return null;
     }
 
     public void setLexicon(HashMap<String, LexiconEntry> lexicon) {

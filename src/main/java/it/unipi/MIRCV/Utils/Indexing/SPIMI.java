@@ -14,5 +14,39 @@ public class SPIMI {
         return true;
     }
 
+    public static String getPathToDocId() {
+        return PATH_TO_DOC_ID;
+    }
 
+    public static String getPathToFreq() {
+        return PATH_TO_FREQ;
+    }
+
+    public static String getPathToFinalDocId() {
+        return PATH_TO_FINAL_DOC_ID;
+    }
+
+    public static String getPathToFinalFreq() {
+        return PATH_TO_FINAL_FREQ;
+    }
+
+    public static String getPathToDocIndex() {
+        return PATH_TO_DOC_INDEX;
+    }
+
+    public static String getPathToLexicon() {
+        return PATH_TO_LEXICON;
+    }
+
+    public static String getPathToFinalLexicon() {
+        return PATH_TO_FINAL_LEXICON;
+    }
+
+    public static String getPathToCollectionStat() {
+        return PATH_TO_COLLECTION_STAT;
+    }
+
+    public static String getPathToBlockFile() {
+        return PATH_TO_BLOCK_FILE;
+    }
 }
