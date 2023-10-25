@@ -30,5 +30,5 @@ public class DocIndex {
         Collections.sort(sortedDocIndex);
         return sortedDocIndex;
     }
-    
+
 }
