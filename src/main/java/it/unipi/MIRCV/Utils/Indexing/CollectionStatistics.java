@@ -9,7 +9,8 @@ import java.nio.MappedByteBuffer;
 public class CollectionStatistics {
     private static int documents;
     private static double avgDocLen;
-    private static final long ENTRY_SIZE = 4 + 8 + 8;
+    private static long totalLenDoc;
+    protected static long ENTRY_SIZE = 4 + 8 + 8 + 8;
     private static long terms;
 
     public static int getDocuments() {
@@ -50,6 +51,14 @@ public class CollectionStatistics {
         }
     }
 
+    public static long getTotalLenDoc() {
+        return totalLenDoc;
+    }
+
+    public static void setTotalLenDoc(long totalLenDoc) {
+        CollectionStatistics.totalLenDoc = totalLenDoc;
+    }
+
     public static boolean readFromDisk() {
         String path = PathConfig.getCollectionStatDir() + "/CollectionStatistics.dat";
         try {
@@ -57,6 +66,7 @@ public class CollectionStatistics {
             documents = mappedByteBuffer.getInt();
             avgDocLen = mappedByteBuffer.getDouble();
             terms = mappedByteBuffer.getLong();
+            totalLenDoc=mappedByteBuffer.getLong();
             return true;
         } catch (IOException e) {
             System.out.println("Problems with reading from the collection statistics file: " + e.getMessage());

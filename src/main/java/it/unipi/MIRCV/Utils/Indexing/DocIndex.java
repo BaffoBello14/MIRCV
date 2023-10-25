@@ -2,6 +2,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,4 +52,24 @@ public class DocIndex {
         return sortedDocIndex;
     }
 
+    public long readFromDisk(long offset) {
+        try {
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(PATH_TO_DOC_INDEX, offset, DocIndexEntry.DOC_INDEX_ENTRY_SIZE);
+
+            // Read data from the MappedByteBuffer
+            int docId = mappedByteBuffer.getInt();
+            byte[] doc = new byte[DocIndexEntry.DOC_NO_LENGTH];
+            mappedByteBuffer.get(doc);
+            String docNo = new String(doc, StandardCharsets.UTF_8);
+            long docSize = mappedByteBuffer.getLong();
+
+            System.out.println("docno" + docNo + "size" + docSize);
+            addDocument(docId, docNo, (int)docSize);
+
+            return offset + DocIndexEntry.DOC_INDEX_ENTRY_SIZE;
+        } catch (IOException e) {
+            System.out.println("Problems with reading document index from disk");
+            return -1;
+        }
+    }
 }
