@@ -12,7 +12,8 @@ import java.util.Collections;
 public class CollectionStatistics {
     private static int documents;
     private static double avgDocLen;
-    protected static long ENTRY_SIZE = 4 + 8 + 8;
+    private static long totalLenDoc;
+    protected static long ENTRY_SIZE = 4 + 8 + 8+8;
     private static long terms;
     public static int getDocuments() {
         return documents;
@@ -38,6 +39,13 @@ public class CollectionStatistics {
         terms = terms1;
     }
 
+    public static long getTotalLenDoc() {
+        return totalLenDoc;
+    }
+
+    public static void setTotalLenDoc(long totalLenDoc) {
+        CollectionStatistics.totalLenDoc = totalLenDoc;
+    }
 
     public static boolean write2Disk(){
         try{
@@ -47,6 +55,7 @@ public class CollectionStatistics {
             mappedByteBuffer.putInt(documents);
             mappedByteBuffer.putDouble(avgDocLen);
             mappedByteBuffer.putLong(terms);
+            mappedByteBuffer.putLong(totalLenDoc);
             fileOutputStream.close();
             fileChannel.close();
             return true;
@@ -66,7 +75,7 @@ public class CollectionStatistics {
             documents = mappedByteBuffer.getInt();
             avgDocLen = mappedByteBuffer.getDouble();
             terms = mappedByteBuffer.getLong();
-
+            totalLenDoc=mappedByteBuffer.getLong();
             // Close the FileChannel and the FileInputStream
             fileChannel.close();
             fileInputStream.close();

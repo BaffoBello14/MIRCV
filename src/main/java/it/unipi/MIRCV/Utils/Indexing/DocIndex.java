@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class DocIndex {
     public void setDocumentIndex(HashMap<Integer, DocIndexEntry> documentIndex) {
         this.documentIndex = documentIndex;
     }
-    public void addDocument(int doc_id,String doc_no,int doc_size){
+    public void addDocument(int doc_id,String doc_no,long doc_size){
         documentIndex.put(doc_id,new DocIndexEntry(doc_no,doc_size));
     }
     public ArrayList<Integer> sortDocIndex(){
@@ -49,5 +50,26 @@ public class DocIndex {
         Collections.sort(sortedDocIndex);
         return sortedDocIndex;
     }
+    public long readFromDisk(FileChannel fileChannel, long offset) {
+        try {
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, DocIndexEntry.DOC_INDEX_ENTRY_SIZE);
+
+            // Read data from the MappedByteBuffer
+            int docId = mappedByteBuffer.getInt();
+            byte[] doc=new byte[DocIndexEntry.DOC_NO_LENGTH];
+            mappedByteBuffer.get(doc);
+            String docNo = new String(doc, StandardCharsets.UTF_8);
+            long docSize = mappedByteBuffer.getLong();
+            System.out.println("docno"+docNo+"size"+docSize);
+            addDocument(docId,docNo,docSize);
+
+
+            return offset+DocIndexEntry.DOC_INDEX_ENTRY_SIZE;
+        } catch (IOException e) {
+            System.out.println("Problems with reading document index from disk");
+            return -1;
+        }
+    }
+
 
 }
