@@ -23,8 +23,14 @@
       <artifactId>porter-stemmer</artifactId>
       <version>1.0.0</version>
     </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+          <version>1.21</version>
+      </dependency>
 
-    <!-- JUnit 5 API -->
+
+      <!-- JUnit 5 API -->
     <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
