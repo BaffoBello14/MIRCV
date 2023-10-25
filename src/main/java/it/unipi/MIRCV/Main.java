@@ -60,7 +60,6 @@ public class Main {
             tokens=Preprocess.removeStopwords(tokens);
             List<String>tokenized=Preprocess.applyStemming(tokens);
             for(String word :tokenized){
-                lexicon.add(word,0,0,0,12,0,3);
                 System.out.print(word+" ");
             }
             System.out.println();

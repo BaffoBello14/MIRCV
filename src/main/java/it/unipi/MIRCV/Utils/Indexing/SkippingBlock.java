@@ -2,6 +2,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
+import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +13,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class SkippingBlock {
-    private static String Freq_file="./IndexData/Final/Freqs.dat";
-    private static String Doc_ID_file="./IndexData/Final/Doc_ids.dat";
+    private static String Freq_file= PathAndFlags.PATH_TO_FINAL_FREQ+"/Freqs.dat";
+    private static String Doc_ID_file=PathAndFlags.PATH_TO_FINAL_DOC_ID+"/Doc_ids.dat";
     private long doc_id_offset;
     private int doc_id_size;
     private long freq_offset;

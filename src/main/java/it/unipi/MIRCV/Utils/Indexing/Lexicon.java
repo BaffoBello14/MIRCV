@@ -1,5 +1,7 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,8 +12,7 @@ import java.util.*;
 
 public class Lexicon {
     private static HashMap<String,LexiconEntry> lexicon=new HashMap<>();
-    private static final int MAX_LEN_OF_TERM=32;
-    private static final int ENTRY_SIZE=MAX_LEN_OF_TERM+5*8+4;
+    protected static final int MAX_LEN_OF_TERM=32;
 
     public HashMap<String, LexiconEntry> getLexicon() {
         return lexicon;
@@ -20,68 +21,49 @@ public class Lexicon {
         if(lexicon.containsKey(term)){
             return lexicon.get(term);
         }
-        LexiconEntry entry=find(term);
-        return entry;
+        return find(term);
     }
-    public String readFromDisk(long offset, String path){
-        try{
-            File file = new File(path);
-            FileInputStream fileInputStream = new FileInputStream(file);
-            FileChannel fileChannel = fileInputStream.getChannel();
-            MappedByteBuffer buffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset,MAX_LEN_OF_TERM);
-            if(buffer==null)
-                return "";
-            byte [] termGot= new byte[MAX_LEN_OF_TERM];
-            String term=new String(termGot,StandardCharsets.UTF_8);
-            LexiconEntry entry=new LexiconEntry();
-            buffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset+MAX_LEN_OF_TERM,ENTRY_SIZE-MAX_LEN_OF_TERM);
-            //read
 
-
-
-            return term;
-
-        }catch (IOException e){
-            e.printStackTrace();
-            System.out.println("problem with the read from the disk lexicon");
-            return "";
-        }
-    }
     public LexiconEntry find(String term){
-        LexiconEntry entry=new LexiconEntry();
-        long bot=CollectionStatistics.getTerms();
-        long top=0;
-        long mid=0;
-        long entrySize=Lexicon.ENTRY_SIZE;
-        String termFinded;
-        while(top<=bot){
-            mid= (long) (top+Math.ceil((top+bot)/2.0));
-            termFinded=readFromDisk(mid*entrySize,SPIMI.getPathToFinalLexicon());
-            if(termFinded.equals(term)){
-                return entry;
-            }
-            if(term.compareTo(termFinded)>0){
-                top=mid+1;
-                continue;
-            }
-            bot=mid-1;
+        try{
+            LexiconEntry entry = new LexiconEntry();
+            long bot = CollectionStatistics.getTerms();
+            long top = 0;
+            long mid = 0;
+            String termFound;
+            FileInputStream fileInputStream = new FileInputStream(PathAndFlags.PATH_TO_FINAL_LEXICON + "/Lexicon.dat");
+            FileChannel fileChannel = fileInputStream.getChannel();
+            while (top <= bot) {
+                mid = (long) (top + Math.ceil((top + bot) / 2.0));
+                termFound = entry.readFromDisk(mid,fileChannel,term);
+                if (termFound.equals(term)) {
+                    return entry;
+                }
+                if (term.compareTo(termFound) > 0) {
+                    top = mid;
+                    continue;
+                }
+                bot = mid;
 
+            }
+            return null;
+        }catch (IOException e){
+            System.out.println("problems with the find term to open the file of lexicon final");
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public void setLexicon(HashMap<String, LexiconEntry> lexicon) {
         this.lexicon = lexicon;
     }
-    public void add(String term,long offset_doc_id, long offset_frequency, long offset_skip_pointer, float term_upper_bound, long offset_last_doc_id, long num_posting){
-        if (term.length()>MAX_LEN_OF_TERM){
-            term=term.substring(0,MAX_LEN_OF_TERM);
-        }
+    public void add(String term){
+        term=padStringToLength(term);
         if(lexicon.containsKey(term)){
-            lexicon.get(term).setTerm_upper_bound(Math.max(term_upper_bound,lexicon.get(term).getTerm_upper_bound()));
-
+            lexicon.get(term).setDf(lexicon.get(term).getDf()+1);
+            lexicon.get(term).calculateIDF();
         }else{
-            lexicon.put(term,new LexiconEntry(offset_doc_id,offset_frequency,offset_skip_pointer, term_upper_bound,offset_last_doc_id,num_posting));
+            lexicon.put(term,new LexiconEntry());
 
         }
     }
@@ -90,27 +72,32 @@ public class Lexicon {
         Collections.sort(sorted);
         return sorted;
     }
-    public long writeToDisk(long position, FileChannel fileChannel){
-        try{
-            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_WRITE,position, (long) lexicon.size() *ENTRY_SIZE);
-            if(mappedByteBuffer==null){
-                return -1;
-            }
-            List<String> terms=sortLexicon();
-            for(String term : terms){
-                mappedByteBuffer.put(term.getBytes(StandardCharsets.UTF_8));
-                mappedByteBuffer.putLong(lexicon.get(term).getOffset_doc_id());
-                mappedByteBuffer.putLong(lexicon.get(term).getOffset_frequency());
-                mappedByteBuffer.putLong(lexicon.get(term).getOffset_skip_pointer());
-                mappedByteBuffer.putFloat(lexicon.get(term).getTerm_upper_bound());
-                mappedByteBuffer.putLong(lexicon.get(term).getOffset_last_doc_id());
-                mappedByteBuffer.putLong(lexicon.get(term).getNum_posting());
 
+    public static String padStringToLength(String input) {
+        if (input.length() >= MAX_LEN_OF_TERM) {
+            return input.substring(0, MAX_LEN_OF_TERM); // Truncate if too long
+        } else {
+            StringBuilder padded = new StringBuilder(input);
+            while (padded.length() < MAX_LEN_OF_TERM) {
+                padded.append('\0'); // Add \0 to pad
             }
-            return position+ (long) lexicon.size() *ENTRY_SIZE;
-        }catch (IOException e){
-            System.out.println("problems in write to disk of lexicon");
-            return -1;
+            return padded.toString();
         }
     }
+    public static String removePadding(String paddedString) {
+        // Find the last non-space character in the padded string
+        int lastIndex = paddedString.length() - 1;
+        while (lastIndex >= 0 && paddedString.charAt(lastIndex) == ' ') {
+            lastIndex--;
+        }
+
+        // If there is no padding, return the original string
+        if (lastIndex < 0) {
+            return paddedString;
+        }
+
+        // Remove the padding and return the original content
+        return paddedString.substring(0, lastIndex + 1);
+    }
+
 }
