@@ -2,6 +2,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -46,6 +47,7 @@ public class CollectionStatistics {
             mappedByteBuffer.putInt(documents);
             mappedByteBuffer.putDouble(avgDocLen);
             mappedByteBuffer.putLong(terms);
+            fileOutputStream.close();
             fileChannel.close();
             return true;
         }catch (IOException e){
@@ -54,4 +56,25 @@ public class CollectionStatistics {
         }
 
     }
+    public static boolean readFromDisk() {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(PathAndFlags.PATH_TO_COLLECTION_STAT + "/CollectionStatistics.dat");
+            FileChannel fileChannel = fileInputStream.getChannel();
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, ENTRY_SIZE);
+
+            // Read data from the MappedByteBuffer
+            documents = mappedByteBuffer.getInt();
+            avgDocLen = mappedByteBuffer.getDouble();
+            terms = mappedByteBuffer.getLong();
+
+            // Close the FileChannel and the FileInputStream
+            fileChannel.close();
+            fileInputStream.close();
+            return true;
+        } catch (IOException e) {
+            System.out.println("Problems with reading from the collection statistics file");
+            return false;
+        }
+    }
+
 }
