@@ -1,42 +1,54 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+import it.unipi.MIRCV.Utils.Paths.PathConfig;
+import it.unipi.MIRCV.Utils.DiskIOManager;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.Collections;
 
 public class CollectionStatistics {
     private static int documents;
     private static double avgDocLen;
     private static long totalLenDoc;
-    protected static long ENTRY_SIZE = 4 + 8 + 8+8;
+    protected static long ENTRY_SIZE = 4 + 8 + 8 + 8;
     private static long terms;
+
     public static int getDocuments() {
         return documents;
     }
 
-    public static void setDocuments(int documents1) {
-        documents = documents1;
+    public static void setDocuments(int documentCount) {
+        documents = documentCount;
     }
 
     public static double getAvgDocLen() {
         return avgDocLen;
     }
 
-    public static void setAvgDocLen(double avgDocLen1) {
-        avgDocLen = avgDocLen1;
+    public static void setAvgDocLen(double averageDocLength) {
+        avgDocLen = averageDocLength;
     }
 
     public static long getTerms() {
         return terms;
     }
 
-    public static void setTerms(long terms1) {
-        terms = terms1;
+    public static void setTerms(long termCount) {
+        terms = termCount;
+    }
+
+    public static boolean write2Disk() {
+        String path = PathConfig.getCollectionStatDir() + "/CollectionStatistics.dat";
+        try {
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(path, 0, ENTRY_SIZE);
+            mappedByteBuffer.putInt(documents);
+            mappedByteBuffer.putDouble(avgDocLen);
+            mappedByteBuffer.putLong(terms);
+            return DiskIOManager.writeToDisk(path, mappedByteBuffer);
+        } catch (IOException e) {
+            System.out.println("Problems with writing to collection statistics file: " + e.getMessage());
+            return false;
+        }
     }
 
     public static long getTotalLenDoc() {
@@ -47,6 +59,7 @@ public class CollectionStatistics {
         CollectionStatistics.totalLenDoc = totalLenDoc;
     }
 
+<<<<<<< HEAD
     public static boolean write2Disk(){
         try{
             FileOutputStream fileOutputStream=new FileOutputStream(PathAndFlags.PATH_TO_COLLECTION_STAT);
@@ -65,25 +78,20 @@ public class CollectionStatistics {
         }
 
     }
+=======
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
     public static boolean readFromDisk() {
+        String path = PathConfig.getCollectionStatDir() + "/CollectionStatistics.dat";
         try {
-            FileInputStream fileInputStream = new FileInputStream(PathAndFlags.PATH_TO_COLLECTION_STAT + "/CollectionStatistics.dat");
-            FileChannel fileChannel = fileInputStream.getChannel();
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, ENTRY_SIZE);
-
-            // Read data from the MappedByteBuffer
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(path, 0, ENTRY_SIZE);
             documents = mappedByteBuffer.getInt();
             avgDocLen = mappedByteBuffer.getDouble();
             terms = mappedByteBuffer.getLong();
             totalLenDoc=mappedByteBuffer.getLong();
-            // Close the FileChannel and the FileInputStream
-            fileChannel.close();
-            fileInputStream.close();
             return true;
         } catch (IOException e) {
-            System.out.println("Problems with reading from the collection statistics file");
+            System.out.println("Problems with reading from the collection statistics file: " + e.getMessage());
             return false;
         }
     }
-
 }

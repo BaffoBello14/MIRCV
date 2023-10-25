@@ -1,32 +1,51 @@
 package it.unipi.MIRCV.Utils.Indexing;
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+
+import it.unipi.MIRCV.Utils.Paths.PathConfig;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 import org.apache.commons.compress.archivers.*;
 
 import java.io.*;
+<<<<<<< HEAD
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
+=======
+import java.nio.file.*;
+import java.util.*;
+import java.nio.channels.FileChannel;
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
 import java.util.zip.GZIPInputStream;
 
+
 public class SPIMI {
+<<<<<<< HEAD
     private static final String PATH_TO_ARCHIVE_COLLECTION="./Collection/reducedCollection100.tar.gz";
     private static int numIndex=0;
     private static long numPosting=0;
     private static boolean finished=false;
     private static long offsetDocIndex=0;
+=======
+    private static final String PATH_TO_ARCHIVE_COLLECTION = "./Collection/reducedCollection100.tar.gz";
+    private static boolean finished = false;
+    private static long offsetDocIndex = 0;
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
 
-    public static boolean  execute() throws Exception{
-        int doc_id=1;
-        String [] lineofDoc;
+    public static boolean execute() throws Exception {
+        int doc_id = 1;
+        String[] lineofDoc;
         String docno;
+<<<<<<< HEAD
         FileChannel fileChannelDI= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ, StandardOpenOption.WRITE,StandardOpenOption.CREATE);
+=======
+        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathConfig.getDocIndexDir() + "/DocIndex.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
 
-        int total_length=0;
+        int total_length = 0;
         List<String> tokens;
+<<<<<<< HEAD
         HashMap<String,PostingIndex> index=new HashMap<>();
         while(!finished){
             Runtime runtime = Runtime.getRuntime();
@@ -64,23 +83,56 @@ public class SPIMI {
                                         posting=new PostingIndex();
                                         index.put(term,posting);
                                     }
+=======
+        HashMap<String, PostingIndex> index = new HashMap<>();
+        
+        // Logic to read from tar.gz file and process it
+        while (!finished) {
+            try {
+                InputStream file = new FileInputStream(PATH_TO_ARCHIVE_COLLECTION);
+                InputStream gzip = new GZIPInputStream(file);
+                ArchiveInputStream archiveStream = new ArchiveStreamFactory().createArchiveInputStream("tar", gzip);
+                ArchiveEntry entry;
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
 
+                while ((entry = archiveStream.getNextEntry()) != null) {
+                    if (!entry.isDirectory()) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(archiveStream));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            lineofDoc = Preprocess.parseLine(line);
+                            docno = lineofDoc[0];
+                            lineofDoc[1] = Preprocess.cleanText(lineofDoc[1]);
+                            tokens = Preprocess.tokenize(lineofDoc[1]);
+                            tokens = Preprocess.removeStopwords(tokens);
+                            tokens = Preprocess.applyStemming(tokens);
+                            int documentLength = tokens.size();
+                            DocIndexEntry docIndexEntry = new DocIndexEntry(docno, documentLength);
+                            docIndexEntry.write2Disk(fileChannelDI, offsetDocIndex, doc_id);
+                            total_length += documentLength;
+                            for (String term : tokens) {
+                                PostingIndex posting;
+                                if (index.containsKey(term)) {
+                                    posting = index.get(term);
+                                } else {
+                                    posting = new PostingIndex();
+                                    index.put(term, posting);
                                 }
-                                doc_id++;
-
                             }
-                            finished=true;
-                            break;
+                            doc_id++;
                         }
+                        finished = true;
+                        break;
                     }
-                }catch (Exception e){
-                    e.printStackTrace();
                 }
-                if(finished) break;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        CollectionStatistics.setTotalLenDoc(CollectionStatistics.getTotalLenDoc()+total_length);
-        CollectionStatistics.setDocuments(doc_id-1);
+        
+        // Update statistics
+        CollectionStatistics.setTotalLenDoc(CollectionStatistics.getTotalLenDoc() + total_length);
+        CollectionStatistics.setDocuments(doc_id - 1);
         fileChannelDI.close();
         return true;
     }
@@ -127,6 +179,7 @@ public class SPIMI {
         }
     }
 
+<<<<<<< HEAD
     public static void main(String[] args) throws  Exception{
 
         FileChannel fileChannelDI= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ, StandardOpenOption.WRITE,StandardOpenOption.CREATE);
@@ -134,8 +187,56 @@ public class SPIMI {
         DocIndex docIndex=new DocIndex();
         docIndex.readFromDisk(fileChannelDI,40);
         System.out.println(docIndex.sortDocIndex().get(0));
+=======
+    public static void main(String[] args) throws Exception {
+        int doc_id = 1;
+        String[] lineofDoc;
+        String docno;
+        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathConfig.getDocIndexDir() + "/DocIndex.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+
+        List<String> tokens;
+        HashMap<String, PostingIndex> index = new HashMap<>();
+
+        // Logic similar to the one in execute method
+        InputStream file = new FileInputStream(PATH_TO_ARCHIVE_COLLECTION);
+        InputStream gzip = new GZIPInputStream(file);
+        ArchiveInputStream archiveStream = new ArchiveStreamFactory().createArchiveInputStream("tar", gzip);
+        ArchiveEntry entry;
+
+        while ((entry = archiveStream.getNextEntry()) != null) {
+            if (!entry.isDirectory()) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(archiveStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lineofDoc = Preprocess.parseLine(line);
+                    docno = lineofDoc[0];
+                    lineofDoc[1] = Preprocess.cleanText(lineofDoc[1]);
+                    tokens = Preprocess.tokenize(lineofDoc[1]);
+                    tokens = Preprocess.removeStopwords(tokens);
+                    tokens = Preprocess.applyStemming(tokens);
+                    int documentLength = tokens.size();
+                    DocIndexEntry docIndexEntry = new DocIndexEntry(docno, documentLength);
+                    docIndexEntry.write2Disk(fileChannelDI, offsetDocIndex, doc_id);
+                    for (String term : tokens) {
+                        PostingIndex posting;
+                        if (index.containsKey(term)) {
+                            posting = index.get(term);
+                        } else {
+                            posting = new PostingIndex();
+                            index.put(term, posting);
+                        }
+                    }
+                    doc_id++;
+                }
+                finished = true;
+                break;
+            }
+        }
+        
+        // Reading from DocIndex
+        DocIndex docIndex = new DocIndex();
+        docIndex.readFromDisk(0);
+        System.out.println(docIndex.sortDocIndex());
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
     }
-
-
-
 }
