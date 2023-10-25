@@ -3,6 +3,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 public class Posting {
     private int doc_id;
     private  int frequency;
+    public static final int SIZE = Integer.BYTES + Integer.BYTES;
     public Posting(int doc_id,int frequency){
         this.doc_id=doc_id;
         this.frequency=frequency;

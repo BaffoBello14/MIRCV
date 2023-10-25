@@ -1,25 +1,27 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-
-import java.io.*;
+import java.io.IOException;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+
+import it.unipi.MIRCV.Utils.DiskIOManager;
+import it.unipi.MIRCV.Utils.Paths.PathConfig;
 
 public class LexiconFileManager {
 
-    public LexiconEntry readEntryFromDisk(long offset, FileChannel fileChannel) {
+    private static final String LEXICON_FILE_PATH = PathConfig.getFinalDir() + "/Lexicon.dat";
+
+    public LexiconEntry readEntryFromDisk(long offset) {
         try {
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, LexiconEntry.ENTRY_SIZE);
-            
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(LEXICON_FILE_PATH, offset, LexiconEntry.ENTRY_SIZE);
+
             if (mappedByteBuffer == null) {
                 return null;
             }
-    
+
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
-    
+
             LexiconEntry entry = new LexiconEntry();
             entry.setTermBytes(termBytes);
             entry.setOffset_doc_id(mappedByteBuffer.getLong());
@@ -28,7 +30,7 @@ public class LexiconFileManager {
             entry.setDf(mappedByteBuffer.getInt());
             entry.setIdf(mappedByteBuffer.getDouble());
             entry.setOffset_skip_pointer(mappedByteBuffer.getLong());
-    
+
             return entry;
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,9 +38,9 @@ public class LexiconFileManager {
         }
     }
 
-    public long writeEntryToDisk(LexiconEntry entry, String term, long offset, FileChannel fileChannel) {
+    public long writeEntryToDisk(LexiconEntry entry, String term, long offset) {
         try {
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, offset, LexiconEntry.ENTRY_SIZE);
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(LEXICON_FILE_PATH, offset, LexiconEntry.ENTRY_SIZE);
             if (mappedByteBuffer == null) {
                 return -1;
             }
@@ -51,15 +53,12 @@ public class LexiconFileManager {
             mappedByteBuffer.putDouble(entry.getIdf());
             mappedByteBuffer.putLong(entry.getOffset_skip_pointer());
 
+            DiskIOManager.writeToDisk(LEXICON_FILE_PATH, mappedByteBuffer);
+            
             return offset + LexiconEntry.ENTRY_SIZE;
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
         }
-    }
-
-    public FileChannel openLexiconFileChannel() throws IOException {
-        FileInputStream fis = new FileInputStream(PathAndFlags.PATH_TO_FINAL_LEXICON + "/Lexicon.dat");
-        return fis.getChannel();
     }
 }

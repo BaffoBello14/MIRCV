@@ -2,46 +2,40 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+import it.unipi.MIRCV.Utils.DiskIOManager;
+import it.unipi.MIRCV.Utils.Paths.PathConfig;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class SkippingBlock {
-    private static String Freq_file= PathAndFlags.PATH_TO_FINAL_FREQ+"/Freqs.dat";
-    private static String Doc_ID_file=PathAndFlags.PATH_TO_FINAL_DOC_ID+"/Doc_ids.dat";
     private long doc_id_offset;
     private int doc_id_size;
     private long freq_offset;
     private int freq_size;
     private int doc_id_max;
     private int num_posting_of_block;
-    private long file_offset=0;
-    private static final int size_of_element=(8+4)*2+4+4;
+    private long file_offset = 0;
+    private static final int size_of_element = (8 + 4) * 2 + 4 + 4;
+    private static final String Doc_ID_file = PathConfig.getFinalDir() + "/Doc_ids.dat";
+    private static final String Freq_file = PathConfig.getFinalDir() + "/Freqs.dat";
+    public static final int SIZE = Integer.BYTES + Integer.BYTES;
 
-    public boolean writeOnDisk(FileChannel file_to_write){
-        if(file_to_write == null){
-            return false;
-        }
-        try{
-            MappedByteBuffer mappedByteBuffer=file_to_write.map(FileChannel.MapMode.READ_WRITE,file_offset,size_of_element);
-            if(mappedByteBuffer==null){
-                return false;
-            }
+    public boolean writeOnDisk() {
+        try {
+            MappedByteBuffer mappedByteBuffer = DiskIOManager.readFromDisk(Doc_ID_file, file_offset, size_of_element);
             mappedByteBuffer.putLong(doc_id_offset);
             mappedByteBuffer.putInt(doc_id_size);
             mappedByteBuffer.putLong(freq_offset);
             mappedByteBuffer.putInt(freq_size);
             mappedByteBuffer.putInt(doc_id_max);
             mappedByteBuffer.putInt(num_posting_of_block);
-            file_offset+=size_of_element;
+            
+            DiskIOManager.writeToDisk(Doc_ID_file, mappedByteBuffer);
+            file_offset += size_of_element;
             return true;
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println("problems with the write of block of posting");
             return false;
         }
@@ -102,38 +96,49 @@ public class SkippingBlock {
     public void setFile_offset(long file_offset) {
         this.file_offset = file_offset;
     }
-    public ArrayList<Posting> getSkippingBlockPostings(boolean compression){
-        try{
-            FileChannel fileChannelDocID= (FileChannel) Files.newByteChannel(Paths.get(Doc_ID_file));
-            FileChannel fileChannelFreqs= (FileChannel) Files.newByteChannel(Paths.get(Freq_file));
-            MappedByteBuffer mappedByteBufferDocID=fileChannelDocID.map(FileChannel.MapMode.READ_ONLY,doc_id_offset,doc_id_size);
-            MappedByteBuffer mappedByteBufferFreq=fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY,freq_offset,freq_size);
-            if(mappedByteBufferFreq==null||mappedByteBufferDocID==null){
-                return null;
-            }
-            ArrayList<Posting> postings=new ArrayList<>();
-            if(compression){
-                byte [] doc_ids=new byte[doc_id_size];
-                byte [] freqs=new byte[freq_size];
-                mappedByteBufferDocID.get(doc_ids,0,doc_id_size);
-                mappedByteBufferFreq.get(freqs,0,freq_size);
-                int [] freqs_decompressed= UnaryConverter.convertFromUnary(freqs,num_posting_of_block);
-                int [] doc_ids_decompressed= VariableByteEncoder.decodeArray(doc_ids);
-                for(int i=0;i<num_posting_of_block;i++){
-                    Posting posting=new Posting(doc_ids_decompressed[i],freqs_decompressed[i]);
-                    postings.add(posting);
-                }
-            }else {
-                for(int i=0;i<num_posting_of_block;i++){
-                    Posting posting=new Posting(mappedByteBufferDocID.getInt(),mappedByteBufferFreq.getInt());
-                    postings.add(posting);
-                }
-            }
-            return postings;
-        }catch (IOException e){
-            System.out.println("problems with the reading form the file of the block desciptor");
+    
+    public ArrayList<Posting> getSkippingBlockPostings(boolean compression) {
+        try {
+            MappedByteBuffer mappedByteBufferDocID = DiskIOManager.readFromDisk(Doc_ID_file, doc_id_offset, doc_id_size);
+            MappedByteBuffer mappedByteBufferFreq = DiskIOManager.readFromDisk(Freq_file, freq_offset, freq_size);
+
+            return getSkippingBlockPostings(compression, mappedByteBufferDocID, mappedByteBufferFreq);
+        } catch (IOException e) {
+            System.out.println("problems with the reading form the file of the block descriptor");
             e.printStackTrace();
             return null;
         }
+    }
+
+    public ArrayList<Posting> getSkippingBlockPostings(boolean compression, MappedByteBuffer docIdBuffer, MappedByteBuffer freqBuffer) {
+        return compression ? getCompressedPostings(docIdBuffer, freqBuffer) : getUncompressedPostings(docIdBuffer, freqBuffer);
+    }
+
+    private ArrayList<Posting> getCompressedPostings(MappedByteBuffer docIdBuffer, MappedByteBuffer freqBuffer) {
+        byte[] docIds = new byte[doc_id_size];
+        byte[] freqs = new byte[freq_size];
+
+        docIdBuffer.get(docIds);
+        freqBuffer.get(freqs);
+
+        int[] freqsDecompressed = UnaryConverter.convertFromUnary(freqs, num_posting_of_block);
+        int[] docIdsDecompressed = VariableByteEncoder.decodeArray(docIds);
+
+        ArrayList<Posting> postings = new ArrayList<>(num_posting_of_block);
+        for (int i = 0; i < num_posting_of_block; i++) {
+            postings.add(new Posting(docIdsDecompressed[i], freqsDecompressed[i]));
+        }
+
+        return postings;
+    }
+
+    private ArrayList<Posting> getUncompressedPostings(MappedByteBuffer docIdBuffer, MappedByteBuffer freqBuffer) {
+        ArrayList<Posting> postings = new ArrayList<>(num_posting_of_block);
+
+        for (int i = 0; i < num_posting_of_block; i++) {
+            postings.add(new Posting(docIdBuffer.getInt(), freqBuffer.getInt()));
+        }
+
+        return postings;
     }
 }
