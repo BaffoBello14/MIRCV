@@ -21,7 +21,9 @@ public class Lexicon {
         if(lexicon.containsKey(term)){
             return lexicon.get(term);
         }
-        return find(term);
+        LexiconEntry lexiconEntry=find(term);
+        add(term, lexiconEntry);
+        return lexiconEntry;
     }
 
     public LexiconEntry find(String term){
@@ -57,13 +59,13 @@ public class Lexicon {
     public void setLexicon(HashMap<String, LexiconEntry> lexicon) {
         this.lexicon = lexicon;
     }
-    public void add(String term){
+    public void add(String term,LexiconEntry lexiconEntry){
         term=padStringToLength(term);
         if(lexicon.containsKey(term)){
             lexicon.get(term).setDf(lexicon.get(term).getDf()+1);
             lexicon.get(term).calculateIDF();
         }else{
-            lexicon.put(term,new LexiconEntry());
+            lexicon.put(term,lexiconEntry);
 
         }
     }
