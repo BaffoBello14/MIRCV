@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,18 +16,17 @@ import java.util.List;
 
 public class DocIndex {
     private HashMap<Integer,DocIndexEntry> documentIndex;
-    private static long offset=0;
-    private static String Path_To_DocIndex=PathAndFlags.PATH_TO_DOC_INDEX+"/DocIndex.dat";
+
+    private static String Path_To_DocIndex=PathAndFlags.PATH_TO_DOC_INDEX;
     public DocIndex(){
         documentIndex=new HashMap<>();
     }
-    public long write2Disk(int doc_id){
+    public long write2Disk(int doc_id,long offset){
         if(!documentIndex.containsKey(doc_id)){
             return -1;
         }
         try{
-            FileOutputStream fileOutputStream = new FileOutputStream(Path_To_DocIndex);
-            FileChannel fileChannel = fileOutputStream.getChannel();
+            FileChannel fileChannel =FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
             offset = documentIndex.get(doc_id).write2Disk(fileChannel, offset, doc_id);
             return offset;
 
@@ -60,7 +61,7 @@ public class DocIndex {
             mappedByteBuffer.get(doc);
             String docNo = new String(doc, StandardCharsets.UTF_8);
             long docSize = mappedByteBuffer.getLong();
-            System.out.println("docno"+docNo+"size"+docSize);
+            System.out.println("docno"+docNo+"size"+docSize+"doc id "+docId);
             addDocument(docId,docNo,docSize);
 
 

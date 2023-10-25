@@ -49,7 +49,7 @@ public class CollectionStatistics {
 
     public static boolean write2Disk(){
         try{
-            FileOutputStream fileOutputStream=new FileOutputStream(PathAndFlags.PATH_TO_COLLECTION_STAT+"/CollectionStatistics.dat");
+            FileOutputStream fileOutputStream=new FileOutputStream(PathAndFlags.PATH_TO_COLLECTION_STAT);
             FileChannel fileChannel= fileOutputStream.getChannel();
             MappedByteBuffer mappedByteBuffer= fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
             mappedByteBuffer.putInt(documents);
