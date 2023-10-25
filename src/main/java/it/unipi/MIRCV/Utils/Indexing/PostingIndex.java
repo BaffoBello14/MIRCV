@@ -5,6 +5,7 @@ import it.unipi.MIRCV.Utils.Paths.PathConfig;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.io.IOException;
 import java.nio.MappedByteBuffer;
 
 public class PostingIndex {
@@ -87,11 +88,22 @@ public class PostingIndex {
 
     private ArrayList<SkippingBlock> extractBlocksFromBuffer(MappedByteBuffer buffer) {
         ArrayList<SkippingBlock> blockList = new ArrayList<>();
-
-        // Similar logic to extract blocks from buffer
-
+    
+        while (buffer.hasRemaining()) {
+            SkippingBlock block = new SkippingBlock();
+    
+            block.setDocIdOffset(buffer.getLong());
+            block.setDocIdSize(buffer.getInt());
+            block.setFreqOffset(buffer.getLong());
+            block.setFreqSize(buffer.getInt());
+            block.setDocIdMax(buffer.getInt());
+            block.setNumPostingOfBlock(buffer.getInt());
+    
+            blockList.add(block);
+        }
+    
         return blockList;
-    }
+    }    
 
     public Posting next(){
         if(!postingIterator.hasNext()){
@@ -103,7 +115,12 @@ public class PostingIndex {
             skippingBlockActual=skippingBlockIterator.next();
 
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+            try {
+                postings.addAll(skippingBlockActual.retrievePostingsFromDisk(compression));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             postingIterator=postings.iterator();
         }
         postingActual=postingIterator.next();

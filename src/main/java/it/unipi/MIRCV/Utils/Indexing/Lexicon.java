@@ -80,7 +80,7 @@ public class Lexicon {
         return sorted;
     }
 
-    public static String padStringToLength(String input) {
+    protected static String padStringToLength(String input) {
         if (input.length() >= MAX_LEN_OF_TERM) {
             return input.substring(0, MAX_LEN_OF_TERM);
         } else {
@@ -88,7 +88,7 @@ public class Lexicon {
         }
     }
 
-    public static String removePadding(String paddedString) {
+    protected static String removePadding(String paddedString) {
         String trimmed = paddedString.trim();
         int nullIndex = trimmed.indexOf('\0');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
