@@ -56,35 +56,6 @@ public class CollectionStatistics {
         }
 
     }
-<<<<<<< HEAD
-=======
-
-    public static void setTotalLenDoc(long totalLenDoc) {
-        CollectionStatistics.totalLenDoc = totalLenDoc;
-    }
-
-<<<<<<< HEAD
-    public static boolean write2Disk(){
-        try{
-            FileOutputStream fileOutputStream=new FileOutputStream(PathAndFlags.PATH_TO_COLLECTION_STAT);
-            FileChannel fileChannel= fileOutputStream.getChannel();
-            MappedByteBuffer mappedByteBuffer= fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
-            mappedByteBuffer.putInt(documents);
-            mappedByteBuffer.putDouble(avgDocLen);
-            mappedByteBuffer.putLong(terms);
-            mappedByteBuffer.putLong(totalLenDoc);
-            fileOutputStream.close();
-            fileChannel.close();
-            return true;
-        }catch (IOException e){
-            System.out.println("Problems with writing to collection statistics file");
-            return false;
-        }
-
-    }
-=======
->>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
->>>>>>> 1b303430e4448ef03e4920045b8c72e5174387d7
     public static boolean readFromDisk() {
         try {
             FileInputStream fileInputStream = new FileInputStream(PathAndFlags.PATH_TO_COLLECTION_STAT + "/CollectionStatistics.dat");
