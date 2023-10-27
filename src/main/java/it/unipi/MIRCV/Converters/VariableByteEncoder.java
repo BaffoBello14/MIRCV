@@ -18,6 +18,7 @@ public class VariableByteEncoder {
         int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
         byte[] encodedBytes = new byte[numBytes];
 
+        // Process each byte of the encoded value, starting from the least significant.
         for (int i = numBytes - 1; i >= 0; i--) {
             byte currentByte = (byte) (value % 128);
             value /= 128;
@@ -31,6 +32,7 @@ public class VariableByteEncoder {
 
         return encodedBytes;
     }
+
     public static byte[] encodeArray(int[] values) {
         // Calculate the total number of bytes required to represent all the values in base-128.
         int totalBytes = 0;
@@ -40,8 +42,12 @@ public class VariableByteEncoder {
 
         byte[] encodedBytes = new byte[totalBytes];
         int currentIndex = 0;
+
+        // Process each integer in the input array.
         for (int value : values) {
             int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
+            
+            // Process each byte of the encoded value, starting from the least significant.
             for (int i = numBytes - 1; i >= 0; i--) {
                 byte currentByte = (byte) (value % 128);
                 value /= 128;
@@ -58,7 +64,6 @@ public class VariableByteEncoder {
         return encodedBytes;
     }
 
-
     /**
      * Decodes a value encoded using Variable Byte encoding back into its integer representation.
      *
@@ -68,6 +73,7 @@ public class VariableByteEncoder {
     public static int decode(byte[] encodedBytes) {
         int decodedValue = 0;
 
+        // Process each byte of the encoded array.
         for (byte b : encodedBytes) {
             int value = b & 0x7f; // Retrieve the 7 least significant bits.
             decodedValue = (decodedValue << 7) | value;
@@ -75,10 +81,12 @@ public class VariableByteEncoder {
 
         return decodedValue;
     }
+
     public static int[] decodeArray(byte[] encodedBytes) {
         List<Integer> decodedValues = new ArrayList<>();
         int currentIndex = 0;
 
+        // Process each byte until we've processed the entire encoded array.
         while (currentIndex < encodedBytes.length) {
             int decodedValue = 0;
             int shift = 0;
@@ -90,7 +98,7 @@ public class VariableByteEncoder {
                 decodedValue |= (value << shift);
                 shift += 7;
                 currentIndex++;
-            } while ((currentByte & 0x80) != 0);
+            } while ((currentByte & 0x80) != 0); // Check for continuation byte.
 
             decodedValues.add(decodedValue);
         }
@@ -103,7 +111,4 @@ public class VariableByteEncoder {
 
         return result;
     }
-
-
-
 }

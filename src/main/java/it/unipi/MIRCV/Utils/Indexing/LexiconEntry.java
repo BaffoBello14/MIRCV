@@ -1,42 +1,43 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 public class LexiconEntry {
-    private static String BLOCK_DESC_PATH= PathAndFlags.PATH_TO_BLOCK_FILE+"/BlockInfo.dat";
-    private long offset_doc_id=0;
-    private int UpperTF=0;
-    private int df=0;
-    private double idf=0;
-    private long offset_frequency=0;
-    private long offset_skip_pointer=0;
-    protected static final long ENTRY_SIZE=4*8+2*4+Lexicon.MAX_LEN_OF_TERM;
+    // Various attributes of a LexiconEntry.
+    private long offset_doc_id = 0;
+    private int upperTF = 0; // Upper term frequency.
+    private int df = 0; // Document frequency.
+    private double idf = 0; // Inverse document frequency.
+    private long offset_frequency = 0;
+    private long offset_skip_pointer = 0;
+    private byte[] termBytes;
+    protected static final long ENTRY_SIZE = 4 * 8 + 2 * 4 + Lexicon.MAX_LEN_OF_TERM; // Size of a LexiconEntry when stored.
 
-
-
-    public void updateTFMAX(PostingIndex index){
-        for(Posting posting: index.getPostings()){
-            if(posting.getFrequency()>this.UpperTF){
-                this.UpperTF=posting.getFrequency();
+    // Updates the maximum term frequency using the provided PostingIndex.
+    public void updateTFMAX(PostingIndex index) {
+        for (Posting posting : index.getPostings()) {
+            if (posting.getFrequency() > this.upperTF) {
+                this.upperTF = posting.getFrequency();
             }
             this.df++;
         }
     }
-    public double calculateIDF(){
-        this.idf=Math.log(CollectionStatistics.getDocuments()/(double)this.df);
-        return 0;
+
+    // Calculates and returns the inverse document frequency.
+    public double calculateIDF() {
+        this.idf = Math.log(CollectionStatistics.getDocuments() / (double) this.df);
+        return this.idf;
     }
 
+    // Custom string representation for a LexiconEntry.
     @Override
     public String toString() {
         return "LexiconEntry{" +
                 "offset_doc_id=" + offset_doc_id +
-                ", UpperTF=" + UpperTF +
+                ", upperTF=" + upperTF +
                 ", df=" + df +
                 ", idf=" + idf +
                 ", offset_frequency=" + offset_frequency +
@@ -44,61 +45,12 @@ public class LexiconEntry {
                 '}';
     }
 
-    public long write2Disk(String term,long offset,FileChannel fileChannel){
-        try {
-            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_WRITE,offset,ENTRY_SIZE);
-            if(mappedByteBuffer==null){
-                return -1;
-            }
-            mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
-            mappedByteBuffer.putLong(offset_doc_id);
-            mappedByteBuffer.putLong(offset_frequency);
-            mappedByteBuffer.putInt(UpperTF);
-            mappedByteBuffer.putInt(df);
-            mappedByteBuffer.putDouble(idf);
-            mappedByteBuffer.putLong(offset_skip_pointer);
-            return offset+ENTRY_SIZE;
-        }catch (IOException e){
-            System.out.println("problems with the writing to disk of lexicon");
-            return -1;
-        }
+    // Increments the document frequency by 1.
+    public void incrementDf() {
+        this.df++;
     }
-    public String readFromDisk(long offset, FileChannel fileChannel,String termtoRead) {
-        try {
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, ENTRY_SIZE);
-            if (mappedByteBuffer == null) {
-                return "";
-            }
 
-            // Read the data from the MappedByteBuffer
-            byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
-            mappedByteBuffer.get(termBytes);
-            String term = Lexicon.removePadding(new String(termBytes, StandardCharsets.UTF_8));
-            if(!term.equals(termtoRead)){
-                return "";
-            }
-            this.offset_doc_id = mappedByteBuffer.getLong();
-            this.offset_frequency = mappedByteBuffer.getLong();
-            this.UpperTF = mappedByteBuffer.getInt();
-            this.df = mappedByteBuffer.getInt();
-            this.idf = mappedByteBuffer.getDouble();
-            this.offset_skip_pointer = mappedByteBuffer.getLong();
-
-            return term;
-        } catch (IOException e) {
-            System.out.println("Problems with reading from the lexicon file.");
-            return "";
-        }
-    }
-    public int numBlocksnecessary(){
-        if(df>512){
-            return (int)Math.ceil(Math.sqrt(df));
-        }
-        return 1;
-    }
-    public int postingsPerBlock(int blocks){
-        return (int)Math.ceil(df/(double)blocks);
-    }
+    // Various getter and setter methods for the attributes.
 
     public long getOffset_doc_id() {
         return offset_doc_id;
@@ -109,11 +61,11 @@ public class LexiconEntry {
     }
 
     public int getUpperTF() {
-        return UpperTF;
+        return upperTF;
     }
 
     public void setUpperTF(int upperTF) {
-        UpperTF = upperTF;
+        this.upperTF = upperTF;
     }
 
     public int getDf() {
@@ -132,6 +84,14 @@ public class LexiconEntry {
         this.idf = idf;
     }
 
+    public byte[] getTermBytes() {
+        return termBytes;
+    }
+    
+    public void setTermBytes(byte[] termBytes) {
+        this.termBytes = termBytes;
+    }    
+
     public long getOffset_frequency() {
         return offset_frequency;
     }
@@ -148,6 +108,51 @@ public class LexiconEntry {
         this.offset_skip_pointer = offset_skip_pointer;
     }
 
+    // Reads a LexiconEntry from disk.
+    public long readEntryFromDisk(long offset, FileChannel fileChannel) {
+        try {
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, LexiconEntry.ENTRY_SIZE);
+            if (mappedByteBuffer == null) {
+                return -1;
+            }
 
-    //need a function to read the Skipping blocks
+            byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
+            mappedByteBuffer.get(termBytes);
+            offset_doc_id = mappedByteBuffer.getLong();
+            offset_frequency = mappedByteBuffer.getLong();
+            upperTF = mappedByteBuffer.getInt();
+            df = mappedByteBuffer.getInt();
+            idf = mappedByteBuffer.getDouble();
+            offset_skip_pointer = mappedByteBuffer.getLong();
+
+            return offset + ENTRY_SIZE;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Writes a LexiconEntry to disk.
+    public long writeEntryToDisk(String term, long offset, FileChannel fileChannel) {
+        try {
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, offset, LexiconEntry.ENTRY_SIZE);
+            if (mappedByteBuffer == null) {
+                return -1;
+            }
+
+            System.out.println(term + toString());
+            mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
+            mappedByteBuffer.putLong(offset_doc_id);
+            mappedByteBuffer.putLong(offset_frequency);
+            mappedByteBuffer.putInt(upperTF);
+            mappedByteBuffer.putInt(df);
+            mappedByteBuffer.putDouble(idf);
+            mappedByteBuffer.putLong(offset_skip_pointer);
+
+            return offset + LexiconEntry.ENTRY_SIZE;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }  
 }
