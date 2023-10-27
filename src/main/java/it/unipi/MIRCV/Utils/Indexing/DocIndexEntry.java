@@ -9,7 +9,15 @@ public class DocIndexEntry {
     private String doc_no;
     private long doc_size;
     protected static  final int DOC_NO_LENGTH=8;
+<<<<<<< HEAD
+    public static final int DOC_INDEX_ENTRY_SIZE=DOC_NO_LENGTH+8+4;
+=======
     protected static final int DOC_INDEX_ENTRY_SIZE=DOC_NO_LENGTH+8+4;
+<<<<<<< HEAD
+=======
+    
+>>>>>>> e1cb0e5b4b73e809a29cbb83f693ae0f3047ab8f
+>>>>>>> 1b303430e4448ef03e4920045b8c72e5174387d7
     public DocIndexEntry(String doc_no,long doc_size){
         this.doc_no=padNumberWithZeros(doc_no,DOC_NO_LENGTH);
         this.doc_size=doc_size;
