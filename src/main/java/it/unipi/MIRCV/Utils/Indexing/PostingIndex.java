@@ -19,7 +19,7 @@ public class PostingIndex {
     }
     public PostingIndex(){}
     public PostingIndex(String term){
-        this.term=Lexicon.padStringToLength(term);
+        this.term=term;
     }
     public void setCompression(boolean compression) {
         this.compression = compression;
@@ -59,7 +59,7 @@ public class PostingIndex {
             skippingBlockActual=skippingBlockIterator.next();
 
             postings.clear();
-            postings.addAll(skippingBlockActual.getSkippingBlockPostings(compression));
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
             postingIterator=postings.iterator();
         }
         postingActual=postingIterator.next();

@@ -10,6 +10,10 @@ public class PathAndFlags {
     public static String PATH_TO_FINAL_LEXICON="./IndexData/Final/Lexicon.dat";
     public static String PATH_TO_COLLECTION_STAT="./IndexData/CollectionStatistics/CollectionStat.dat";
     public static String PATH_TO_BLOCK_FILE="./IndexData/BlockInfo/BlockInfo.dat";
+    public static boolean COMPRESSION_ENABLED=true;
+    public static boolean STOPWORD_STEM_ENABLED=true;
+    public static boolean BM25=false;
+
 
 
 

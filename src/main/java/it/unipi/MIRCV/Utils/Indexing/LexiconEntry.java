@@ -6,14 +6,22 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 public class LexiconEntry {
+    private String term;
     private long offset_doc_id = 0;
     private int upperTF = 0;
     private int df = 0;
-    private double idf = 0;
+    private float idf = 0;
+    private float upperTFIDF=0;
+    private int doclen=1;
+    private int tf=0;
+    private float upperBM25=0;
     private long offset_frequency = 0;
     private long offset_skip_pointer = 0;
-    private byte[] termBytes;
-    protected static final long ENTRY_SIZE = 4 * 8 + 2 * 4 + Lexicon.MAX_LEN_OF_TERM;
+    private int freqByteSize=0;
+    private int numBlocks=1;
+    private int docidByteSize=0;
+
+    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM;
 
     public void updateTFMAX(PostingIndex index) {
         for (Posting posting : index.getPostings()) {
@@ -24,8 +32,81 @@ public class LexiconEntry {
         }
     }
 
-    public double calculateIDF() {
-        this.idf = Math.log(CollectionStatistics.getDocuments() / (double) this.df);
+    public String getTerm() {
+        return term;
+    }
+
+    public void setTerm(String term) {
+        this.term = term;
+    }
+
+    public float getUpperTFIDF() {
+        return upperTFIDF;
+    }
+
+    public void setUpperTFIDF(float upperTFIDF) {
+        this.upperTFIDF = upperTFIDF;
+    }
+
+    public int getDoclen() {
+        return doclen;
+    }
+
+    public void setDoclen(int doclen) {
+        this.doclen = doclen;
+    }
+
+    public int getTf() {
+        return tf;
+    }
+
+    public void setTf(int tf) {
+        this.tf = tf;
+    }
+
+    public float getUpperBM25() {
+        return upperBM25;
+    }
+
+    public void setUpperBM25(float upperBM25) {
+        this.upperBM25 = upperBM25;
+    }
+
+    public int getFreqByteSize() {
+        return freqByteSize;
+    }
+
+    public void setFreqByteSize(int freqByteSize) {
+        this.freqByteSize = freqByteSize;
+    }
+
+    public int getNumBlocks() {
+        return numBlocks;
+    }
+
+    public void setNumBlocks(int numBlocks) {
+        this.numBlocks = numBlocks;
+    }
+
+    public int getDocidByteSize() {
+        return docidByteSize;
+    }
+
+    public void setDocidByteSize(int docidByteSize) {
+        this.docidByteSize = docidByteSize;
+    }
+
+    public void updateBM25Values(int tf, int doc_len){
+        float ratio=(float)this.tf/(float)(this.doclen+this.tf);
+        float newRatio=(float)tf/(float)(doclen+tf);
+        if(newRatio>ratio){
+            this.tf=tf;
+            this.doclen=doc_len;
+        }
+    }
+
+    public float calculateIDF() {
+        this.idf = (float) Math.log(CollectionStatistics.getDocuments() / (float) this.df);
         return this.idf;
     }
 
@@ -70,21 +151,14 @@ public class LexiconEntry {
         this.df = df;
     }
 
-    public double getIdf() {
+    public float getIdf() {
         return idf;
     }
 
-    public void setIdf(double idf) {
+    public void setIdf(float idf) {
         this.idf = idf;
     }
 
-    public byte[] getTermBytes() {
-        return termBytes;
-    }
-    
-    public void setTermBytes(byte[] termBytes) {
-        this.termBytes = termBytes;
-    }    
 
     public long getOffset_frequency() {
         return offset_frequency;
@@ -111,12 +185,19 @@ public class LexiconEntry {
 
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
-
+            term=Lexicon.removePadding(new String(termBytes,StandardCharsets.UTF_8));
+            df=(mappedByteBuffer.getInt());
+            idf=(mappedByteBuffer.getFloat());
+            upperTF=(mappedByteBuffer.getInt());
+            doclen=(mappedByteBuffer.getInt());
+            tf=(mappedByteBuffer.getInt());
+            upperTFIDF=(mappedByteBuffer.getFloat());
+            upperBM25=(mappedByteBuffer.getFloat());
             offset_doc_id=(mappedByteBuffer.getLong());
             offset_frequency=(mappedByteBuffer.getLong());
-            upperTF=(mappedByteBuffer.getInt());
-            df=(mappedByteBuffer.getInt());
-            idf=(mappedByteBuffer.getDouble());
+            docidByteSize=(mappedByteBuffer.getInt());
+            freqByteSize=(mappedByteBuffer.getInt());
+            numBlocks=(mappedByteBuffer.getInt());
             offset_skip_pointer=(mappedByteBuffer.getLong());
 
             return offset+ENTRY_SIZE;
@@ -132,13 +213,20 @@ public class LexiconEntry {
             if (mappedByteBuffer == null) {
                 return -1;
             }
-            System.out.println(term+toString());
+            System.out.println(term+ this);
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
+            mappedByteBuffer.putInt(df);
+            mappedByteBuffer.putFloat(idf);
+            mappedByteBuffer.putInt(upperTF);
+            mappedByteBuffer.putInt(doclen);
+            mappedByteBuffer.putInt(tf);
+            mappedByteBuffer.putFloat(upperTFIDF);
+            mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_doc_id);
             mappedByteBuffer.putLong(offset_frequency);
-            mappedByteBuffer.putInt(upperTF);
-            mappedByteBuffer.putInt(df);
-            mappedByteBuffer.putDouble(idf);
+            mappedByteBuffer.putInt(docidByteSize);
+            mappedByteBuffer.putInt(freqByteSize);
+            mappedByteBuffer.putInt(numBlocks);
             mappedByteBuffer.putLong(offset_skip_pointer);
 
             return offset + LexiconEntry.ENTRY_SIZE;

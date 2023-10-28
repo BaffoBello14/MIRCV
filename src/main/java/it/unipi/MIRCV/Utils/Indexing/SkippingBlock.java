@@ -10,11 +10,10 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 public class SkippingBlock {
-    private static String Freq_file= PathAndFlags.PATH_TO_FINAL_FREQ;
-    private static String Doc_ID_file=PathAndFlags.PATH_TO_FINAL_DOC_ID;
     private long doc_id_offset;
     private int doc_id_size;
     private long freq_offset;
@@ -102,17 +101,17 @@ public class SkippingBlock {
     public void setFile_offset(long file_offset) {
         this.file_offset = file_offset;
     }
-    public ArrayList<Posting> getSkippingBlockPostings(boolean compression){
+    public ArrayList<Posting> getSkippingBlockPostings(){
         try{
-            FileChannel fileChannelDocID= (FileChannel) Files.newByteChannel(Paths.get(Doc_ID_file));
-            FileChannel fileChannelFreqs= (FileChannel) Files.newByteChannel(Paths.get(Freq_file));
+            FileChannel fileChannelDocID= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
+            FileChannel fileChannelFreqs= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
             MappedByteBuffer mappedByteBufferDocID=fileChannelDocID.map(FileChannel.MapMode.READ_ONLY,doc_id_offset,doc_id_size);
             MappedByteBuffer mappedByteBufferFreq=fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY,freq_offset,freq_size);
             if(mappedByteBufferFreq==null||mappedByteBufferDocID==null){
                 return null;
             }
             ArrayList<Posting> postings=new ArrayList<>();
-            if(compression){
+            if(PathAndFlags.COMPRESSION_ENABLED){
                 byte [] doc_ids=new byte[doc_id_size];
                 byte [] freqs=new byte[freq_size];
                 mappedByteBufferDocID.get(doc_ids,0,doc_id_size);

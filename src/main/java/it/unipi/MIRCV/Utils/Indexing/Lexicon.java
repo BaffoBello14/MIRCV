@@ -23,13 +23,16 @@ public class Lexicon {
             return lexicon.get(term);
         }
         LexiconEntry lexiconEntry=find(term);
+        if (lexiconEntry==null){
+            return null;
+        }
         add(term, lexiconEntry);
         return lexiconEntry;
     }
 
     public LexiconEntry find(String term) {
         try {
-            long top = CollectionStatistics.getTerms();
+            long top = CollectionStatistics.getTerms()-1;
             long bot = 0;
             long mid;
             LexiconEntry entry=new LexiconEntry();
@@ -45,7 +48,7 @@ public class Lexicon {
                         return null; 
                     }
     
-                    String termFound = Lexicon.removePadding(new String(entry.getTermBytes(), StandardCharsets.UTF_8));
+                    String termFound = Lexicon.removePadding(entry.getTerm());
     
                     int comparisonResult = term.compareTo(termFound);
                     
@@ -73,17 +76,10 @@ public class Lexicon {
     }
     
     public void add(String term,LexiconEntry lexiconEntry){
-        term=padStringToLength(term);
-        if(lexicon.containsKey(term)){
-            lexicon.get(term).setDf(lexicon.get(term).getDf()+1);
-            lexicon.get(term).calculateIDF();
-        }else{
-            lexicon.put(term,lexiconEntry);
-        }
+        lexicon.put(term,lexiconEntry);
     }
 
     public void add(String term) {
-        term = padStringToLength(term);
         lexicon.compute(term, (key, entry) -> {
             if (entry == null) {
                 return new LexiconEntry();
@@ -113,4 +109,8 @@ public class Lexicon {
         int nullIndex = trimmed.indexOf('\0');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
+    public float getIDF(String term){
+        return lexicon.get(term).getIdf();
+    }
+
 }
