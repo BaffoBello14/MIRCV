@@ -56,7 +56,7 @@ public class Preprocess {
                    .replaceAll(NON_LETTER_REGEX, " ")
                    .replaceAll(MULTIPLE_SPACES_REGEX, " ")
                    .replaceAll(CONSECUTIVE_LETTERS_REGEX, "$1$1")
-                   .replaceAll(NO_STANDARD_ASCII_FOR_7_BITS_REGEX,"")
+                   .replaceAll(NO_STANDARD_ASCII_FOR_7_BITS_REGEX," ")
                    .trim();
     }
 
@@ -69,6 +69,9 @@ public class Preprocess {
         for (String word : words) {
             String[] withoutCamelCase = word.split(CAMEL_CASE_REGEX);
             for (String token : withoutCamelCase) {
+                if(token.trim().isEmpty()||token.isEmpty()){
+                    continue;
+                }
                 tokens.add(token.toLowerCase(Locale.ROOT));
             }
         }

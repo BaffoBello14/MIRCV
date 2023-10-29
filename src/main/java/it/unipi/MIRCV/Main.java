@@ -32,10 +32,7 @@ public class Main {
 
 package it.unipi.MIRCV;
 
-import it.unipi.MIRCV.Utils.Indexing.DocIndex;
-import it.unipi.MIRCV.Utils.Indexing.DocIndexEntry;
-import it.unipi.MIRCV.Utils.Indexing.Lexicon;
-import it.unipi.MIRCV.Utils.Indexing.LexiconEntry;
+import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
@@ -52,7 +49,19 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        System.out.println(100*((double)Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/Runtime.getRuntime().totalMemory());
+        FileChannel fileChannelLEX=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON),StandardOpenOption.READ);
+        LexiconEntry lexiconEntry=new LexiconEntry();
+        long pos=0;
+        while(lexiconEntry.readEntryFromDisk(pos,fileChannelLEX)!=-1
+               // &&!lexiconEntry.getTerm().trim().isEmpty()
+        ){
+            System.out.println(lexiconEntry);
+            pos+=100;
+            System.out.println(pos);
+            System.out.println(fileChannelLEX.size());
+        }
+        CollectionStatistics.readFromDisk();
+        System.out.println(CollectionStatistics.getDocuments()+" "+CollectionStatistics.getAvgDocLen()+" "+CollectionStatistics.getTerms()+" "+CollectionStatistics.getTotalLenDoc());
 
     }
 }

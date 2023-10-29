@@ -13,7 +13,9 @@ public class PathAndFlags {
     public static boolean COMPRESSION_ENABLED=true;
     public static boolean STOPWORD_STEM_ENABLED=true;
     public static boolean BM25=false;
-
+    public static final float BM25_k1= 1.5F;
+    public static final float BM25_b=0.75F;
+    public static final int POSTING_PER_BLOCK=512;
 
 
 

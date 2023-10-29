@@ -106,7 +106,7 @@ public class Lexicon {
 
     public static String removePadding(String paddedString) {
         String trimmed = paddedString.trim();
-        int nullIndex = trimmed.indexOf('\0');
+        int nullIndex = trimmed.indexOf(' ');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
     public float getIDF(String term){

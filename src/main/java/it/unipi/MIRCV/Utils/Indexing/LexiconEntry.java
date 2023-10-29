@@ -1,9 +1,12 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class LexiconEntry {
     private String term;
@@ -112,15 +115,22 @@ public class LexiconEntry {
 
     @Override
     public String toString() {
-        return "LexiconEntry{" +
-                "offset_doc_id=" + offset_doc_id +
-                ", upperTF=" + upperTF +
-                ", df=" + df +
-                ", idf=" + idf +
-                ", offset_frequency=" + offset_frequency +
-                ", offset_skip_pointer=" + offset_skip_pointer +
-                '}';
+        return "Term: " + term + " " +
+                "Offset Doc ID: " + offset_doc_id + " " +
+                "Upper TF: " + upperTF + " " +
+                "DF: " + df + " " +
+                "IDF: " + idf + " " +
+                "Upper TF-IDF: " + upperTFIDF + " " +
+                "Doclen: " + doclen + " " +
+                "TF: " + tf + " " +
+                "Upper BM25: " + upperBM25 + " " +
+                "Offset Frequency: " + offset_frequency + " " +
+                "Offset Skip Pointer: " + offset_skip_pointer + " " +
+                "Freq Byte Size: " + freqByteSize + " " +
+                "Num Blocks: " + numBlocks + " " +
+                "DocID Byte Size: " + docidByteSize;
     }
+
 
     public void incrementDf() {
         this.df++;
@@ -177,6 +187,9 @@ public class LexiconEntry {
     }
     public long readEntryFromDisk(long offset, FileChannel fileChannel) {
         try {
+            if(offset>=fileChannel.size()){
+                return -1;
+            }
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, LexiconEntry.ENTRY_SIZE);
 
             if (mappedByteBuffer == null) {
@@ -213,7 +226,7 @@ public class LexiconEntry {
             if (mappedByteBuffer == null) {
                 return -1;
             }
-            System.out.println(term+ this);
+            //System.out.println(term+"\t"+ this);
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
             mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
@@ -235,5 +248,16 @@ public class LexiconEntry {
             return -1;
         }
     }
-    
+    public void calculateUpperBounds(){
+        this.upperTFIDF= (float) ((1+Math.log(this.upperTF))*this.idf);
+        CollectionStatistics.computeAVGDOCLEN();
+        this.upperBM25= (float) ((tf/(tf+ PathAndFlags.BM25_k1*(1-PathAndFlags.BM25_b+PathAndFlags.BM25_b*(doclen/CollectionStatistics.getAvgDocLen()))))*idf);
+    }
+    public void calculateBlockNeed(){
+        this.offset_skip_pointer=SkippingBlock.getFile_offset();
+        if(df> PathAndFlags.POSTING_PER_BLOCK){
+            this.numBlocks= (int) Math.ceil(Math.sqrt(df));
+        }
+    }
+
 }

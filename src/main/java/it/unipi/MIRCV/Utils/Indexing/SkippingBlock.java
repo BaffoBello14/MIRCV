@@ -20,7 +20,7 @@ public class SkippingBlock {
     private int freq_size;
     private int doc_id_max;
     private int num_posting_of_block;
-    private long file_offset=0;
+    private static long file_offset=0;
     private static final int size_of_element=(8+4)*2+4+4;
 
     public boolean writeOnDisk(FileChannel file_to_write){
@@ -94,12 +94,12 @@ public class SkippingBlock {
         this.num_posting_of_block = num_posting_of_block;
     }
 
-    public long getFile_offset() {
+    public static long getFile_offset() {
         return file_offset;
     }
 
-    public void setFile_offset(long file_offset) {
-        this.file_offset = file_offset;
+    public static void setFile_offset(long file_offset) {
+        SkippingBlock.file_offset = file_offset;
     }
     public ArrayList<Posting> getSkippingBlockPostings(){
         try{
