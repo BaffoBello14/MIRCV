@@ -19,7 +19,7 @@ public class ProcessCollection {
         long start = System.currentTimeMillis();
 
         // Execute SPIMI
-        // int indexes = (int) SPIMI.execute(); // Commented out, possibly an incomplete code snippet
+        int indexes = (int) SPIMI.execute(); // Commented out, possibly an incomplete code snippet
 
         // Record the ending time and calculate execution time
         long end = System.currentTimeMillis();
@@ -30,13 +30,13 @@ public class ProcessCollection {
 
         // Set the number of indexes and execute SPIMIMerger
         start = System.currentTimeMillis();
-        SPIMIMerger.setNumIndex(60);
+        SPIMIMerger.setNumIndex(indexes);
         SPIMIMerger.execute();
         end = System.currentTimeMillis();
         System.out.println("SPIMIMerger time -> " + (end - start) / 1000 + " sec");
 
         // Open file channels for lexicon and create arrays for LexiconEntry objects
-        FileChannel[] fileChannelLEX = new FileChannel[60];
+        /*FileChannel[] fileChannelLEX = new FileChannel[60];
         LexiconEntry[] lexiconEntries = new LexiconEntry[60];
         for (int i = 0; i < 60; i++) {
             fileChannelLEX[i] = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON + i + ".dat"),
@@ -46,7 +46,7 @@ public class ProcessCollection {
             // Read LexiconEntry from disk and display it
             lexiconEntries[i].readEntryFromDisk(fileChannelLEX[i].size() - LexiconEntry.ENTRY_SIZE, fileChannelLEX[i]);
             System.out.println(i + " " + lexiconEntries[i]);
-        }
+        }*/
 
         // Create a DocIndex object and read it from disk
         DocIndex docIndex = new DocIndex();

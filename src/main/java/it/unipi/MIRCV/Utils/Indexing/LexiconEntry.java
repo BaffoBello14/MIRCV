@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 
 public class LexiconEntry {
 
@@ -255,7 +254,8 @@ public class LexiconEntry {
 
     // Method to calculate the block needs based on the posting's size
     public void calculateBlockNeed() {
-        this.offset_skip_pointer = SkippingBlock.getFile_offset();
+        SkippingBlock skippingBlock = new SkippingBlock();
+        this.offset_skip_pointer = skippingBlock.getFile_offset();
         if(df > PathAndFlags.POSTING_PER_BLOCK) {
             this.numBlocks = (int) Math.ceil(Math.sqrt(df));
         }

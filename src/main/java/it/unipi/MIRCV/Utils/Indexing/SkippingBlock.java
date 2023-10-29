@@ -7,15 +7,11 @@ import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 public class SkippingBlock {
-
-    // File paths for frequency and document ID.
-    private static String Freq_file = PathAndFlags.PATH_TO_FINAL_FREQ;
-    private static String Doc_ID_file = PathAndFlags.PATH_TO_FINAL_DOC_ID;
 
     // Attributes to describe the block.
     private long doc_id_offset;
@@ -118,39 +114,57 @@ public class SkippingBlock {
         this.file_offset = file_offset;
     }
 
-    // Retrieve postings from a skipping block.
-    public ArrayList<Posting> getSkippingBlockPostings(boolean compression) {
+    /**
+ * Retrieves the postings from a skipping block.
+ * 
+ * @return ArrayList of Posting objects representing the postings for a term.
+ */
+    public ArrayList<Posting> getSkippingBlockPostings() {
         try {
-            FileChannel fileChannelDocID = (FileChannel) Files.newByteChannel(Paths.get(Doc_ID_file));
-            FileChannel fileChannelFreqs = (FileChannel) Files.newByteChannel(Paths.get(Freq_file));
+            // Open the channels for document IDs and frequencies.
+            FileChannel fileChannelDocID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            FileChannel fileChannelFreqs = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+
+            // Map the file content to ByteBuffers.
             MappedByteBuffer mappedByteBufferDocID = fileChannelDocID.map(FileChannel.MapMode.READ_ONLY, doc_id_offset, doc_id_size);
             MappedByteBuffer mappedByteBufferFreq = fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY, freq_offset, freq_size);
 
+            // Check if the buffers were successfully created.
             if (mappedByteBufferFreq == null || mappedByteBufferDocID == null) {
                 return null;
             }
 
             ArrayList<Posting> postings = new ArrayList<>();
-            if (compression) {
+
+            // If compression is enabled, decompress the data.
+            if (PathAndFlags.COMPRESSION_ENABLED) {
                 byte[] doc_ids = new byte[doc_id_size];
                 byte[] freqs = new byte[freq_size];
+                
                 mappedByteBufferDocID.get(doc_ids, 0, doc_id_size);
                 mappedByteBufferFreq.get(freqs, 0, freq_size);
+
                 int[] freqs_decompressed = UnaryConverter.convertFromUnary(freqs, num_posting_of_block);
                 int[] doc_ids_decompressed = VariableByteEncoder.decodeArray(doc_ids);
+
+                // Create and add Posting objects to the list.
                 for (int i = 0; i < num_posting_of_block; i++) {
                     Posting posting = new Posting(doc_ids_decompressed[i], freqs_decompressed[i]);
                     postings.add(posting);
                 }
             } else {
+                // If compression is not enabled, directly retrieve the data.
                 for (int i = 0; i < num_posting_of_block; i++) {
                     Posting posting = new Posting(mappedByteBufferDocID.getInt(), mappedByteBufferFreq.getInt());
-                    postings add(posting);
+                    postings.add(posting);
                 }
             }
+
             return postings;
         } catch (IOException e) {
-            System.out.println("Problems with the reading from the file of the block descriptor");
+            System.out.println("Problems with reading from the file of the block descriptor.");
             e.printStackTrace();
             return null;
         }

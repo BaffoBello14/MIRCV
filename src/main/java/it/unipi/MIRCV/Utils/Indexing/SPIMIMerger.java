@@ -32,9 +32,9 @@ public class SPIMIMerger {
         PostingIndex postingIndex;
         try {
             // Map the doc_id data into memory.
-            MappedByteBuffer mappedByteBufferDOCID = doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_doc_id(), lexiconEntry.getDocidByteSize);
+            MappedByteBuffer mappedByteBufferDOCID = doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_doc_id(), lexiconEntry.getDocidByteSize());
             // Map the frequency data into memory.
-            MappedByteBuffer mappedByteBufferFreq = freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_frequency(), lexiconEntry.getFreqByteSize);
+            MappedByteBuffer mappedByteBufferFreq = freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_frequency(), lexiconEntry.getFreqByteSize());
             // Create a new PostingIndex for the term.
             postingIndex = new PostingIndex(lexiconEntry.getTerm());
             for (int i = 0; i < lexiconEntry.getDf(); i++) {
@@ -50,7 +50,6 @@ public class SPIMIMerger {
             return null;
         }
     }
-
 
     public static boolean execute() {
         // Check if the SPIMI index is set.
@@ -122,7 +121,7 @@ public class SPIMIMerger {
                 }
 
                 lexiconEntry.calculateBlockNeed();
-                int numPostingPerBlock = (int) Math.ceil(lexiconEntry.getDf() / (double) lexiconEntry.getNumBlocks);
+                int numPostingPerBlock = (int) Math.ceil(lexiconEntry.getDf() / (double) lexiconEntry.getNumBlocks());
                 int numBlocks = lexiconEntry.getNumBlocks();
                 Iterator<Posting> postingIterator = mergedPosting.getPostings().iterator();
 
@@ -242,7 +241,6 @@ public class SPIMIMerger {
         }
     }
 
-
     private static String getTermToProcess() {
         String termToProcess, nextTerm;
         termToProcess = null;
@@ -252,7 +250,7 @@ public class SPIMIMerger {
             if (lexiconEntries[i] == null) {
                 continue;
             }
-            nextTerm = lexiconEntries[i].getTerm;
+            nextTerm = lexiconEntries[i].getTerm();
 
             // If termToProcess is null, set it to nextTerm.
             if (termToProcess == null) {

@@ -7,7 +7,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 
 public class Lexicon {
 
@@ -48,10 +47,6 @@ public class Lexicon {
                 while (bot <= top) {
                     mid = (bot + top) / 2;
                     entry.readEntryFromDisk(mid * LexiconEntry.ENTRY_SIZE, fileChannel);
-
-                    if (entry == null) {
-                        return null;
-                    }
 
                     String termFound = Lexicon.removePadding(entry.getTerm());
                     int comparisonResult = term.compareTo(termFound);
