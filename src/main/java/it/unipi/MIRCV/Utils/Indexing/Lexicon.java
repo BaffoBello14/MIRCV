@@ -11,29 +11,34 @@ import java.nio.charset.StandardCharsets;
 
 public class Lexicon {
 
-    // The main data structure to hold lexicon entries.
+    // Main data structure to hold lexicon entries
     private HashMap<String, LexiconEntry> lexicon = new HashMap<>();
-    protected static final int MAX_LEN_OF_TERM = 32; // Max length of a term.
 
-    // Getter method to retrieve the lexicon.
+    // Maximum length allowed for a term
+    protected static final int MAX_LEN_OF_TERM = 32;
+
+    // Getter method to retrieve the entire lexicon
     public HashMap<String, LexiconEntry> getLexicon() {
         return lexicon;
     }
 
-    // Retrieves an entry from the lexicon, or finds it on disk if not present.
+    // Retrieves a lexicon entry based on the term. If the term is not in the in-memory lexicon, it tries to find it on disk.
     public LexiconEntry retrieveEntry(String term) {
         if (lexicon.containsKey(term)) {
             return lexicon.get(term);
         }
         LexiconEntry lexiconEntry = find(term);
+        if (lexiconEntry == null) {
+            return null;
+        }
         add(term, lexiconEntry);
         return lexiconEntry;
     }
 
-    // Attempts to find a term in the lexicon file on disk using a binary search.
+    // Attempts to find a term in the lexicon file on disk using binary search
     public LexiconEntry find(String term) {
         try {
-            long top = CollectionStatistics.getTerms();
+            long top = CollectionStatistics.getTerms() - 1;
             long bot = 0;
             long mid;
             LexiconEntry entry = new LexiconEntry();
@@ -44,8 +49,11 @@ public class Lexicon {
                     mid = (bot + top) / 2;
                     entry.readEntryFromDisk(mid * LexiconEntry.ENTRY_SIZE, fileChannel);
 
-                    String termFound = Lexicon.removePadding(new String(entry.getTermBytes(), StandardCharsets.UTF_8));
+                    if (entry == null) {
+                        return null;
+                    }
 
+                    String termFound = Lexicon.removePadding(entry.getTerm());
                     int comparisonResult = term.compareTo(termFound);
 
                     if (comparisonResult == 0) {
@@ -65,25 +73,18 @@ public class Lexicon {
         }
     }
 
-    // Setter method to update the lexicon.
+    // Setter method to update the lexicon
     public void setLexicon(HashMap<String, LexiconEntry> lexicon) {
         this.lexicon = lexicon;
     }
 
-    // Adds an entry to the lexicon or updates it if it already exists.
+    // Adds an entry to the lexicon
     public void add(String term, LexiconEntry lexiconEntry) {
-        term = padStringToLength(term);
-        if (lexicon.containsKey(term)) {
-            lexicon.get(term).setDf(lexicon.get(term).getDf() + 1);
-            lexicon.get(term).calculateIDF();
-        } else {
-            lexicon.put(term, lexiconEntry);
-        }
+        lexicon.put(term, lexiconEntry);
     }
 
-    // Adds or updates a term in the lexicon.
+    // Adds or updates a term in the lexicon
     public void add(String term) {
-        term = padStringToLength(term);
         lexicon.compute(term, (key, entry) -> {
             if (entry == null) {
                 return new LexiconEntry();
@@ -94,14 +95,14 @@ public class Lexicon {
         });
     }
 
-    // Returns a sorted list of terms in the lexicon.
+    // Returns a sorted list of terms in the lexicon
     public ArrayList<String> sortLexicon() {
         ArrayList<String> sorted = new ArrayList<>(lexicon.keySet());
         Collections.sort(sorted);
         return sorted;
     }
 
-    // Pads a string to a specified length.
+    // Pads a string to a specified length
     public static String padStringToLength(String input) {
         if (input.length() >= MAX_LEN_OF_TERM) {
             return input.substring(0, MAX_LEN_OF_TERM);
@@ -110,10 +111,15 @@ public class Lexicon {
         }
     }
 
-    // Removes any padding from a string.
+    // Removes any padding from a string
     public static String removePadding(String paddedString) {
         String trimmed = paddedString.trim();
-        int nullIndex = trimmed.indexOf('\0');
+        int nullIndex = trimmed.indexOf(' ');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
+    }
+
+    // Returns the IDF value for a given term
+    public float getIDF(String term) {
+        return lexicon.get(term).getIdf();
     }
 }

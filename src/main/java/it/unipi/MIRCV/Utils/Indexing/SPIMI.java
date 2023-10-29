@@ -16,183 +16,262 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 public class SPIMI {
-
-    // Class level constants and attributes
-    private static final String PATH_TO_ARCHIVE_COLLECTION = "./Collection/reducedCollection1000.tar.gz";
+    private static final String PATH_TO_ARCHIVE_COLLECTION = "./Collection/collection.tar.gz";
     private static int numIndex = 0;
     private static long numPosting = 0;
-    private static boolean finished = false;
     private static long offsetDocIndex = 0;
 
+    // Main method to execute the SPIMI indexing process
     public static long execute() throws Exception {
         int doc_id = 1;
         String[] lineofDoc;
         String docno;
-
-        // Open file channel for document index
-        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         
+        // Open a FileChannel for the Doc Index
+        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         int total_length = 0;
         List<String> tokens;
-        HashMap<String, PostingIndex> index = new HashMap<>();
+        Runtime runtime = Runtime.getRuntime();
         
-        // Process till not finished
-        while (!finished) {
-            Runtime runtime = Runtime.getRuntime();
-            long totalMemory = runtime.totalMemory();
-            long freeMemory = runtime.freeMemory();
-            long usedMemory = totalMemory - freeMemory;
+        try {
+            InputStream file = Files.newInputStream(Paths.get(PATH_TO_ARCHIVE_COLLECTION));
+            InputStream gzip = new GZIPInputStream(file);
+            ArchiveInputStream archiveStream = new ArchiveStreamFactory().createArchiveInputStream("tar", gzip);
+            archiveStream.getNextEntry();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(archiveStream, StandardCharsets.UTF_8));
+            String line;
+            
+            // Initialize the in-memory index
+            HashMap<String, PostingIndex> index = new HashMap<>();
 
-            // Process till memory threshold is safe
-            while ((usedMemory / totalMemory) * 100 < 80) {
-                try {
-                    InputStream file = Files.newInputStream(Paths.get(PATH_TO_ARCHIVE_COLLECTION));
-                    InputStream gzip = new GZIPInputStream(file);
-                    ArchiveInputStream archiveStream = new ArchiveStreamFactory().createArchiveInputStream("tar", gzip);
-                    ArchiveEntry entry;
-
-                    // Process each archive entry
-                    while ((entry = archiveStream.getNextEntry()) != null) {
-                        if (!entry.isDirectory()) {
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(archiveStream, StandardCharsets.UTF_8));
-                            String line;
-
-                            // Process each line in the document
-                            while ((line = reader.readLine()) != null) {
-                                lineofDoc = Preprocess.parseLine(line);
-                                docno = lineofDoc[0];
-                                lineofDoc[1] = Preprocess.cleanText(lineofDoc[1]);
-                                tokens = Preprocess.tokenize(lineofDoc[1]);
-                                tokens = Preprocess.removeStopwords(tokens);
-                                tokens = Preprocess.applyStemming(tokens);
-
-                                int documentLength = tokens.size();
-                                DocIndexEntry docIndexEntry = new DocIndexEntry(docno, documentLength);
-                                docIndexEntry.write2Disk(fileChannelDI, offsetDocIndex, doc_id);
-                                offsetDocIndex += DocIndexEntry.DOC_INDEX_ENTRY_SIZE;
-                                total_length += documentLength;
-
-                                // Process tokens and add to index
-                                for (String term : tokens) {
-                                    if (term.isEmpty() || term.trim().isEmpty()) {
-                                        continue;
-                                    }
-                                    PostingIndex posting;
-                                    if (index.containsKey(term)) {
-                                        posting = index.get(term);
-                                    } else {
-                                        posting = new PostingIndex(term);
-                                        index.put(term, posting);
-                                    }
-                                    addPosting(doc_id, posting);
-                                }
-
-                                doc_id++;
-                                usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-                            }
-
-                            write2Disk(index);
-                            finished = true;
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+            // Read each line of the archived collection
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
                 }
-                if (finished) break;
+                lineofDoc = Preprocess.parseLine(line);
+                
+                if (lineofDoc[1].trim().isEmpty()) {
+                    continue;
+                }
+                
+                docno = lineofDoc[0];
+                lineofDoc[1] = Preprocess.cleanText(lineofDoc[1]);
+                tokens = Preprocess.tokenize(lineofDoc[1]);
+
+                // If stopword removal and stemming is enabled, apply them
+                if (PathAndFlags.STOPWORD_STEM_ENABLED) {
+                    tokens = Preprocess.removeStopwords(tokens);
+                    tokens = Preprocess.applyStemming(tokens);
+                }
+                
+                if (tokens.isEmpty()) {
+                    continue;
+                }
+
+                int documentLength = tokens.size();
+
+                // Create a new DocIndexEntry for this document
+                DocIndexEntry docIndexEntry = new DocIndexEntry(docno, documentLength);
+                docIndexEntry.write2Disk(fileChannelDI, offsetDocIndex, doc_id);
+                offsetDocIndex += DocIndexEntry.DOC_INDEX_ENTRY_SIZE;
+                total_length += documentLength;
+
+                // Process each token of the document
+                for (String term : tokens) {
+                    PostingIndex posting;
+                    if (index.containsKey(term)) {
+                        posting = index.get(term);
+                    } else {
+                        posting = new PostingIndex(term);
+                        index.put(term, posting);
+                    }
+                    addPosting(doc_id, posting);
+                    posting.updateBM25Values(posting.getPostings().size(), documentLength);
+                }
+
+                if (doc_id % 100000 == 0) {
+                    System.out.println(doc_id + "processed");
+                }
+                doc_id++;
+
+                // If memory consumption exceeds 80%, write the in-memory index to disk
+                if (((double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.totalMemory()) * 100 > 80) {
+                    if (!write2Disk(index)) {
+                        System.out.println("problems with writing to disk of SPIMI");
+                        return -1;
+                    }
+                    index.clear();
+                    System.gc();
+                }
             }
+
+            // Final write to disk for remaining in-memory index entries
+            if (!write2Disk(index)) {
+                System.out.println("problems with writing to disk spimi");
+                return -1;
+            }
+            
+            index.clear();
+            System.gc();
+        } catch (IOException | ArchiveException e) {
+            e.printStackTrace();
+            return -1;
         }
 
-        // Update collection statistics
-        CollectionStatistics.setTotalLenDoc(CollectionStatistics.getTotalLenDoc() + total_length);
-        CollectionStatistics.setDocuments(doc_id - 1);
+        CollectionStatistics.setTotalLenDoc(total_length);
+        CollectionStatistics.setDocuments(doc_id-1);
         CollectionStatistics.computeAVGDOCLEN();
         CollectionStatistics.write2Disk();
-        CollectionStatistics.readFromDisk();
         System.out.println(CollectionStatistics.getAvgDocLen());
         fileChannelDI.close();
 
         return numIndex;
     }
 
-    // Write the in-memory index to disk
-    private static boolean write2Disk(HashMap<String, PostingIndex> index) {
+    /**
+     * Writes the current in-memory index to disk.
+     *
+     * @param index The in-memory index to be written to disk.
+     * @return true if writing is successful, false otherwise.
+     */
+    private static boolean write2Disk(HashMap<String,PostingIndex> index) {
         System.out.println("save index with size->" + index.size() + " the num ->" + numIndex);
-
+        
         if (index.isEmpty()) {
             return true;
         }
-
-        // Sort the index
+        
+        // Sort index by term
         index = index.entrySet().stream()
-            .sorted(Map.Entry.comparingByKey())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                     .sorted(Map.Entry.comparingByKey())
+                     .collect(Collectors.toMap(Map.Entry::getKey, 
+                                               Map.Entry::getValue, 
+                                               (e1, e2) -> e1, 
+                                               LinkedHashMap::new));
 
         try {
-            // Open file channels
+            // Opening channels for writing to disk
             FileChannel fileChannelLex = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON + numIndex + ".dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileChannel fileChannelDOCID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_ID + numIndex + ".dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileChannel fileChannelFreq = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FREQ + numIndex + ".dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-            
+
+            // Mapping byte buffers
             MappedByteBuffer mappedByteBufferDOCID = fileChannelDOCID.map(FileChannel.MapMode.READ_WRITE, 0, numPosting * 4L);
             MappedByteBuffer mappedByteBufferFreq = fileChannelFreq.map(FileChannel.MapMode.READ_WRITE, 0, numPosting * 4L);
-
+            
             long lexOffset = 0;
 
+            if (mappedByteBufferDOCID == null || mappedByteBufferFreq == null) {
+                return false;
+            }
+
+            // Write each posting list to disk
             for (PostingIndex postingIndex : index.values()) {
                 LexiconEntry lexiconEntry = new LexiconEntry();
                 lexiconEntry.setOffset_doc_id(mappedByteBufferDOCID.position());
                 lexiconEntry.setOffset_frequency(mappedByteBufferFreq.position());
 
                 for (Posting posting : postingIndex.getPostings()) {
-                    System.out.println(posting.getDoc_id() + " " + posting.getFrequency());
                     mappedByteBufferDOCID.putInt(posting.getDoc_id());
                     mappedByteBufferFreq.putInt(posting.getFrequency());
                 }
 
                 lexiconEntry.updateTFMAX(postingIndex);
-                lexiconEntry.setDf(postingIndex.getPostings().size());
+                lexiconEntry.setDocidByteSize(postingIndex.getPostings().size() * 4);
+                lexiconEntry.setFreqByteSize(postingIndex.getPostings().size() * 4);
+                lexiconEntry.setTf(postingIndex.getTf_BM25());
+                lexiconEntry.setDoclen(postingIndex.getDoc_len_BM25());
                 lexOffset = lexiconEntry.writeEntryToDisk(postingIndex.getTerm(), lexOffset, fileChannelLex);
             }
 
             numIndex++;
             numPosting = 0;
             return true;
-
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    // Utility to add postings
+    /**
+     * Adds a posting to a given PostingIndex.
+     *
+     * @param doc_id The document ID.
+     * @param postingIndex The PostingIndex to which the posting is added.
+     */
     protected static void addPosting(int doc_id, PostingIndex postingIndex) {
         if (!postingIndex.getPostings().isEmpty()) {
             Posting posting = postingIndex.getPostings().get(postingIndex.getPostings().size() - 1);
+
             if (doc_id == posting.getDoc_id()) {
                 posting.setFrequency((posting.getFrequency() + 1));
                 return;
             }
         }
+        
         postingIndex.getPostings().add(new Posting(doc_id, 1));
         numPosting++;
     }
 
     public static void main(String[] args) throws Exception {
-        // Setup and execute SPIMI
-        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        FileChannel fileChannelFRQ = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_ID + "0.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        FileChannel fileChannelLEX = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON + "0.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        // Open channels to read and write to the document index, frequency, and lexicon files
+        FileChannel fileChannelDI = FileChannel.open(
+            Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),
+            StandardOpenOption.READ, 
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE
+        );
+        FileChannel fileChannelFRQ = FileChannel.open(
+            Paths.get(PathAndFlags.PATH_TO_DOC_ID + "0.dat"),
+            StandardOpenOption.READ, 
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE
+        );
+        FileChannel fileChannelLEX = FileChannel.open(
+            Paths.get(PathAndFlags.PATH_TO_LEXICON + "0.dat"),
+            StandardOpenOption.READ, 
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE
+        );
+    
+        // Record the start time for the execution
+        long start = System.currentTimeMillis();
+        
+        // Execute the SPIMI indexing process
         execute();
-
-        // Testing the output
+        
+        // Record the end time for the execution
+        long end = System.currentTimeMillis();
+        
+        // Print the time taken for the SPIMI indexing process
+        System.out.println("SPIMI time->" + (end - start) / 1000 + "sec");
+        
+        // Read the document index from disk for the 200th document
         DocIndex docIndex = new DocIndex();
         docIndex.readFromDisk(fileChannelDI, 200);
+        
+        // Read a lexicon entry from the lexicon file
+        LexiconEntry lexiconEntry = new LexiconEntry();
+        lexiconEntry.readEntryFromDisk(LexiconEntry.ENTRY_SIZE, fileChannelLEX);
+        
+        // Map a byte buffer to read the frequency of terms from the frequency file
         byte[] term = new byte[Lexicon.MAX_LEN_OF_TERM];
         MappedByteBuffer mappedByteBuffer = fileChannelFRQ.map(FileChannel.MapMode.READ_ONLY, 8, 4);
-        MappedByteBuffer mappedByteBuffer1 = fileChannelLEX.map(FileChannel.MapMode.READ_ONLY, 48, 4);
-        System.out.println(mappedByteBuffer1.getInt());
+        
+        // Uncomment below if you want to print the term from the byte buffer
+        // System.out.println(new String(term, StandardCharsets.UTF_8));
+        
+        // Print the lexicon entry, the term's frequency, and the sorted document index
+        System.out.println(lexiconEntry);
         System.out.println(mappedByteBuffer.getInt());
         System.out.println(docIndex.sortDocIndex().get(0));
-    }
+    }    
 }
+/*
+leggo la riga
+computo la riga
+vedo se occupazione memoria >80
+se si scrivi in disco
+altrimenti nulla
+ */

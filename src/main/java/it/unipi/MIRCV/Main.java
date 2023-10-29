@@ -1,38 +1,40 @@
 package it.unipi.MIRCV;
 
-import it.unipi.MIRCV.Utils.Indexing.DocIndexEntry;
+import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-import java.nio.MappedByteBuffer;
+
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 public class Main {
-
     public static void main(String[] args) throws Exception {
 
-        FileChannel fileChannelDI = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX + "/DocIndex.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        MappedByteBuffer mappedByteBuffer = fileChannelDI.map(FileChannel.MapMode.READ_WRITE, 0, 20);
+        // Open the file channel to read the final lexicon
+        FileChannel fileChannelLEX = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
 
-        String doc_no = "30";
-        doc_no = DocIndexEntry.padNumberWithZeros(doc_no, 8);
+        // Create a new lexicon entry object
+        LexiconEntry lexiconEntry = new LexiconEntry();
 
-        mappedByteBuffer.putInt(4);
-        mappedByteBuffer.put(doc_no.getBytes(StandardCharsets.UTF_8));
-        mappedByteBuffer.putLong((long) 50);
+        long pos = 0;
+        
+        // Iterate through and read lexicon entries from the file
+        // Stop when there's no entry left or the entry is empty
+        while (lexiconEntry.readEntryFromDisk(pos, fileChannelLEX) != -1) {
+            System.out.println(lexiconEntry);
 
-        MappedByteBuffer mappedByteBuffer1 = fileChannelDI.map(FileChannel.MapMode.READ_ONLY, 0, 20);
-        long did = mappedByteBuffer1.getInt();
+            pos += 100;
+            System.out.println(pos);
+            System.out.println(fileChannelLEX.size());
+        }
 
-        byte[] dno = new byte[8];
-        mappedByteBuffer1.get(dno);
+        // Read collection statistics from disk
+        CollectionStatistics.readFromDisk();
 
-        String docn = new String(dno, StandardCharsets.UTF_8);
-        long dsize = mappedByteBuffer1.getLong();
-
-        System.out.println("docno " + docn + " doid" + did + " size" + dsize);
-
-        fileChannelDI.close();
+        // Print out the collection statistics
+        System.out.println(CollectionStatistics.getDocuments() + " " + 
+                           CollectionStatistics.getAvgDocLen() + " " + 
+                           CollectionStatistics.getTerms() + " " + 
+                           CollectionStatistics.getTotalLenDoc());
     }
 }
