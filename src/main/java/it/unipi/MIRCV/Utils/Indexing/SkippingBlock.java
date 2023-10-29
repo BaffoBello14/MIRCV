@@ -48,12 +48,13 @@ public class SkippingBlock {
             file_offset += size_of_element;
             return true;
         } catch (IOException e) {
-            System.out.println("problems with the write of block of posting");
+            System.out.println("Problems with the write of block of posting");
             return false;
         }
     }
 
     // Several getter and setter methods for the class attributes.
+
     // Getter and Setter methods for doc_id_offset
     public long getDoc_id_offset() {
         return doc_id_offset;
@@ -107,7 +108,7 @@ public class SkippingBlock {
     public void setNum_posting_of_block(int num_posting_of_block) {
         this.num_posting_of_block = num_posting_of_block;
     }
-    
+
     // Getter and Setter methods for file_offset
     public long getFile_offset() {
         return file_offset;
@@ -115,7 +116,7 @@ public class SkippingBlock {
 
     public void setFile_offset(long file_offset) {
         this.file_offset = file_offset;
-    }    
+    }
 
     // Retrieve postings from a skipping block.
     public ArrayList<Posting> getSkippingBlockPostings(boolean compression) {
@@ -144,12 +145,12 @@ public class SkippingBlock {
             } else {
                 for (int i = 0; i < num_posting_of_block; i++) {
                     Posting posting = new Posting(mappedByteBufferDocID.getInt(), mappedByteBufferFreq.getInt());
-                    postings.add(posting);
+                    postings add(posting);
                 }
             }
             return postings;
         } catch (IOException e) {
-            System.out.println("problems with the reading form the file of the block descriptor");
+            System.out.println("Problems with the reading from the file of the block descriptor");
             e.printStackTrace();
             return null;
         }
