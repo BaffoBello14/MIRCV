@@ -109,8 +109,6 @@ public class Lexicon {
         int nullIndex = trimmed.indexOf(' ');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
-    public float getIDF(String term){
-        return lexicon.get(term).getIdf();
-    }
+
 
 }

@@ -32,6 +32,7 @@ public class Main {
 
 package it.unipi.MIRCV;
 
+import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
@@ -48,7 +49,7 @@ import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-
+/*
         FileChannel fileChannelDOC=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ);
         MappedByteBuffer mappedByteBuffer = fileChannelDOC.map(FileChannel.MapMode.READ_ONLY, (1-1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE , DocIndexEntry.DOC_INDEX_ENTRY_SIZE);
         System.out.println(mappedByteBuffer.getInt());
@@ -56,6 +57,19 @@ public class Main {
         mappedByteBuffer.get(docno);
         System.out.println(new String(docno));
         System.out.println(mappedByteBuffer.getLong());
+*/
+        int []values={127,128,255,256,511};
+        byte[]encoded={(byte)0x7f,(byte)0x01,(byte)0x80,(byte)0x01,(byte)0xff,(byte)0x02,(byte)0x80,(byte)0x03,(byte)0xff};
+        byte [] dal=VariableByteEncoder.encodeArray(values);
+        //byte []num={(byte)0x01,(byte)0x80};
+        //System.out.println(VariableByteEncoder.decode(num));
+        //System.exit(0);
+        int [] ret=VariableByteEncoder.decodeArray(encoded);
+
+        for(int i=0;i<ret.length;i++){
+            System.out.println(ret[i]);
+        }
 
     }
 }
+

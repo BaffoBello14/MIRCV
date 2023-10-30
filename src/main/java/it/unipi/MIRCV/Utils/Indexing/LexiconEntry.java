@@ -13,7 +13,7 @@ public class LexiconEntry {
     private long offset_doc_id = 0;
     private int upperTF = 0;
     private int df = 0;
-    private float idf = 0;
+    //private float idf = 0;
     private float upperTFIDF=0;
     //private int doclen=1;
     //private int tf=0;
@@ -24,7 +24,7 @@ public class LexiconEntry {
     private int numBlocks=1;
     //private int docidByteSize=0;
 
-    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM-16;
+    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM-20;
 
     public void updateTFMAX(PostingIndex index) {
         for (Posting posting : index.getPostings()) {
@@ -109,19 +109,19 @@ public class LexiconEntry {
             this.doclen=doc_len;
         }
     }
-*/
+
     public float calculateIDF() {
         this.idf = (float) Math.log(CollectionStatistics.getDocuments() / (float) this.df);
         return this.idf;
     }
-
+*/
     @Override
     public String toString() {
         return "Term: " + term + " " +
                 "Offset Doc ID: " + offset_doc_id + " " +
                 "Upper TF: " + upperTF + " " +
                 "DF: " + df + " " +
-                "IDF: " + idf + " " +
+         //       "IDF: " + idf + " " +
                 "Upper TF-IDF: " + upperTFIDF + " " +
 //                "Doclen: " + doclen + " " +
 //                "TF: " + tf + " " +
@@ -162,7 +162,7 @@ public class LexiconEntry {
     public void setDf(int df) {
         this.df = df;
     }
-
+/*
     public float getIdf() {
         return idf;
     }
@@ -171,7 +171,7 @@ public class LexiconEntry {
         this.idf = idf;
     }
 
-
+*/
     public long getOffset_frequency() {
         return offset_frequency;
     }
@@ -202,7 +202,7 @@ public class LexiconEntry {
             mappedByteBuffer.get(termBytes);
             term=Lexicon.removePadding(new String(termBytes,StandardCharsets.UTF_8));
             df=(mappedByteBuffer.getInt());
-            idf=(mappedByteBuffer.getFloat());
+            //idf=(mappedByteBuffer.getFloat());
             upperTF=(mappedByteBuffer.getInt());
             //doclen=(mappedByteBuffer.getInt());
             //tf=(mappedByteBuffer.getInt());
@@ -231,7 +231,7 @@ public class LexiconEntry {
             //System.out.println(term+"\t"+ this);
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
             mappedByteBuffer.putInt(df);
-            mappedByteBuffer.putFloat(idf);
+            //mappedByteBuffer.putFloat(idf);
             mappedByteBuffer.putInt(upperTF);
             //mappedByteBuffer.putInt(doclen);
             //mappedByteBuffer.putInt(tf);
@@ -250,11 +250,14 @@ public class LexiconEntry {
             return -1;
         }
     }
+    /*
     public void calculateUpperBounds(){
         this.upperTFIDF= (float) ((1+Math.log(this.upperTF))*this.idf);
         //CollectionStatistics.computeAVGDOCLEN();
         //this.upperBM25= (float) ((tf/(tf+ PathAndFlags.BM25_k1*(1-PathAndFlags.BM25_b+PathAndFlags.BM25_b*(doclen/CollectionStatistics.getAvgDocLen()))))*idf);
     }
+
+     */
     public void calculateBlockNeed(){
         this.offset_skip_pointer=SkippingBlock.getFile_offset();
         if(df> PathAndFlags.POSTING_PER_BLOCK){
