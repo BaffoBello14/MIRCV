@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+
 
 public class LexiconEntry {
     private String term;
@@ -15,16 +15,16 @@ public class LexiconEntry {
     private int df = 0;
     private float idf = 0;
     private float upperTFIDF=0;
-    private int doclen=1;
-    private int tf=0;
+    //private int doclen=1;
+    //private int tf=0;
     private float upperBM25=0;
     private long offset_frequency = 0;
     private long offset_skip_pointer = 0;
-    private int freqByteSize=0;
+    //private int freqByteSize=0;
     private int numBlocks=1;
-    private int docidByteSize=0;
+    //private int docidByteSize=0;
 
-    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM;
+    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM-16;
 
     public void updateTFMAX(PostingIndex index) {
         for (Posting posting : index.getPostings()) {
@@ -50,7 +50,7 @@ public class LexiconEntry {
     public void setUpperTFIDF(float upperTFIDF) {
         this.upperTFIDF = upperTFIDF;
     }
-
+/*
     public int getDoclen() {
         return doclen;
     }
@@ -66,6 +66,8 @@ public class LexiconEntry {
     public void setTf(int tf) {
         this.tf = tf;
     }
+    */
+
 
     public float getUpperBM25() {
         return upperBM25;
@@ -74,7 +76,7 @@ public class LexiconEntry {
     public void setUpperBM25(float upperBM25) {
         this.upperBM25 = upperBM25;
     }
-
+/*
     public int getFreqByteSize() {
         return freqByteSize;
     }
@@ -82,7 +84,7 @@ public class LexiconEntry {
     public void setFreqByteSize(int freqByteSize) {
         this.freqByteSize = freqByteSize;
     }
-
+*/
     public int getNumBlocks() {
         return numBlocks;
     }
@@ -90,7 +92,7 @@ public class LexiconEntry {
     public void setNumBlocks(int numBlocks) {
         this.numBlocks = numBlocks;
     }
-
+/*
     public int getDocidByteSize() {
         return docidByteSize;
     }
@@ -107,7 +109,7 @@ public class LexiconEntry {
             this.doclen=doc_len;
         }
     }
-
+*/
     public float calculateIDF() {
         this.idf = (float) Math.log(CollectionStatistics.getDocuments() / (float) this.df);
         return this.idf;
@@ -121,14 +123,14 @@ public class LexiconEntry {
                 "DF: " + df + " " +
                 "IDF: " + idf + " " +
                 "Upper TF-IDF: " + upperTFIDF + " " +
-                "Doclen: " + doclen + " " +
-                "TF: " + tf + " " +
+//                "Doclen: " + doclen + " " +
+//                "TF: " + tf + " " +
                 "Upper BM25: " + upperBM25 + " " +
                 "Offset Frequency: " + offset_frequency + " " +
                 "Offset Skip Pointer: " + offset_skip_pointer + " " +
-                "Freq Byte Size: " + freqByteSize + " " +
-                "Num Blocks: " + numBlocks + " " +
-                "DocID Byte Size: " + docidByteSize;
+//                "Freq Byte Size: " + freqByteSize + " " +
+                "Num Blocks: " + numBlocks + " " ;
+//                "DocID Byte Size: " + docidByteSize;
     }
 
 
@@ -202,14 +204,14 @@ public class LexiconEntry {
             df=(mappedByteBuffer.getInt());
             idf=(mappedByteBuffer.getFloat());
             upperTF=(mappedByteBuffer.getInt());
-            doclen=(mappedByteBuffer.getInt());
-            tf=(mappedByteBuffer.getInt());
+            //doclen=(mappedByteBuffer.getInt());
+            //tf=(mappedByteBuffer.getInt());
             upperTFIDF=(mappedByteBuffer.getFloat());
             upperBM25=(mappedByteBuffer.getFloat());
             offset_doc_id=(mappedByteBuffer.getLong());
             offset_frequency=(mappedByteBuffer.getLong());
-            docidByteSize=(mappedByteBuffer.getInt());
-            freqByteSize=(mappedByteBuffer.getInt());
+            //docidByteSize=(mappedByteBuffer.getInt());
+            //freqByteSize=(mappedByteBuffer.getInt());
             numBlocks=(mappedByteBuffer.getInt());
             offset_skip_pointer=(mappedByteBuffer.getLong());
 
@@ -231,14 +233,14 @@ public class LexiconEntry {
             mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
             mappedByteBuffer.putInt(upperTF);
-            mappedByteBuffer.putInt(doclen);
-            mappedByteBuffer.putInt(tf);
+            //mappedByteBuffer.putInt(doclen);
+            //mappedByteBuffer.putInt(tf);
             mappedByteBuffer.putFloat(upperTFIDF);
             mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_doc_id);
             mappedByteBuffer.putLong(offset_frequency);
-            mappedByteBuffer.putInt(docidByteSize);
-            mappedByteBuffer.putInt(freqByteSize);
+            //mappedByteBuffer.putInt(docidByteSize);
+            //mappedByteBuffer.putInt(freqByteSize);
             mappedByteBuffer.putInt(numBlocks);
             mappedByteBuffer.putLong(offset_skip_pointer);
 
@@ -250,8 +252,8 @@ public class LexiconEntry {
     }
     public void calculateUpperBounds(){
         this.upperTFIDF= (float) ((1+Math.log(this.upperTF))*this.idf);
-        CollectionStatistics.computeAVGDOCLEN();
-        this.upperBM25= (float) ((tf/(tf+ PathAndFlags.BM25_k1*(1-PathAndFlags.BM25_b+PathAndFlags.BM25_b*(doclen/CollectionStatistics.getAvgDocLen()))))*idf);
+        //CollectionStatistics.computeAVGDOCLEN();
+        //this.upperBM25= (float) ((tf/(tf+ PathAndFlags.BM25_k1*(1-PathAndFlags.BM25_b+PathAndFlags.BM25_b*(doclen/CollectionStatistics.getAvgDocLen()))))*idf);
     }
     public void calculateBlockNeed(){
         this.offset_skip_pointer=SkippingBlock.getFile_offset();

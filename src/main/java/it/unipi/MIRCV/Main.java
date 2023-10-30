@@ -49,19 +49,13 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        FileChannel fileChannelLEX=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON),StandardOpenOption.READ);
-        LexiconEntry lexiconEntry=new LexiconEntry();
-        long pos=0;
-        while(lexiconEntry.readEntryFromDisk(pos,fileChannelLEX)!=-1
-               // &&!lexiconEntry.getTerm().trim().isEmpty()
-        ){
-            System.out.println(lexiconEntry);
-            pos+=100;
-            System.out.println(pos);
-            System.out.println(fileChannelLEX.size());
-        }
-        CollectionStatistics.readFromDisk();
-        System.out.println(CollectionStatistics.getDocuments()+" "+CollectionStatistics.getAvgDocLen()+" "+CollectionStatistics.getTerms()+" "+CollectionStatistics.getTotalLenDoc());
+        FileChannel fileChannelDOC=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ);
+        MappedByteBuffer mappedByteBuffer = fileChannelDOC.map(FileChannel.MapMode.READ_ONLY, (1-1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE , DocIndexEntry.DOC_INDEX_ENTRY_SIZE);
+        System.out.println(mappedByteBuffer.getInt());
+        byte [] docno=new byte[DocIndexEntry.DOC_NO_LENGTH];
+        mappedByteBuffer.get(docno);
+        System.out.println(new String(docno));
+        System.out.println(mappedByteBuffer.getLong());
 
     }
 }

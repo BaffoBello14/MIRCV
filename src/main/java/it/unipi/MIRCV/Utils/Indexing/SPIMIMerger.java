@@ -5,6 +5,7 @@ import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -28,8 +29,8 @@ public class SPIMIMerger {
     private static PostingIndex loadList(LexiconEntry lexiconEntry,int index){
         PostingIndex postingIndex;
         try {
-            MappedByteBuffer mappedByteBufferDOCID=doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY,lexiconEntry.getOffset_doc_id(),lexiconEntry.getDocidByteSize());
-            MappedByteBuffer mappedByteBufferFreq=freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY,lexiconEntry.getOffset_frequency(),lexiconEntry.getFreqByteSize());
+            MappedByteBuffer mappedByteBufferDOCID=doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY,lexiconEntry.getOffset_doc_id(),lexiconEntry.getDf()*4L);
+            MappedByteBuffer mappedByteBufferFreq=freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY,lexiconEntry.getOffset_frequency(),lexiconEntry.getDf()*4L);
             postingIndex= new PostingIndex(lexiconEntry.getTerm());
             for(int i=0;i<lexiconEntry.getDf();i++){
                 Posting posting=new Posting(mappedByteBufferDOCID.getInt(),mappedByteBufferFreq.getInt());
@@ -253,17 +254,43 @@ public class SPIMIMerger {
                     System.out.println("partial index null of entry->"+i);
                     return null;
                 }
-                lexiconEntry.updateBM25Values(lexiconEntries[i].getTf(),lexiconEntries[i].getDoclen());
+                //lexiconEntry.updateBM25Values(lexiconEntries[i].getTf(),lexiconEntries[i].getDoclen());
                 lexiconEntry.updateTFMAX(partialPosting);
                 mergedPosting.addPostings(partialPosting.getPostings());
             }
         }
+        float BM25Upper=0F;
+        float actualBM25,idf;
+        int N= CollectionStatistics.getDocuments();
+        idf=(float) ((Math.log((double) N /mergedPosting.getPostings().size())));
+        int tf=0;
+        for(Posting posting: mergedPosting.getPostings()){
+            actualBM25=calculateBM25(posting.getFrequency(),idf, posting.getDoc_id());
+            if(actualBM25!=-1F&&actualBM25>BM25Upper){
+                BM25Upper=actualBM25;
+            }
+            if(tf< posting.getFrequency()){
+                tf= posting.getFrequency();
+            }
+        }
+        lexiconEntry.setUpperBM25(BM25Upper);
         moveToNextTermLexicon(termToProcess);
         lexiconEntry.setOffset_doc_id(doc_id_offset);
         lexiconEntry.setOffset_frequency(freq_offset);
-        lexiconEntry.calculateIDF();
-        lexiconEntry.calculateUpperBounds();
+        lexiconEntry.setUpperTFIDF((float) ((1+Math.log(tf))*idf));
         return mergedPosting;
     }
-
+    private static float calculateBM25(int tf,float idf,long doc_id){
+        try{
+            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);
+            long doclen = mappedByteBuffer.getLong();
+            fileChannel.close();
+            return (float) ((tf / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doclen / CollectionStatistics.getAvgDocLen())))) * idf);
+        }catch (IOException e){
+            System.out.println("problems with opening the file channel of doc id in calculate bm25 in merger");
+            e.printStackTrace();
+            return -1F;
+        }
+    }
 }

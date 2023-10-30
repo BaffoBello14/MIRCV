@@ -19,11 +19,11 @@ public class ProcessCollection {
         System.out.println("SPIMI time->"+(end-start)/1000+"sec");
         CollectionStatistics.readFromDisk();
         start=System.currentTimeMillis();
-        SPIMIMerger.setNumIndex(60);
+        SPIMIMerger.setNumIndex(66);
         SPIMIMerger.execute();
         end=System.currentTimeMillis();
         System.out.println("SPIMIMerger time->"+(end-start)/1000+"sec");
-
+        System.exit(0);
         FileChannel [] fileChannelLEX = new FileChannel[60];
         LexiconEntry []lexiconEntries=new LexiconEntry[60];
         for(int i=0;i<60;i++){

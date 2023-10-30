@@ -70,7 +70,7 @@ public class SPIMI {
                         index.put(term, posting);
                     }
                     addPosting(doc_id, posting);
-                    posting.updateBM25Values(posting.getPostings().size(),documentLength);
+                    //posting.updateBM25Values(posting.getPostings().size(),documentLength);
                 }
                 if(doc_id%100000==0) {
                     System.out.println(doc_id+"processed");
@@ -131,10 +131,10 @@ public class SPIMI {
                     mappedByteBufferFreq.putInt(posting.getFrequency());
                 }
                 lexiconEntry.updateTFMAX(postingIndex);
-                lexiconEntry.setDocidByteSize(postingIndex.getPostings().size()*4);
-                lexiconEntry.setFreqByteSize(postingIndex.getPostings().size()*4);
-                lexiconEntry.setTf(postingIndex.getTf_BM25());
-                lexiconEntry.setDoclen(postingIndex.getDoc_len_BM25());
+                //lexiconEntry.setDocidByteSize(postingIndex.getPostings().size()*4);
+                //lexiconEntry.setFreqByteSize(postingIndex.getPostings().size()*4);
+                //lexiconEntry.setTf(postingIndex.getTf_BM25());
+                //lexiconEntry.setDoclen(postingIndex.getDoc_len_BM25());
                 lexOffset=lexiconEntry.writeEntryToDisk(postingIndex.getTerm(), lexOffset,fileChannelLex);
 
 
