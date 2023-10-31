@@ -38,17 +38,17 @@ public class Lexicon {
             LexiconEntry entry=new LexiconEntry();
     
             try (
-                    FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE)) {
+                    FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ)) {
     
                 while (bot <= top) {
                     mid = (bot + top) / 2;
                     entry.readEntryFromDisk(mid * LexiconEntry.ENTRY_SIZE, fileChannel);
                     
-                    if (entry == null) {
+                    if (entry.getTerm().isEmpty()) {
                         return null; 
                     }
     
-                    String termFound = Lexicon.removePadding(entry.getTerm());
+                    String termFound = entry.getTerm();
     
                     int comparisonResult = term.compareTo(termFound);
                     

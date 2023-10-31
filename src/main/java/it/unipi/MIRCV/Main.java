@@ -58,17 +58,10 @@ public class Main {
         System.out.println(new String(docno));
         System.out.println(mappedByteBuffer.getLong());
 */
-        int []values={127,128,255,256,511};
-        byte[]encoded={(byte)0x7f,(byte)0x01,(byte)0x80,(byte)0x01,(byte)0xff,(byte)0x02,(byte)0x80,(byte)0x03,(byte)0xff};
-        byte [] dal=VariableByteEncoder.encodeArray(values);
-        //byte []num={(byte)0x01,(byte)0x80};
-        //System.out.println(VariableByteEncoder.decode(num));
-        //System.exit(0);
-        int [] ret=VariableByteEncoder.decodeArray(encoded);
-
-        for(int i=0;i<ret.length;i++){
-            System.out.println(ret[i]);
-        }
+        Lexicon lexicon=new Lexicon();
+        CollectionStatistics.readFromDisk();
+        LexiconEntry lexiconEntry=lexicon.find("clown");
+        System.out.println(lexiconEntry);
 
     }
 }
