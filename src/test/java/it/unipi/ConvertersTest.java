@@ -67,4 +67,26 @@ public class ConvertersTest {
             assertEquals(expected[i], result);
         }
     }
+    @Test
+    public void testEncodeArray() {
+        int[] originalValues = {42, 123, 999, 4567};
+        byte[] expectedEncodedBytes = {(byte)0x2A, (byte) 0x7B, (byte) 0x07,(byte)0xE7, (byte) 0x23, (byte)0xD7};
+
+        // Encode the original values.
+        byte[] encodedBytes = VariableByteEncoder.encodeArray(originalValues);
+
+        // Check if the encoded bytes match the expected encoded bytes.
+        assertArrayEquals(expectedEncodedBytes, encodedBytes);
+    }
+    @Test
+    public void testDecodeArray() {
+        byte[] encodedBytes = {(byte)0x2A, (byte) 0x7B, (byte) 0x07,(byte)0xE7, (byte) 0x23, (byte)0xD7};
+        int[] expectedDecodedValues = {42, 123, 999, 4567};
+
+        // Decode the encoded bytes.
+        int[] decodedValues = VariableByteEncoder.decodeArray(encodedBytes);
+
+        // Check if the decoded values match the expected decoded values.
+        assertArrayEquals(expectedDecodedValues, decodedValues);
+    }
 }
