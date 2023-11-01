@@ -10,13 +10,14 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 public class Lexicon {
+    private static Lexicon instance=new Lexicon();
     private HashMap<String, LexiconEntry> lexicon = new HashMap<>();
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LRUCache<String,LexiconEntry> lruCache= new LRUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
-
-    public HashMap<String, LexiconEntry> getLexicon() {
-        return lexicon;
+    private Lexicon(){}
+    public static Lexicon getInstance(){
+        return instance;
     }
 
     public LexiconEntry retrieveEntry(String term) {

@@ -265,7 +265,7 @@ public class SPIMIMerger {
         idf=(float) ((Math.log((double) N /mergedPosting.getPostings().size())));
         int tf=0;
         for(Posting posting: mergedPosting.getPostings()){
-            actualBM25=calculateBM25WithoutIDF(posting.getFrequency(), posting.getDoc_id());
+            actualBM25=calculateBM25WithoutIDF((float) (1+Math.log(posting.getFrequency())), posting.getDoc_id());
             if(actualBM25!=-1F&&actualBM25>BM25Upper){
                 BM25Upper=actualBM25;
             }
@@ -282,7 +282,7 @@ public class SPIMIMerger {
         lexiconEntry.setUpperTFIDF((float) ((1+Math.log(tf))*idf));
         return mergedPosting;
     }
-    private static float calculateBM25WithoutIDF(int tf,long doc_id){
+    private static float calculateBM25WithoutIDF(float tf,long doc_id){
         try{
             FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);

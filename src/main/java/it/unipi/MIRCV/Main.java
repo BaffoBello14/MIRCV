@@ -41,19 +41,20 @@ import java.util.HashMap;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        Lexicon lexicon=new Lexicon();
+        Lexicon lexicon=Lexicon.getInstance();
         CollectionStatistics.readFromDisk();
         long start=System.currentTimeMillis();
-        DocIndex docIndex= new DocIndex();
+        DocIndex docIndex=DocIndex.getInstance();
+
         long len=docIndex.getDoc_len(5);
-        //LexiconEntry lexiconEntry=lexicon.retrieveEntry("ciao");
+        LexiconEntry lexiconEntry=lexicon.retrieveEntry("ciao");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         start=System.currentTimeMillis();
-        //System.out.println(lexiconEntry);
+        System.out.println(lexiconEntry);
         System.out.println(len);
         docIndex.getDoc_len(5);
-        //lexicon.retrieveEntry("ciao");
+        lexicon.retrieveEntry("ciao");
         end=System.currentTimeMillis();
         System.out.println(end-start);
 

@@ -3,6 +3,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 import it.unipi.MIRCV.Main;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import javax.print.Doc;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
@@ -16,11 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DocIndex {
+    private static DocIndex instance=new DocIndex();
     private HashMap<Integer,DocIndexEntry> documentIndex;
     private final LRUCache<Integer,DocIndexEntry>lruCache= new LRUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
 
     private static String Path_To_DocIndex=PathAndFlags.PATH_TO_DOC_INDEX;
-    public DocIndex(){
+    private DocIndex(){
         documentIndex=new HashMap<>();
     }
     public long getDoc_len(int doc_id){
@@ -60,13 +62,6 @@ public class DocIndex {
         }
     }
 
-    public HashMap<Integer, DocIndexEntry> getDocumentIndex() {
-        return documentIndex;
-    }
-
-    public void setDocumentIndex(HashMap<Integer, DocIndexEntry> documentIndex) {
-        this.documentIndex = documentIndex;
-    }
     public void addDocument(int doc_id,String doc_no,long doc_size){
         documentIndex.put(doc_id,new DocIndexEntry(doc_no,doc_size));
     }
@@ -90,6 +85,9 @@ public class DocIndex {
             System.out.println("Problems with reading document index from disk");
             return -1;
         }
+    }
+    public static DocIndex getInstance(){
+        return instance;
     }
 
 
