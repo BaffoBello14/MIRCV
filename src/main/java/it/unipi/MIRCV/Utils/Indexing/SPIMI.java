@@ -21,7 +21,7 @@ public class SPIMI {
 
     private static long offsetDocIndex=0;
 
-    public static long  execute() throws Exception{
+    public static int execute() throws Exception{
         int doc_id=1;
         String [] lineofDoc;
         String docno;
@@ -160,35 +160,4 @@ public class SPIMI {
         postingIndex.getPostings().add(new Posting(doc_id,1));
         numPosting++;
     }
-    public static void main(String[] args) throws  Exception{
-
-        FileChannel fileChannelDI= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ, StandardOpenOption.WRITE,StandardOpenOption.CREATE);
-        FileChannel fileChannelFRQ= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_ID+"0.dat"),StandardOpenOption.READ, StandardOpenOption.WRITE,StandardOpenOption.CREATE);
-        FileChannel fileChannelLEX=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON+"0.dat"),StandardOpenOption.READ, StandardOpenOption.WRITE,StandardOpenOption.CREATE);
-        long start=System.currentTimeMillis();
-        execute();
-        long end=System.currentTimeMillis();
-        System.out.println("SPIMI time->"+(end-start)/1000+"sec");
-        DocIndex docIndex=new DocIndex();
-        docIndex.readFromDisk(fileChannelDI,200);
-        LexiconEntry lexiconEntry=new LexiconEntry();
-        lexiconEntry.readEntryFromDisk(LexiconEntry.ENTRY_SIZE,fileChannelLEX);
-        byte [] term=new byte[Lexicon.MAX_LEN_OF_TERM];
-        MappedByteBuffer mappedByteBuffer=fileChannelFRQ.map(FileChannel.MapMode.READ_ONLY,8,4);
-        //mappedByteBuffer1.get(term);
-        //System.out.println(new String(term, StandardCharsets.UTF_8));
-        System.out.println(lexiconEntry);
-        System.out.println(mappedByteBuffer.getInt());
-        System.out.println(docIndex.sortDocIndex().get(0));
-    }
-
-
-
 }
-/*
-leggo la riga
-conputo la riga
-vedo se occupazione memoria >80
-se si scrivi in disco
-altrimenti nulla
- */

@@ -265,7 +265,7 @@ public class SPIMIMerger {
         idf=(float) ((Math.log((double) N /mergedPosting.getPostings().size())));
         int tf=0;
         for(Posting posting: mergedPosting.getPostings()){
-            actualBM25=calculateBM25(posting.getFrequency(),idf, posting.getDoc_id());
+            actualBM25=calculateBM25WithoutIDF(posting.getFrequency(), posting.getDoc_id());
             if(actualBM25!=-1F&&actualBM25>BM25Upper){
                 BM25Upper=actualBM25;
             }
@@ -273,20 +273,22 @@ public class SPIMIMerger {
                 tf= posting.getFrequency();
             }
         }
-        lexiconEntry.setUpperBM25(BM25Upper);
+        lexiconEntry.setIdf(idf);
+        lexiconEntry.setDf(mergedPosting.getPostings().size());
+        lexiconEntry.setUpperBM25(BM25Upper*idf);
         moveToNextTermLexicon(termToProcess);
         lexiconEntry.setOffset_doc_id(doc_id_offset);
         lexiconEntry.setOffset_frequency(freq_offset);
         lexiconEntry.setUpperTFIDF((float) ((1+Math.log(tf))*idf));
         return mergedPosting;
     }
-    private static float calculateBM25(int tf,float idf,long doc_id){
+    private static float calculateBM25WithoutIDF(int tf,long doc_id){
         try{
             FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);
             long doclen = mappedByteBuffer.getLong();
             fileChannel.close();
-            return (float) ((tf / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doclen / CollectionStatistics.getAvgDocLen())))) * idf);
+            return (float) ((tf / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doclen / CollectionStatistics.getAvgDocLen())))));
         }catch (IOException e){
             System.out.println("problems with opening the file channel of doc id in calculate bm25 in merger");
             e.printStackTrace();
