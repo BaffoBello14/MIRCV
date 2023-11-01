@@ -16,6 +16,8 @@ public class PathAndFlags {
     public static final float BM25_k1= 1.5F;
     public static final float BM25_b=0.75F;
     public static final int POSTING_PER_BLOCK=512;
+    public static final int LEXICON_CACHE_SIZE=1000;
+    public static final int DOC_INDEX_CACHE_SIZE=10000;
 
 
 

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 public class Lexicon {
     private HashMap<String, LexiconEntry> lexicon = new HashMap<>();
     protected static final int MAX_LEN_OF_TERM = 32;
+    private final LRUCache<String,LexiconEntry> lruCache= new LRUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
 
     public HashMap<String, LexiconEntry> getLexicon() {
@@ -19,14 +20,14 @@ public class Lexicon {
     }
 
     public LexiconEntry retrieveEntry(String term) {
-        if (lexicon.containsKey(term)) {
+        if (lruCache.containsKey(term)) {
             return lexicon.get(term);
         }
         LexiconEntry lexiconEntry=find(term);
         if (lexiconEntry==null){
             return null;
         }
-        add(term, lexiconEntry);
+        lruCache.put(term,lexiconEntry);
         return lexiconEntry;
     }
 
@@ -71,30 +72,10 @@ public class Lexicon {
     }
        
 
-    public void setLexicon(HashMap<String, LexiconEntry> lexicon) {
-        this.lexicon = lexicon;
-    }
-    
-    public void add(String term,LexiconEntry lexiconEntry){
-        lexicon.put(term,lexiconEntry);
+    public void setLexicon(HashMap<String, LexiconEntry> lexicon1) {
+        lexicon = lexicon1;
     }
 
-    public void add(String term) {
-        lexicon.compute(term, (key, entry) -> {
-            if (entry == null) {
-                return new LexiconEntry();
-            } else {
-                entry.incrementDf();
-                return entry;
-            }
-        });
-    }
-
-    public ArrayList<String> sortLexicon() {
-        ArrayList<String> sorted = new ArrayList<>(lexicon.keySet());
-        Collections.sort(sorted);
-        return sorted;
-    }
 
     public static String padStringToLength(String input) {
         if (input.length() >= MAX_LEN_OF_TERM) {

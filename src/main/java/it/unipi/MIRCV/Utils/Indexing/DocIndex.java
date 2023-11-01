@@ -1,5 +1,6 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
+import it.unipi.MIRCV.Main;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 import java.io.FileOutputStream;
@@ -16,10 +17,33 @@ import java.util.List;
 
 public class DocIndex {
     private HashMap<Integer,DocIndexEntry> documentIndex;
+    private final LRUCache<Integer,DocIndexEntry>lruCache= new LRUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
 
     private static String Path_To_DocIndex=PathAndFlags.PATH_TO_DOC_INDEX;
     public DocIndex(){
         documentIndex=new HashMap<>();
+    }
+    public long getDoc_len(int doc_id){
+        if (lruCache.containsKey(doc_id)){
+            return lruCache.get(doc_id).getDoc_size();
+        }
+        try{
+
+            FileChannel fileChannel=FileChannel.open(Paths.get(Path_To_DocIndex),StandardOpenOption.READ);
+            DocIndexEntry docIndexEntry= new DocIndexEntry();
+            int ret=docIndexEntry.readFromDisk((long) (doc_id - 1) *DocIndexEntry.DOC_INDEX_ENTRY_SIZE,fileChannel);
+            if(ret>0&&ret==doc_id){
+                lruCache.put(doc_id,docIndexEntry);
+                return docIndexEntry.getDoc_size();
+            }
+            return -1;
+        }catch (IOException e){
+            System.out.println("problems with read form disk of the doc index ");
+            e.printStackTrace();
+            return -1;
+        }
+
+
     }
     public long write2Disk(int doc_id,long offset){
         if(!documentIndex.containsKey(doc_id)){
@@ -46,11 +70,7 @@ public class DocIndex {
     public void addDocument(int doc_id,String doc_no,long doc_size){
         documentIndex.put(doc_id,new DocIndexEntry(doc_no,doc_size));
     }
-    public ArrayList<Integer> sortDocIndex(){
-        ArrayList<Integer>sortedDocIndex=new ArrayList<>(documentIndex.keySet());
-        Collections.sort(sortedDocIndex);
-        return sortedDocIndex;
-    }
+
     public long readFromDisk(FileChannel fileChannel, long offset) {
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, DocIndexEntry.DOC_INDEX_ENTRY_SIZE);

@@ -34,34 +34,28 @@ package it.unipi.MIRCV;
 
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.Indexing.*;
-import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
-import java.io.*;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 public class Main {
     public static void main(String[] args) throws Exception {
-/*
-        FileChannel fileChannelDOC=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX),StandardOpenOption.READ);
-        MappedByteBuffer mappedByteBuffer = fileChannelDOC.map(FileChannel.MapMode.READ_ONLY, (1-1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE , DocIndexEntry.DOC_INDEX_ENTRY_SIZE);
-        System.out.println(mappedByteBuffer.getInt());
-        byte [] docno=new byte[DocIndexEntry.DOC_NO_LENGTH];
-        mappedByteBuffer.get(docno);
-        System.out.println(new String(docno));
-        System.out.println(mappedByteBuffer.getLong());
-*/
+
         Lexicon lexicon=new Lexicon();
         CollectionStatistics.readFromDisk();
-        LexiconEntry lexiconEntry=lexicon.find("clown");
-        System.out.println(lexiconEntry);
+        long start=System.currentTimeMillis();
+        DocIndex docIndex= new DocIndex();
+        long len=docIndex.getDoc_len(5);
+        //LexiconEntry lexiconEntry=lexicon.retrieveEntry("ciao");
+        long end=System.currentTimeMillis();
+        System.out.println(end-start);
+        start=System.currentTimeMillis();
+        //System.out.println(lexiconEntry);
+        System.out.println(len);
+        docIndex.getDoc_len(5);
+        //lexicon.retrieveEntry("ciao");
+        end=System.currentTimeMillis();
+        System.out.println(end-start);
 
     }
 }

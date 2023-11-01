@@ -10,6 +10,7 @@ public class DocIndexEntry {
     private long doc_size;
     public static  final int DOC_NO_LENGTH=8;
     public static final int DOC_INDEX_ENTRY_SIZE=DOC_NO_LENGTH+8+4;
+    public DocIndexEntry(){}
     public DocIndexEntry(String doc_no,long doc_size){
         this.doc_no=padNumberWithZeros(doc_no,DOC_NO_LENGTH);
         this.doc_size=doc_size;
@@ -40,5 +41,20 @@ public class DocIndexEntry {
     }
     public static String padNumberWithZeros(String numberString, int totalWidth) {
         return String.format("%0" + totalWidth + "d", Long.parseLong(numberString));
+    }
+    public int readFromDisk(long offset,FileChannel fileChannel){
+        try {
+            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset,DOC_INDEX_ENTRY_SIZE);
+            int doc_id=mappedByteBuffer.getInt();
+            byte []docno=new byte[DOC_NO_LENGTH];
+            mappedByteBuffer.get(docno);
+            doc_no=new String(docno,StandardCharsets.UTF_8);
+            doc_size=mappedByteBuffer.getLong();
+            return doc_id;
+        }catch (IOException e){
+            System.out.println("problems with the writing to disk of doc index ");
+            e.printStackTrace();
+            return -1;
+        }
     }
 }
