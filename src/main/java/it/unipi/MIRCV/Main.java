@@ -47,14 +47,14 @@ public class Main {
         DocIndex docIndex=DocIndex.getInstance();
 
         long len=docIndex.getDoc_len(5);
-        LexiconEntry lexiconEntry=lexicon.retrieveEntry("ciao");
+        LexiconEntry lexiconEntry=lexicon.retrieveEntry("pornhub");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         start=System.currentTimeMillis();
         System.out.println(lexiconEntry);
         System.out.println(len);
         docIndex.getDoc_len(5);
-        lexicon.retrieveEntry("ciao");
+        lexicon.retrieveEntry("pornhub");
         end=System.currentTimeMillis();
         System.out.println(end-start);
 

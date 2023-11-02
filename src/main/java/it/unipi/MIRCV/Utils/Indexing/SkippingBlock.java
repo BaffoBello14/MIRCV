@@ -21,7 +21,7 @@ public class SkippingBlock {
     private int doc_id_max;
     private int num_posting_of_block;
     private static long file_offset=0;
-    private static final int size_of_element=(8+4)*2+4+4;
+    public static final int size_of_element=(8+4)*2+4+4;
 
     public boolean writeOnDisk(FileChannel file_to_write){
         if(file_to_write == null){
@@ -103,8 +103,8 @@ public class SkippingBlock {
     }
     public ArrayList<Posting> getSkippingBlockPostings(){
         try{
-            FileChannel fileChannelDocID= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
-            FileChannel fileChannelFreqs= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
+            FileChannel fileChannelDocID= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
+            FileChannel fileChannelFreqs= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
             MappedByteBuffer mappedByteBufferDocID=fileChannelDocID.map(FileChannel.MapMode.READ_ONLY,doc_id_offset,doc_id_size);
             MappedByteBuffer mappedByteBufferFreq=fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY,freq_offset,freq_size);
             if(mappedByteBufferFreq==null||mappedByteBufferDocID==null){

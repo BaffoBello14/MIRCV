@@ -18,4 +18,7 @@ public class LRUCache<K,V> {
     public void remove(K key){
         cache.invalidate(key);
     }
+    public void clearCache(){
+        cache.invalidateAll();
+    }
 }

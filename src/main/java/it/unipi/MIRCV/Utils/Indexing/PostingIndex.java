@@ -16,6 +16,7 @@ public class PostingIndex {
     public void closeLists(){
         postings.clear();
         blocks.clear();
+        Lexicon.getInstance().remove(term);
 
     }
 /*
@@ -60,8 +61,10 @@ public class PostingIndex {
         postings.addAll(postings2Add);
     }
     public void openList(){
-        //need to read blocks form lexicon
-        //blocks=get blocks from lexicon
+        blocks=Lexicon.getInstance().get(term).readBlocks();
+        if(blocks==null){
+            return;
+        }
         skippingBlockIterator= blocks.iterator();
         postingIterator=postings.iterator();
     }
@@ -80,5 +83,29 @@ public class PostingIndex {
         }
         postingActual=postingIterator.next();
         return postingActual;
+    }
+    public Posting nextGEQ(int doc_id){
+        boolean nextBlock=false;
+        while(skippingBlockActual==null||skippingBlockActual.getDoc_id_max()<doc_id){
+            if(!skippingBlockIterator.hasNext()){
+                postingActual = null;
+                return null;
+            }
+            skippingBlockActual=skippingBlockIterator.next();
+            nextBlock=true;
+        }
+        if(nextBlock){
+            postings.clear();
+            postings.addAll(skippingBlockActual.getSkippingBlockPostings());
+            postingIterator=postings.iterator();
+        }
+        while (postingIterator.hasNext()){
+            postingActual=postingIterator.next();
+            if(postingActual.getDoc_id()>=doc_id){
+                return postingActual;
+            }
+        }
+        postingActual=null;
+        return null;
     }
 }

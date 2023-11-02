@@ -2,10 +2,15 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Map;
 
 
 public class LexiconEntry {
@@ -219,6 +224,30 @@ public class LexiconEntry {
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
+        }
+    }
+    public ArrayList<SkippingBlock> readBlocks(){
+        try {
+            FileChannel fileChannel= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
+            ArrayList<SkippingBlock>blocks=new ArrayList<>();
+            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset_skip_pointer, (long) numBlocks *SkippingBlock.size_of_element);
+            if(mappedByteBuffer==null){
+                return null;
+            }
+            for(int i=0;i<numBlocks;i++){
+                SkippingBlock skippingBlock=new SkippingBlock();
+                skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
+                skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
+                skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
+                skippingBlock.setFreq_size(mappedByteBuffer.getInt());
+                skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
+                blocks.add(skippingBlock);
+            }
+            return blocks;
+        }catch (IOException e){
+            System.out.println("Problems with reading blocks in the lexicon entry");
+            e.printStackTrace();
+            return null;
         }
     }
 

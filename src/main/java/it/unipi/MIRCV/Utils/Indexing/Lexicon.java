@@ -7,7 +7,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
+
 
 public class Lexicon {
     private static Lexicon instance=new Lexicon();
@@ -92,6 +92,21 @@ public class Lexicon {
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
 
-
+    public LexiconEntry get(String term){
+        if(lruCache.containsKey(term)){
+            return lruCache.get(term);
+        }
+        LexiconEntry lexiconEntry=retrieveEntry(term);
+        if(lexiconEntry==null){
+            return null;
+        }
+        lruCache.put(term,lexiconEntry);
+        return lruCache.get(term);
+    }
+    public void remove(String term){
+        if(lruCache.containsKey(term)){
+            lruCache.remove(term);
+        }
+    }
 
 }
