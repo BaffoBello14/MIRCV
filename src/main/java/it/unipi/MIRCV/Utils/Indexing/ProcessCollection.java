@@ -37,6 +37,7 @@ public class ProcessCollection {
                 System.out.println("No recognized answer, so for default the Stopword Removal and Stemming is enabled");
             }
         }
+        PathAndFlags.write2Disk();
         long start=System.currentTimeMillis();
         int indexes= SPIMI.execute();
         long end=System.currentTimeMillis();

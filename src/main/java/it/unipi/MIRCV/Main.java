@@ -34,29 +34,29 @@ package it.unipi.MIRCV;
 
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.Indexing.*;
+import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-
-        Lexicon lexicon=Lexicon.getInstance();
         CollectionStatistics.readFromDisk();
-        long start=System.currentTimeMillis();
-        DocIndex docIndex=DocIndex.getInstance();
+        ArrayList<PostingIndex> postingIndices=new ArrayList<>();
+        String po="break";
+        System.out.println(Lexicon.getInstance().find(po));
+        LexiconEntry entry=Lexicon.getInstance().retrieveEntry(po);
+        postingIndices.add(new PostingIndex(entry.getTerm()));
+        postingIndices.get(0).openList();
+        postingIndices.get(0).next();
+        postingIndices.get(0).nextGEQ(8657947);
 
-        long len=docIndex.getDoc_len(5);
-        LexiconEntry lexiconEntry=lexicon.retrieveEntry("pornhub");
-        long end=System.currentTimeMillis();
-        System.out.println(end-start);
-        start=System.currentTimeMillis();
-        System.out.println(lexiconEntry);
-        System.out.println(len);
-        docIndex.getDoc_len(5);
-        lexicon.retrieveEntry("pornhub");
-        end=System.currentTimeMillis();
-        System.out.println(end-start);
 
     }
 }

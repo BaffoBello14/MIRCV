@@ -127,6 +127,8 @@ public class SPIMIMerger {
                             if(numPostingTobeWriteToThisBlock==postingInTheSkippingBlock){
                                 byte[] compressed_doc_ids= VariableByteEncoder.encodeArray(doc_id);
                                 byte[] compressed_freqs= UnaryConverter.convertToUnary(freq);
+                                skippingBlock.setDoc_id_size(compressed_doc_ids.length);
+                                skippingBlock.setFreq_size(compressed_freqs.length);
                                 try {
                                     MappedByteBuffer mappedByteBufferDOCID= fileChannelDocIdFinal.map(FileChannel.MapMode.READ_WRITE,doc_id_offset,compressed_doc_ids.length);
                                     MappedByteBuffer mappedByteBufferFREQS=fileChannelFreqFinal.map(FileChannel.MapMode.READ_WRITE,freq_offset,compressed_freqs.length);

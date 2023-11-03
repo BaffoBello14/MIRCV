@@ -7,20 +7,21 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
+import org.junit.platform.commons.util.LruCache;
 
 
 public class Lexicon {
     private static Lexicon instance=new Lexicon();
     private HashMap<String, LexiconEntry> lexicon = new HashMap<>();
     protected static final int MAX_LEN_OF_TERM = 32;
-    private final LRUCache<String,LexiconEntry> lruCache= new LRUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
+    private final LruCache<String,LexiconEntry> lruCache= new LruCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
     private Lexicon(){}
     public static Lexicon getInstance(){
         return instance;
     }
 
-    public LexiconEntry retrieveEntry(String term) {
+    public  LexiconEntry retrieveEntry(String term) {
         if (lruCache.containsKey(term)) {
             return lexicon.get(term);
         }

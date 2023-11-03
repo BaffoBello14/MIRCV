@@ -2,7 +2,6 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -10,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Map;
 
 
 public class LexiconEntry {
@@ -240,6 +238,7 @@ public class LexiconEntry {
                 skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
                 skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
                 skippingBlock.setFreq_size(mappedByteBuffer.getInt());
+                skippingBlock.setDoc_id_max(mappedByteBuffer.getInt());
                 skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
                 blocks.add(skippingBlock);
             }

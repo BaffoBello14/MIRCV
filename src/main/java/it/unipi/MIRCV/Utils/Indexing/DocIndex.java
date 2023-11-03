@@ -1,25 +1,19 @@
 package it.unipi.MIRCV.Utils.Indexing;
 
-import it.unipi.MIRCV.Main;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+import org.junit.platform.commons.util.LruCache;
 
-import javax.print.Doc;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-
 public class DocIndex {
     private static DocIndex instance=new DocIndex();
     private HashMap<Integer,DocIndexEntry> documentIndex;
-    private final LRUCache<Integer,DocIndexEntry>lruCache= new LRUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
+    private final LruCache<Integer,DocIndexEntry>lruCache= new LruCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
 
     private static String Path_To_DocIndex=PathAndFlags.PATH_TO_DOC_INDEX;
     private DocIndex(){
