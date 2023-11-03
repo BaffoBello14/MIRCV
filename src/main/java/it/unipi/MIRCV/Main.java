@@ -55,7 +55,7 @@ public class Main {
         postingIndices.add(new PostingIndex(entry.getTerm()));
         postingIndices.get(0).openList();
         postingIndices.get(0).next();
-        postingIndices.get(0).nextGEQ(8657947);
+        System.out.println(postingIndices.get(0).nextGEQ(8657947));
 
 
     }
