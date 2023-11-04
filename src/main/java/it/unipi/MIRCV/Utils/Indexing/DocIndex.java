@@ -41,20 +41,7 @@ public class DocIndex {
 
 
     }
-    public long write2Disk(int doc_id,long offset){
-        if(!documentIndex.containsKey(doc_id)){
-            return -1;
-        }
-        try{
-            FileChannel fileChannel =FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
-            offset = documentIndex.get(doc_id).write2Disk(fileChannel, offset, doc_id);
-            return offset;
 
-        }catch(IOException e){
-            System.out.println("Problems writing document index to disk");
-            return -1;
-        }
-    }
 
     public void addDocument(int doc_id,String doc_no,long doc_size){
         documentIndex.put(doc_id,new DocIndexEntry(doc_no,doc_size));

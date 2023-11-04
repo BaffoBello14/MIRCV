@@ -12,9 +12,12 @@ public class ProcessCollection {
         System.out.print("Compressed doc_id and freqs (Y/n)?");
         readed=scanner.nextLine();
         switch (readed){
-            case "Y":{
+            case "Y":
+            case "y":
+            case "\r":{
                 break;
             }
+            case "N":
             case "n":{
                 PathAndFlags.COMPRESSION_ENABLED=false;
                 break;
@@ -26,9 +29,12 @@ public class ProcessCollection {
         System.out.print("Stopword and Stemming (Y/n)?");
         readed=scanner.nextLine();
         switch (readed){
-            case "Y":{
+            case "Y":
+            case "y":
+            case "\r":{
                 break;
             }
+            case "N":
             case "n":{
                 PathAndFlags.STOPWORD_STEM_ENABLED=false;
                 break;

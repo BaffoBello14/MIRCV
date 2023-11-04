@@ -24,7 +24,7 @@ public class PathAndFlags {
     public static final float BM25_b=0.75F;
     public static final int POSTING_PER_BLOCK=512;
     public static final int LEXICON_CACHE_SIZE=1000;
-    public static final int DOC_INDEX_CACHE_SIZE=10000;
+    public static final int DOC_INDEX_CACHE_SIZE=1000000;
 
     public static void write2Disk(){
         try{

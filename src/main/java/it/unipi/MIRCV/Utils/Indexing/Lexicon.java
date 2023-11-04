@@ -12,7 +12,6 @@ import org.junit.platform.commons.util.LruCache;
 
 public class Lexicon {
     private static Lexicon instance=new Lexicon();
-    private HashMap<String, LexiconEntry> lexicon = new HashMap<>();
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LruCache<String,LexiconEntry> lruCache= new LruCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
@@ -23,7 +22,7 @@ public class Lexicon {
 
     public  LexiconEntry retrieveEntry(String term) {
         if (lruCache.containsKey(term)) {
-            return lexicon.get(term);
+            return lruCache.get(term);
         }
         LexiconEntry lexiconEntry=find(term);
         if (lexiconEntry==null){
@@ -74,9 +73,7 @@ public class Lexicon {
     }
        
 
-    public void setLexicon(HashMap<String, LexiconEntry> lexicon1) {
-        lexicon = lexicon1;
-    }
+
 
 
     public static String padStringToLength(String input) {

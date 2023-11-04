@@ -17,9 +17,7 @@ public class Processer {
 
     public static ArrayList<PostingIndex>getQueryPostingLists(ArrayList<String>query,boolean conjunctive){
         ArrayList<PostingIndex> postingOfQuery=new ArrayList<>();
-        ArrayList<String> queryDistinctTerms=(ArrayList<String>) query.stream().distinct().collect(Collectors.toList());
-        CollectionStatistics.readFromDisk();
-        for(String term:queryDistinctTerms){
+        for(String term:query){
             LexiconEntry lexiconEntry= Lexicon.getInstance().retrieveEntry(term);
             if(lexiconEntry==null){
                 if(conjunctive){
@@ -43,8 +41,12 @@ public class Processer {
         if(queryPostings==null||queryPostings.isEmpty()){
             return null;
         }
-        PriorityQueue<Pair<Float,Integer>>priorityQueue= new PriorityQueue<>(k,Comparator.comparing(Pair::getKey));
-
+        TopKPriorityQueue<Pair<Float,Integer>>priorityQueue;
+        if(PathAndFlags.DYNAMIC_PRUNING){
+            priorityQueue= new TopKPriorityQueue<>(k,Comparator.comparing(Pair::getKey));
+        }else{
+            priorityQueue=DAAT.scoreCollection(queryPostings,new ArrayList<>(cleaned),k,scoringFun);
+        }
 
         ArrayList<Integer> list=new ArrayList<>();
         while(!priorityQueue.isEmpty()){

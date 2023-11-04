@@ -33,6 +33,10 @@ public class Main {
 package it.unipi.MIRCV;
 
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
+import it.unipi.MIRCV.Query.Pair;
+import it.unipi.MIRCV.Query.Processer;
+import it.unipi.MIRCV.Query.Scorer;
+import it.unipi.MIRCV.Query.TopKPriorityQueue;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
@@ -48,6 +52,8 @@ import java.util.HashMap;
 public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
+        PathAndFlags.readFromDisk();
+        /*
         ArrayList<PostingIndex> postingIndices=new ArrayList<>();
         String po="break";
         System.out.println(Lexicon.getInstance().find(po));
@@ -55,9 +61,20 @@ public class Main {
         postingIndices.add(new PostingIndex(entry.getTerm()));
         postingIndices.get(0).openList();
         postingIndices.get(0).next();
-        System.out.println(postingIndices.get(0).nextGEQ(8657947));
+        System.out.println(postingIndices.get(0).nextGEQ(1425508));
+*/
 
+        long start=System.currentTimeMillis();
+        ArrayList<Integer>ret=Processer.processQuery("what is prescribed to treat thyroid storm",10,true,"bm25");
+        long end=System.currentTimeMillis();
+        System.out.println(end-start);
+        System.out.println(ret);
+        start=System.currentTimeMillis();
+        ret=Processer.processQuery("what is prescribed to treat thyroid storm",10,true,"bm25");
 
+        end=System.currentTimeMillis();
+        System.out.println(end-start);
+        System.out.println(ret);
     }
 }
 

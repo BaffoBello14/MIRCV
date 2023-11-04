@@ -119,7 +119,7 @@ public class SkippingBlock {
                 int [] freqs_decompressed= UnaryConverter.convertFromUnary(freqs,num_posting_of_block);
                 int [] doc_ids_decompressed= VariableByteEncoder.decodeArray(doc_ids);
                 for(int i=0;i<num_posting_of_block;i++){
-                    System.out.println(doc_ids_decompressed[i]+" "+freqs_decompressed[i]);
+
                     Posting posting=new Posting(doc_ids_decompressed[i],freqs_decompressed[i]);
                     postings.add(posting);
                 }
