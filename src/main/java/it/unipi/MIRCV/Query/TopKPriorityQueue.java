@@ -13,7 +13,7 @@ public class TopKPriorityQueue<E> extends PriorityQueue<E> {
     public boolean offer(E e){
         if(size()>=maxSize){
             E top=peek();
-            if(comparator().compare(e,top)<0){
+            if(comparator().compare(e,top)>0){
                 poll();
                 super.offer(e);
                 return true;

@@ -7,10 +7,7 @@ import it.unipi.MIRCV.Utils.Indexing.PostingIndex;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Processer {
@@ -53,6 +50,7 @@ public class Processer {
             Pair<Float,Integer> pair=priorityQueue.poll();
             list.add(pair.getValue());
         }
+        Collections.reverse(list);
         return list;
 
     }
