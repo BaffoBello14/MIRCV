@@ -15,11 +15,20 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 public class SPIMI {
-    private static final String PATH_TO_ARCHIVE_COLLECTION="./Collection/collection.tar.gz";
+    private static String PATH_TO_ARCHIVE_COLLECTION="./Collection/collection.tar.gz";
     private static int numIndex=0;
     private static long numPosting=0;
 
     private static long offsetDocIndex=0;
+    private static int threshold = 80;
+
+    public static void path_setter(String path){
+        PATH_TO_ARCHIVE_COLLECTION = path;
+    }
+
+    public static void threshold_setter(int num){
+        threshold = num;
+    }
 
     public static int execute() throws Exception{
         int doc_id=1;
@@ -76,7 +85,7 @@ public class SPIMI {
                     System.out.println(doc_id+"processed");
                 }
                 doc_id++;
-                if (((double)(runtime.totalMemory()- runtime.freeMemory()) / runtime.totalMemory())* 100 > 80) {
+                if (((double)(runtime.totalMemory()- runtime.freeMemory()) / runtime.totalMemory())* 100 > threshold) {
                     if(!write2Disk(index)){
                         System.out.println("problems with writing to disk of SPIMI");
                         return -1;
