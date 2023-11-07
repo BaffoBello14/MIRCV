@@ -67,12 +67,12 @@ public class Main {
 */
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("heat capacity",10,true,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("top 10 bidet",10,true,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
         start=System.currentTimeMillis();
-        ret=Processer.processQuery("heat capacity",10,true,"tfidf");
+        ret=Processer.processQuery("top 10 bidet",10,true,"tfidf");
 
         end=System.currentTimeMillis();
         System.out.println(end-start);

@@ -182,7 +182,6 @@ public class SPIMIMerger {
                     }
                 }
                 lex_offset=lexiconEntry.writeEntryToDisk(termToProcess,lex_offset,fileChannelLexicon);
-                System.out.println(lexiconEntry);
                 lexSize++;
             }
             fileChannelBlockInfo.close();
@@ -198,7 +197,7 @@ public class SPIMIMerger {
             return true;
 
         }catch (IOException e){
-            System.out.println("problemswith opening of file channels of lexicon doc id freq partial or total");
+            System.out.println("problems with opening of file channels of lexicon doc id freq partial or total");
             e.printStackTrace();
             return false;
         }
@@ -256,7 +255,7 @@ public class SPIMIMerger {
                     System.out.println("partial index null of entry->"+i);
                     return null;
                 }
-                //lexiconEntry.updateBM25Values(lexiconEntries[i].getTf(),lexiconEntries[i].getDoclen());
+
                 lexiconEntry.updateTFMAX(partialPosting);
                 mergedPosting.addPostings(partialPosting.getPostings());
             }
