@@ -1,6 +1,5 @@
 package it.unipi.MIRCV.Query;
 
-import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
 import it.unipi.MIRCV.Utils.Indexing.Lexicon;
 import it.unipi.MIRCV.Utils.Indexing.LexiconEntry;
 import it.unipi.MIRCV.Utils.Indexing.PostingIndex;
@@ -8,7 +7,6 @@ import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Processer {
 

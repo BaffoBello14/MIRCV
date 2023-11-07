@@ -4,11 +4,9 @@ import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
