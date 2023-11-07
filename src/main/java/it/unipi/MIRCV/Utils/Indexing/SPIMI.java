@@ -79,7 +79,7 @@ public class SPIMI {
                         index.put(term, posting);
                     }
                     addPosting(doc_id, posting);
-                    //posting.updateBM25Values(posting.getPostings().size(),documentLength);
+                    
                 }
                 if(doc_id%100000==0) {
                     System.out.println(doc_id+"processed");
