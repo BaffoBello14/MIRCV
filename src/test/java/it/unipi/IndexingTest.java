@@ -2,11 +2,8 @@ package it.unipi;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -109,32 +106,6 @@ public class IndexingTest {
     public void testLexiconComparison() throws Exception {
         String groundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
         String lexiconPath = "./IndexDataTest/Final/Lexicon.dat";
-        
-        // Esegui il test per scrivere il file .dat
-        testLexicon(groundTruePath);
-
-        // Confronta il file creato con il file di riferimento
-        assertTrue(compareFiles(groundTruePath, lexiconPath));
-    }
-
-    public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
-        try (BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream(filePath1));
-             BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(filePath2))) {
-            int byte1, byte2;
- 
-            while ((byte1 = bis1.read()) != -1) {
-                byte2 = bis2.read();
-                if (byte1 != byte2) {
-                    return false; // Files have different elements
-                }
-            }
- 
-            // Check if the second file has more elements
-            return bis2.read() == -1;
-        }
-    }    
-
-    public static void main(String[] args) throws Exception {
         IndexingTest indexingTest = new IndexingTest();
         indexingTest.indexTest();
 
@@ -144,13 +115,42 @@ public class IndexingTest {
         System.out.println(spimi);
         SPIMIMerger.setNumIndex(spimi);
         SPIMIMerger.execute();
-        FileChannel fc = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
-        long offset = 0;
-        while (offset < fc.size()) {
-            LexiconEntry le = new LexiconEntry();
-            le.readEntryFromDisk(offset, fc);
-            System.out.println("\n\t" + le.toString());
-            offset += 84;
+        
+        // Esegui il test per scrivere il file .dat
+        testLexicon(groundTruePath);
+
+        // Confronta il file creato con il file di riferimento
+        assertTrue(compareFiles(groundTruePath, lexiconPath));
+    }
+
+    public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
+        try (FileChannel fc1 = FileChannel.open(Paths.get(filePath1),StandardOpenOption.READ);
+             FileChannel fc2 = FileChannel.open(Paths.get(filePath2),StandardOpenOption.READ)) {
+            byte byte1, byte2;
+            long offset1=0;
+            long offset2=0;
+
+ 
+            while (offset1< fc1.size()&&offset2< fc2.size()) {
+                MappedByteBuffer mp1=fc1.map(FileChannel.MapMode.READ_ONLY,offset1,1);
+                MappedByteBuffer mp2=fc2.map(FileChannel.MapMode.READ_ONLY,offset2,1);
+                byte1=mp1.get();
+                byte2 = mp2.get();
+                if (byte1 != byte2) {
+                    return false; // Files have different elements
+                }
+                offset2++;
+                offset1++;
+            }
+            //if passed all the test and the 2 file are equals in length and has no difference
+            return offset2 == fc2.size() || offset1 == fc1.size();
         }
+    }    
+
+    public static void main(String[] args) throws Exception {
+        IndexingTest indexingTest = new IndexingTest();
+        indexingTest.indexTest();
+
+
     }
 }
