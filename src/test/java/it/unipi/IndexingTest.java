@@ -1,10 +1,18 @@
 package it.unipi;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+
+import org.junit.jupiter.api.Test;
 
 import it.unipi.MIRCV.Utils.Indexing.LexiconEntry;
 import it.unipi.MIRCV.Utils.Indexing.SPIMI;
@@ -52,23 +60,79 @@ public class IndexingTest {
         }
     }
 
-    private void createLexicon() throws Exception{
-        FileChannel fc = FileChannel.open(Paths.get("./IndexDataTest/Final/LexiconGroundTrue.dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-        LexiconEntry le = new LexiconEntry();
-        le.setTerm("beauti");
-        le.setDf(2);
-        le.setUpperTF(1);
-        le.setOffset_doc_id(0);
-        le.setUpperTFIDF(1.609438F);
-        le.setIdf(1.609438F);
-        le.setNumBlocks(1);
-        le.setOffset_skip_pointer(0);
-        le.setOffset_frequency(0);
-        le.setUpperBM25(0.9058143F);
+    public static void testLexicon(String outputPath) {
+        String FilePath = "indexing_test.txt";
 
-        long offset = 0;
-        offset = le.writeEntryToDisk("beauti", offset, fc);
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(outputPath), 
+                StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BufferedReader reader = new BufferedReader(new FileReader(FilePath));
+            String line;
+            long offset = 0;
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length >= 10) {
+                    String term = fields[0].trim();
+                    int offsetDocId = Integer.parseInt(fields[1].trim());
+                    int upperTF = Integer.parseInt(fields[2].trim());
+                    int df = Integer.parseInt(fields[3].trim());
+                    float idf = Float.parseFloat(fields[4].trim());
+                    float upperTFIDF = Float.parseFloat(fields[5].trim());
+                    float upperBM25 = Float.parseFloat(fields[6].trim());
+                    int offsetFrequency = Integer.parseInt(fields[7].trim());
+                    int offsetSkipPointer = Integer.parseInt(fields[8].trim());
+                    int numBlocks = Integer.parseInt(fields[9].trim());
+
+                    LexiconEntry le = new LexiconEntry();
+                    le.setTerm(term);
+                    le.setOffset_doc_id(offsetDocId);
+                    le.setUpperTF(upperTF);
+                    le.setDf(df);
+                    le.setIdf(idf);
+                    le.setUpperTFIDF(upperTFIDF);
+                    le.setUpperBM25(upperBM25);
+                    le.setOffset_frequency(offsetFrequency);
+                    le.setOffset_skip_pointer(offsetSkipPointer);
+                    le.setNumBlocks(numBlocks);
+
+                    offset = le.writeEntryToDisk(term, offset, fc);
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    
+    @Test
+    public void testLexiconComparison() throws Exception {
+        String groundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
+        String lexiconPath = "./IndexDataTest/Final/Lexicon.dat";
+        
+        // Esegui il test per scrivere il file .dat
+        testLexicon(groundTruePath);
+
+        // Confronta il file creato con il file di riferimento
+        assertTrue(compareFiles(groundTruePath, lexiconPath));
+    }
+
+    public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
+        try (BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream(filePath1));
+             BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(filePath2))) {
+            int byte1, byte2;
+ 
+            while ((byte1 = bis1.read()) != -1) {
+                byte2 = bis2.read();
+                if (byte1 != byte2) {
+                    return false; // Files have different elements
+                }
+            }
+ 
+            // Check if the second file has more elements
+            return bis2.read() == -1;
+        }
+    }    
 
     public static void main(String[] args) throws Exception {
         IndexingTest indexingTest = new IndexingTest();
@@ -77,7 +141,7 @@ public class IndexingTest {
         SPIMI.path_setter("./test_collection.tar.gz");
         SPIMI.threshold_setter(1);
         int spimi = SPIMI.execute();
-        System.out.println("\n\t" + spimi);
+        System.out.println(spimi);
         SPIMIMerger.setNumIndex(spimi);
         SPIMIMerger.execute();
         FileChannel fc = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
