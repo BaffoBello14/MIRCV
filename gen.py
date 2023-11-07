@@ -1,5 +1,5 @@
 import tarfile
-import random
+import os
 
 # Lista di frasi casuali in inglese
 test_collection = [
@@ -23,5 +23,8 @@ with open("test_collection.tsv", "w") as tsv_file:
 # Crea un file .tar.gz e aggiunge il file .tsv
 with tarfile.open("test_collection.tar.gz", "w:gz") as tar:
     tar.add("test_collection.tsv")
+
+# Elimina il file .tsv
+os.remove("test_collection.tsv")
 
 print("File .tar.gz creato con successo.")

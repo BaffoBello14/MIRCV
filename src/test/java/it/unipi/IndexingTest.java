@@ -3,11 +3,12 @@ package it.unipi;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.*;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.MappedByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,18 +19,29 @@ import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 public class IndexingTest {
 
-    public void indexTest() {
-        initialize();
-        // Altri compiti di indicizzazione da eseguire
+    private static void createDirectoryIfNotExists(String directoryPath) {
+        if (directoryPath != null && !directoryPath.isEmpty()) {
+            try {
+                if (!Files.exists(Paths.get(directoryPath))) {
+                    Files.createDirectories(Paths.get(directoryPath));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    private void initialize() {
+    private static void initialize() {
+        // Directory paths
         PathAndFlags.PATH_TO_DOC_ID = "./IndexDataTest/Doc_ids/";
+        PathAndFlags.PATH_TO_FINAL = "./IndexDataTest/Final";
         PathAndFlags.PATH_TO_FREQ = "./IndexDataTest/Freqs/";
+        PathAndFlags.PATH_TO_LEXICON = "./IndexDataTest/Lexicons/";
+
+        // File paths
         PathAndFlags.PATH_TO_FINAL_DOC_ID = "./IndexDataTest/Final/DocID.dat";
         PathAndFlags.PATH_TO_FINAL_FREQ = "./IndexDataTest/Final/Freq.dat";
         PathAndFlags.PATH_TO_DOC_INDEX = "./IndexDataTest/Doc_index/DocIndex.dat";
-        PathAndFlags.PATH_TO_LEXICON = "./IndexDataTest/Lexicons/";
         PathAndFlags.PATH_TO_FINAL_LEXICON = "./IndexDataTest/Final/Lexicon.dat";
         PathAndFlags.PATH_TO_COLLECTION_STAT = "./IndexDataTest/CollectionStatistics/CollectionStat.dat";
         PathAndFlags.PATH_TO_BLOCK_FILE = "./IndexDataTest/BlockInfo/BlockInfo.dat";
@@ -45,24 +57,12 @@ public class IndexingTest {
         createDirectoryIfNotExists("./IndexDataTest/Lexicons/");
     }
 
-    private void createDirectoryIfNotExists(String directoryPath) {
-        if (directoryPath != null && !directoryPath.isEmpty()) {
-            try {
-                if (!Files.exists(Paths.get(directoryPath))) {
-                    Files.createDirectories(Paths.get(directoryPath));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void testLexicon(String outputPath) {
+    private static void testLexicon(String outputPath) {
         String FilePath = "indexing_test.txt";
 
         try {
-            FileChannel fc = FileChannel.open(Paths.get(outputPath), 
-                StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            FileChannel fc = FileChannel.open(Paths.get(outputPath),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             BufferedReader reader = new BufferedReader(new FileReader(FilePath));
             String line;
             long offset = 0;
@@ -101,13 +101,13 @@ public class IndexingTest {
             e.printStackTrace();
         }
     }
-    
+
     @Test
     public void testLexiconComparison() throws Exception {
         String groundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
         String lexiconPath = "./IndexDataTest/Final/Lexicon.dat";
-        IndexingTest indexingTest = new IndexingTest();
-        indexingTest.indexTest();
+
+        initialize();
 
         SPIMI.path_setter("./test_collection.tar.gz");
         SPIMI.threshold_setter(1);
@@ -115,7 +115,7 @@ public class IndexingTest {
         System.out.println(spimi);
         SPIMIMerger.setNumIndex(spimi);
         SPIMIMerger.execute();
-        
+
         // Esegui il test per scrivere il file .dat
         testLexicon(groundTruePath);
 
@@ -124,33 +124,33 @@ public class IndexingTest {
     }
 
     public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
-        try (FileChannel fc1 = FileChannel.open(Paths.get(filePath1),StandardOpenOption.READ);
-             FileChannel fc2 = FileChannel.open(Paths.get(filePath2),StandardOpenOption.READ)) {
-            byte byte1, byte2;
-            long offset1=0;
-            long offset2=0;
+        try (FileChannel fc1 = FileChannel.open(Paths.get(filePath1), StandardOpenOption.READ);
+             FileChannel fc2 = FileChannel.open(Paths.get(filePath2), StandardOpenOption.READ)) {
+            AtomicLong offset1 = new AtomicLong(0);
+            AtomicLong offset2 = new AtomicLong(0);
 
- 
-            while (offset1< fc1.size()&&offset2< fc2.size()) {
-                MappedByteBuffer mp1=fc1.map(FileChannel.MapMode.READ_ONLY,offset1,1);
-                MappedByteBuffer mp2=fc2.map(FileChannel.MapMode.READ_ONLY,offset2,1);
-                byte1=mp1.get();
-                byte2 = mp2.get();
+            while (offset1.get() < fc1.size() && offset2.get() < fc2.size()) {
+                MappedByteBuffer mp1 = fc1.map(FileChannel.MapMode.READ_ONLY, offset1.get(), 1);
+                MappedByteBuffer mp2 = fc2.map(FileChannel.MapMode.READ_ONLY, offset2.get(), 1);
+
+                byte byte1 = mp1.get();
+                byte byte2 = mp2.get();
+
                 if (byte1 != byte2) {
-                    return false; // Files have different elements
+                    return false; // I file hanno elementi diversi
                 }
-                offset2++;
-                offset1++;
+
+                offset1.incrementAndGet();
+                offset2.incrementAndGet();
             }
-            //if passed all the test and the 2 file are equals in length and has no difference
-            return offset2 == fc2.size() || offset1 == fc1.size();
+
+            // Se tutti i test sono passati e i due file hanno la stessa lunghezza e nessuna differenza
+            return offset2.get() == fc2.size() || offset1.get() == fc1.size();
         }
-    }    
+    }
 
     public static void main(String[] args) throws Exception {
         IndexingTest indexingTest = new IndexingTest();
-        indexingTest.indexTest();
-
-
+        indexingTest.testLexiconComparison();
     }
 }
