@@ -79,7 +79,6 @@ public class SPIMI {
                         index.put(term, posting);
                     }
                     addPosting(doc_id, posting);
-                    //posting.updateBM25Values(posting.getPostings().size(),documentLength);
                 }
                 if(doc_id%100000==0) {
                     System.out.println(doc_id+"processed");
@@ -94,9 +93,11 @@ public class SPIMI {
                     System.gc();
                 }
             }
-            if(!write2Disk(index)){
-                System.out.println("problems with writing to disk spimi");
-                return -1;
+            if(!index.isEmpty()){
+                if(!write2Disk(index)){
+                    System.out.println("problems with writing to disk spimi");
+                    return -1;
+                }
             }
             index.clear();
             System.gc();
@@ -113,7 +114,6 @@ public class SPIMI {
         CollectionStatistics.setDocuments(doc_id-1);
         CollectionStatistics.computeAVGDOCLEN();
         CollectionStatistics.write2Disk();
-        System.out.println(CollectionStatistics.getAvgDocLen());
         fileChannelDI.close();
 
 

@@ -34,6 +34,10 @@ public class Processer {
             cleaned=Preprocess.removeStopwords(cleaned);
             cleaned=Preprocess.applyStemming(cleaned);
         }
+        if(cleaned.isEmpty()){
+            System.out.println("empty query");
+            return null;
+        }
         Set<String> queryDistinctWords = new HashSet<>(cleaned);
         ArrayList<PostingIndex> queryPostings=getQueryPostingLists(new ArrayList<>(queryDistinctWords),conjunctive);
         if(queryPostings==null||queryPostings.isEmpty()){

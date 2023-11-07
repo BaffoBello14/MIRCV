@@ -67,15 +67,18 @@ public class Main {
 */
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("top 10 bidet",10,true,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("",10,false,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
         start=System.currentTimeMillis();
-        ret=Processer.processQuery("top 10 bidet",10,true,"tfidf");
+        ret=Processer.processQuery("",10,true,"tfidf");
 
         end=System.currentTimeMillis();
         System.out.println(end-start);
+        if(ret==null){
+            System.exit(0);
+        }
         for (int i:ret){
             System.out.print(DocIndex.getInstance().getDoc_NO(i)+" ");
         }
