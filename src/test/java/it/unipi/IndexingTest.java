@@ -77,7 +77,7 @@ public class IndexingTest {
         SPIMI.path_setter("./test_collection.tar.gz");
         SPIMI.threshold_setter(1);
         int spimi = SPIMI.execute();
-        System.out.println("\n\t" + spimi);
+        System.out.println(spimi);
         SPIMIMerger.setNumIndex(spimi);
         SPIMIMerger.execute();
         FileChannel fc = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);

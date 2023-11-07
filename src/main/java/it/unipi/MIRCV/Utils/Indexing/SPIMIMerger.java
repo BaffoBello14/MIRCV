@@ -87,7 +87,7 @@ public class SPIMIMerger {
                 if(termToProcess.isEmpty()){
                     continue;
                 }
-                System.out.print(termToProcess);
+
                 LexiconEntry lexiconEntry=new LexiconEntry();
                 lexiconEntry.setTerm(termToProcess);
                 PostingIndex mergedPosting=processTerm(lexiconEntry,termToProcess);

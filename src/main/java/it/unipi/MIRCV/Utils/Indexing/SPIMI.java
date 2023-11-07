@@ -94,9 +94,11 @@ public class SPIMI {
                     System.gc();
                 }
             }
-            if(!write2Disk(index)){
-                System.out.println("problems with writing to disk spimi");
-                return -1;
+            if(!index.isEmpty()){
+                if(!write2Disk(index)){
+                    System.out.println("problems with writing to disk spimi");
+                    return -1;
+                }
             }
             index.clear();
             System.gc();
@@ -113,7 +115,6 @@ public class SPIMI {
         CollectionStatistics.setDocuments(doc_id-1);
         CollectionStatistics.computeAVGDOCLEN();
         CollectionStatistics.write2Disk();
-        System.out.println(CollectionStatistics.getAvgDocLen());
         fileChannelDI.close();
 
 
