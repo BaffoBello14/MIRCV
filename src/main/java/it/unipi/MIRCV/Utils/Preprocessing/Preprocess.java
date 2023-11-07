@@ -37,6 +37,7 @@ public class Preprocess {
     private static final String MULTIPLE_SPACES_REGEX = " +";
     private static final String CONSECUTIVE_LETTERS_REGEX = "(.)\\1{2,}";
     private static final String CAMEL_CASE_REGEX = "(?<=[a-z])(?=[A-Z])";
+    private static final String NO_STANDARD_ASCII_FOR_7_BITS_REGEX="[^\\x00-\\x7f]";
 
     /**
      * Splits the TSV file lines into columns.
@@ -55,6 +56,7 @@ public class Preprocess {
                    .replaceAll(NON_LETTER_REGEX, " ")
                    .replaceAll(MULTIPLE_SPACES_REGEX, " ")
                    .replaceAll(CONSECUTIVE_LETTERS_REGEX, "$1$1")
+                   .replaceAll(NO_STANDARD_ASCII_FOR_7_BITS_REGEX," ")
                    .trim();
     }
 
@@ -67,6 +69,9 @@ public class Preprocess {
         for (String word : words) {
             String[] withoutCamelCase = word.split(CAMEL_CASE_REGEX);
             for (String token : withoutCamelCase) {
+                if(token.trim().isEmpty()||token.isEmpty()){
+                    continue;
+                }
                 tokens.add(token.toLowerCase(Locale.ROOT));
             }
         }

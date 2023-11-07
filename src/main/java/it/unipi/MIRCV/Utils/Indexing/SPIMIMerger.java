@@ -3,7 +3,6 @@ package it.unipi.MIRCV.Utils.Indexing;
 import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -22,43 +21,36 @@ public class SPIMIMerger {
     private static FileChannel[] doc_id_File_channels;
     private static FileChannel[] freq_file_channels;
 
-    // Set the number of indexes for the SPIMI Merger.
     public static void setNumIndex(int num_index) {
         SPIMI_Index = num_index;
     }
 
-    // Load a posting list from the index file.
     private static PostingIndex loadList(LexiconEntry lexiconEntry, int index) {
         PostingIndex postingIndex;
         try {
-            // Map the doc_id data into memory.
-            MappedByteBuffer mappedByteBufferDOCID = doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_doc_id(), lexiconEntry.getDocidByteSize());
-            // Map the frequency data into memory.
-            MappedByteBuffer mappedByteBufferFreq = freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_frequency(), lexiconEntry.getFreqByteSize());
-            // Create a new PostingIndex for the term.
+            MappedByteBuffer mappedByteBufferDOCID = doc_id_File_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_doc_id(), lexiconEntry.getDf() * 4L);
+            MappedByteBuffer mappedByteBufferFreq = freq_file_channels[index].map(FileChannel.MapMode.READ_ONLY, lexiconEntry.getOffset_frequency(), lexiconEntry.getDf() * 4L);
             postingIndex = new PostingIndex(lexiconEntry.getTerm());
+
             for (int i = 0; i < lexiconEntry.getDf(); i++) {
-                // Read doc_id and frequency and create a Posting.
                 Posting posting = new Posting(mappedByteBufferDOCID.getInt(), mappedByteBufferFreq.getInt());
-                // Add the Posting to the PostingIndex.
                 postingIndex.getPostings().add(posting);
             }
+
             return postingIndex;
         } catch (IOException e) {
-            System.out.println("Problems with opening the file of the doc_id or freq channel in load list of merger.");
+            System.out.println("Problems with opening the file of the doc_id or freq channel in load list of merger");
             e.printStackTrace();
             return null;
         }
     }
 
     public static boolean execute() {
-        // Check if the SPIMI index is set.
         if (SPIMI_Index == -1) {
             System.out.println("Set the index produced by SPIMI Splitter");
             return false;
         }
 
-        // Initialize arrays and variables.
         lexiconEntries = new LexiconEntry[SPIMI_Index];
         lexiconOffsets = new long[SPIMI_Index];
         doc_id_File_channels = new FileChannel[SPIMI_Index];
@@ -66,7 +58,6 @@ public class SPIMIMerger {
         long ifError;
 
         try {
-            // Open and read lexicon entries from individual SPIMI Splitter output files.
             for (int i = 0; i < SPIMI_Index; i++) {
                 lexiconEntries[i] = new LexiconEntry();
                 lexiconOffsets[i] = 0;
@@ -83,20 +74,18 @@ public class SPIMIMerger {
                 freq_file_channels[i] = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FREQ + i + ".dat"), StandardOpenOption.READ);
             }
         } catch (IOException e) {
-            System.out.println("Error on opening the file on merger of SPIMI for doc id or freq file");
+            System.out.println("Error opening the file on merger of SPIMI for doc_id or freq file");
             e.printStackTrace();
             return false;
         }
 
         try {
-            // Open final output files for lexicon, doc_id, freq, and block info.
             FileChannel fileChannelLexicon = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileChannel fileChannelDocIdFinal = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileChannel fileChannelFreqFinal = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileChannel fileChannelBlockInfo = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 
             while (true) {
-                // Get the next term to process.
                 String termToProcess = getTermToProcess();
 
                 if (termToProcess == null) {
@@ -108,11 +97,8 @@ public class SPIMIMerger {
                     continue;
                 }
 
-                System.out.print(termToProcess);
-
                 LexiconEntry lexiconEntry = new LexiconEntry();
                 lexiconEntry.setTerm(termToProcess);
-
                 PostingIndex mergedPosting = processTerm(lexiconEntry, termToProcess);
 
                 if (mergedPosting == null) {
@@ -131,32 +117,35 @@ public class SPIMIMerger {
                     skippingBlock.setFreq_offset(freq_offset);
                     int postingInTheSkippingBlock = 0;
                     int writtenPostings = i * numPostingPerBlock;
-                    int numPostingToBeWriteToThisBlock = Math.min((mergedPosting.getPostings().size() - writtenPostings), numPostingPerBlock);
+                    int numPostingTobeWriteToThisBlock = Math.min((mergedPosting.getPostings().size() - writtenPostings), numPostingPerBlock);
 
                     if (PathAndFlags.COMPRESSION_ENABLED) {
-                        int[] doc_id = new int[numPostingToBeWriteToThisBlock];
-                        int[] freq = new int[numPostingToBeWriteToThisBlock];
+                        int[] doc_id = new int[numPostingTobeWriteToThisBlock];
+                        int[] freq = new int[numPostingTobeWriteToThisBlock];
 
                         while (true) {
                             if (!postingIterator.hasNext()) {
                                 System.out.println(mergedPosting.getPostings().size());
                                 System.out.println(writtenPostings);
-                                System.out.println(numPostingToBeWriteToThisBlock);
+                                System.out.println(numPostingTobeWriteToThisBlock);
                                 return false;
                             }
+
                             Posting actualPosting = postingIterator.next();
                             doc_id[postingInTheSkippingBlock] = actualPosting.getDoc_id();
                             freq[postingInTheSkippingBlock] = actualPosting.getFrequency();
                             postingInTheSkippingBlock++;
 
-                            if (numPostingToBeWriteToThisBlock == postingInTheSkippingBlock) {
+                            if (numPostingTobeWriteToThisBlock == postingInTheSkippingBlock) {
                                 byte[] compressed_doc_ids = VariableByteEncoder.encodeArray(doc_id);
                                 byte[] compressed_freqs = UnaryConverter.convertToUnary(freq);
+
+                                skippingBlock.setDoc_id_size(compressed_doc_ids.length);
+                                skippingBlock.setFreq_size(compressed_freqs.length);
 
                                 try {
                                     MappedByteBuffer mappedByteBufferDOCID = fileChannelDocIdFinal.map(FileChannel.MapMode.READ_WRITE, doc_id_offset, compressed_doc_ids.length);
                                     MappedByteBuffer mappedByteBufferFREQS = fileChannelFreqFinal.map(FileChannel.MapMode.READ_WRITE, freq_offset, compressed_freqs.length);
-
                                     mappedByteBufferDOCID.put(compressed_doc_ids);
                                     mappedByteBufferFREQS.put(compressed_freqs);
 
@@ -166,24 +155,25 @@ public class SPIMIMerger {
 
                                     doc_id_offset += compressed_doc_ids.length;
                                     freq_offset += compressed_freqs.length;
+
                                     break;
                                 } catch (IOException e) {
-                                    System.out.println("Problems with opening the file to write the compressed docids and freqs on the merging algorithm of SPIMI");
+                                    System.out.println("Problems with opening the file to write the compressed doc_ids and freqs in the merging algorithm of SPIMI");
                                     e.printStackTrace();
                                     return false;
                                 }
                             }
                         }
                     } else {
-                        skippingBlock.setDoc_id_size(numPostingToBeWriteToThisBlock * 4);
-                        skippingBlock.setFreq_size(numPostingToBeWriteToThisBlock * 4);
+                        skippingBlock.setDoc_id_size(numPostingTobeWriteToThisBlock * 4);
+                        skippingBlock.setFreq_size(numPostingTobeWriteToThisBlock * 4);
 
                         try {
-                            MappedByteBuffer mappedByteBufferDOCID = fileChannelDocIdFinal.map(FileChannel.MapMode.READ_WRITE, doc_id_offset, numPostingToBeWriteToThisBlock * 4L);
-                            MappedByteBuffer mappedByteBufferFREQS = fileChannelFreqFinal.map(FileChannel.MapMode.READ_WRITE, freq_offset, numPostingToBeWriteToThisBlock * 4L);
+                            MappedByteBuffer mappedByteBufferDOCID = fileChannelDocIdFinal.map(FileChannel.MapMode.READ_WRITE, doc_id_offset, numPostingTobeWriteToThisBlock * 4L);
+                            MappedByteBuffer mappedByteBufferFREQS = fileChannelFreqFinal.map(FileChannel.MapMode.READ_WRITE, freq_offset, numPostingTobeWriteToThisBlock * 4L);
 
                             if (mappedByteBufferDOCID == null || mappedByteBufferFREQS == null) {
-                                System.out.println("Channel for doc id or freq of non-compressed version of merger is not open");
+                                System.out.println("Channel for doc_id or freq of no compressed version of merger is not open");
                                 return false;
                             }
 
@@ -191,18 +181,20 @@ public class SPIMIMerger {
                                 if (!postingIterator.hasNext()) {
                                     break;
                                 }
+
                                 Posting actualPosting = postingIterator.next();
                                 mappedByteBufferDOCID.putInt(actualPosting.getDoc_id());
                                 mappedByteBufferFREQS.putInt(actualPosting.getFrequency());
                                 postingInTheSkippingBlock++;
 
-                                if (numPostingToBeWriteToThisBlock == postingInTheSkippingBlock) {
+                                if (numPostingTobeWriteToThisBlock == postingInTheSkippingBlock) {
                                     skippingBlock.setDoc_id_max(actualPosting.getDoc_id());
                                     skippingBlock.setNum_posting_of_block(postingInTheSkippingBlock);
                                     skippingBlock.writeOnDisk(fileChannelBlockInfo);
 
-                                    doc_id_offset += numPostingToBeWriteToThisBlock * 4L;
-                                    freq_offset += numPostingToBeWriteToThisBlock * 4L;
+                                    doc_id_offset += numPostingTobeWriteToThisBlock * 4L;
+                                    freq_offset += numPostingTobeWriteToThisBlock * 4L;
+
                                     break;
                                 }
                             }
@@ -215,11 +207,9 @@ public class SPIMIMerger {
                 }
 
                 lex_offset = lexiconEntry.writeEntryToDisk(termToProcess, lex_offset, fileChannelLexicon);
-                System.out.println(lexiconEntry);
                 lexSize++;
             }
 
-            // Close file channels.
             fileChannelBlockInfo.close();
             fileChannelLexicon.close();
             fileChannelDocIdFinal.close();
@@ -230,12 +220,11 @@ public class SPIMIMerger {
                 freq_file_channels[i].close();
             }
 
-            // Update collection statistics.
             CollectionStatistics.setTerms(lexSize);
             CollectionStatistics.write2Disk();
             return true;
         } catch (IOException e) {
-            System.out.println("Problems with opening file channels of lexicon, doc id, freq, partial or total");
+            System.out.println("Problems with opening file channels of lexicon, doc_id, freq, partial, or total");
             e.printStackTrace();
             return false;
         }
@@ -245,39 +234,36 @@ public class SPIMIMerger {
         String termToProcess, nextTerm;
         termToProcess = null;
 
-        // Iterate through the lexicon entries to find the next term to process.
         for (int i = 0; i < SPIMI_Index; i++) {
             if (lexiconEntries[i] == null) {
                 continue;
             }
+
             nextTerm = lexiconEntries[i].getTerm();
 
-            // If termToProcess is null, set it to nextTerm.
             if (termToProcess == null) {
                 termToProcess = nextTerm;
                 continue;
             }
 
-            // Compare terms and update termToProcess if needed.
             if (termToProcess.compareTo(nextTerm) > 0) {
                 termToProcess = nextTerm;
             }
         }
+
         return termToProcess;
     }
 
-
     private static void moveToNextTermLexicon(String term) {
-        // Iterate through the lexicon entries to move to the next term.
         for (int i = 0; i < SPIMI_Index; i++) {
             if (lexiconEntries[i] != null && lexiconEntries[i].getTerm().equals(term)) {
                 try {
-                    // Update the lexicon offset and read the next lexicon entry.
                     lexiconOffsets[i] += LexiconEntry.ENTRY_SIZE;
                     FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON + i + ".dat"), StandardOpenOption.READ);
 
                     if (lexiconOffsets[i] < fileChannel.size()) {
                         long ifError = lexiconEntries[i].readEntryFromDisk(lexiconOffsets[i], fileChannel);
+
                         if (ifError == 0 || ifError == -1) {
                             lexiconEntries[i] = null;
                         }
@@ -287,7 +273,7 @@ public class SPIMIMerger {
 
                     fileChannel.close();
                 } catch (IOException e) {
-                    System.out.println("Problem with opening the file of lexicon partial when moving to the next term in merge");
+                    System.out.println("Problems with opening the file of lexicon partial when moving to the next term during merging");
                     e.printStackTrace();
                     return;
                 }
@@ -296,36 +282,63 @@ public class SPIMIMerger {
     }
 
     private static PostingIndex processTerm(LexiconEntry lexiconEntry, String termToProcess) {
-        // Create a new PostingIndex for the term to store merged postings.
         PostingIndex mergedPosting = new PostingIndex();
         mergedPosting.setTerm(termToProcess);
 
         for (int i = 0; i < SPIMI_Index; i++) {
             if (lexiconEntries[i] != null && lexiconEntries[i].getTerm().equals(termToProcess)) {
-                // Load the posting list for the term from the current SPIMI index.
                 PostingIndex partialPosting = loadList(lexiconEntries[i], i);
 
                 if (partialPosting == null) {
-                    System.out.println("Partial index is null for entry -> " + i);
+                    System.out.println("Partial index null for entry -> " + i);
                     return null;
                 }
 
-                // Update BM25 values, TFMAX, and add postings to the mergedPosting.
-                lexiconEntry.updateBM25Values(lexiconEntries[i].getTf(), lexiconEntries[i].getDoclen());
                 lexiconEntry.updateTFMAX(partialPosting);
                 mergedPosting.addPostings(partialPosting.getPostings());
             }
         }
 
-        // Move to the next term in the lexicon.
-        moveToNextTermLexicon(termToProcess);
+        float BM25Upper = 0F;
+        float actualBM25, idf;
+        int N = CollectionStatistics.getDocuments();
+        idf = (float) ((Math.log((double) N / mergedPosting.getPostings().size())));
+        int tf = 0;
 
-        // Set doc_id and frequency offsets, calculate IDF, and upper bounds.
+        for (Posting posting : mergedPosting.getPostings()) {
+            actualBM25 = calculateBM25WithoutIDF((float) (1 + Math.log(posting.getFrequency())), posting.getDoc_id());
+
+            if (actualBM25 != -1F && actualBM25 > BM25Upper) {
+                BM25Upper = actualBM25;
+            }
+
+            if (tf < posting.getFrequency()) {
+                tf = posting.getFrequency();
+            }
+        }
+
+        lexiconEntry.setIdf(idf);
+        lexiconEntry.setDf(mergedPosting.getPostings().size());
+        lexiconEntry.setUpperBM25(BM25Upper * idf);
+        moveToNextTermLexicon(termToProcess);
         lexiconEntry.setOffset_doc_id(doc_id_offset);
         lexiconEntry.setOffset_frequency(freq_offset);
-        lexiconEntry.calculateIDF();
-        lexiconEntry.calculateUpperBounds();
-
+        lexiconEntry.setUpperTFIDF((float) ((1 + Math.log(tf)) * idf));
         return mergedPosting;
     }
+
+    private static float calculateBM25WithoutIDF(float tf, long doc_id) {
+        try {
+            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);
+            long doclen = mappedByteBuffer.getLong();
+            fileChannel.close();
+            return (float) ((tf / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doclen / CollectionStatistics.getAvgDocLen())))));
+        } catch (IOException e) {
+            System.out.println("Problems with opening the file channel of doc id in calculate BM25 in merger");
+            e.printStackTrace();
+            return -1F;
+        }
+    }
+    
 }

@@ -28,6 +28,14 @@
           <artifactId>commons-compress</artifactId>
           <version>1.21</version>
       </dependency>
+      <dependency>
+          <groupId>org.junit.platform</groupId>
+          <artifactId>junit-platform-commons</artifactId>
+          <version>1.8.0</version> <!-- Replace with the desired version -->
+      </dependency>
+
+
+
 
 
       <!-- JUnit 5 API -->

@@ -18,11 +18,10 @@ public class VariableByteEncoder {
         int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
         byte[] encodedBytes = new byte[numBytes];
 
-        // Process each byte of the encoded value, starting from the least significant.
         for (int i = numBytes - 1; i >= 0; i--) {
             byte currentByte = (byte) (value % 128);
             value /= 128;
-            
+
             // Set the most significant bit if there's another byte after the current one.
             if (i > 0) {
                 currentByte |= (byte) 128;
@@ -32,7 +31,6 @@ public class VariableByteEncoder {
 
         return encodedBytes;
     }
-
     public static byte[] encodeArray(int[] values) {
         // Calculate the total number of bytes required to represent all the values in base-128.
         int totalBytes = 0;
@@ -42,27 +40,14 @@ public class VariableByteEncoder {
 
         byte[] encodedBytes = new byte[totalBytes];
         int currentIndex = 0;
-
-        // Process each integer in the input array.
         for (int value : values) {
-            int numBytes = (int) Math.ceil((Math.log(value + 1) / Math.log(128)));
-            
-            // Process each byte of the encoded value, starting from the least significant.
-            for (int i = numBytes - 1; i >= 0; i--) {
-                byte currentByte = (byte) (value % 128);
-                value /= 128;
-
-                // Set the most significant bit if there's another byte after the current one.
-                if (i > 0) {
-                    currentByte |= (byte) 128;
-                }
-                encodedBytes[currentIndex] = currentByte;
-                currentIndex++;
-            }
+            byte [] encode=encode(value);
+            System.arraycopy(encode, 0, encodedBytes, currentIndex, encode.length);
+            currentIndex+=encode.length;
         }
-
         return encodedBytes;
     }
+
 
     /**
      * Decodes a value encoded using Variable Byte encoding back into its integer representation.
@@ -73,7 +58,6 @@ public class VariableByteEncoder {
     public static int decode(byte[] encodedBytes) {
         int decodedValue = 0;
 
-        // Process each byte of the encoded array.
         for (byte b : encodedBytes) {
             int value = b & 0x7f; // Retrieve the 7 least significant bits.
             decodedValue = (decodedValue << 7) | value;
@@ -81,34 +65,37 @@ public class VariableByteEncoder {
 
         return decodedValue;
     }
-
     public static int[] decodeArray(byte[] encodedBytes) {
         List<Integer> decodedValues = new ArrayList<>();
-        int currentIndex = 0;
+        int currentIndex = encodedBytes.length-1;
+        int backwardIndex=currentIndex;
 
-        // Process each byte until we've processed the entire encoded array.
-        while (currentIndex < encodedBytes.length) {
-            int decodedValue = 0;
-            int shift = 0;
+        while (backwardIndex>=0) {
+            int value;
+            while((encodedBytes[backwardIndex]&0x80)!=0x00){
+                backwardIndex--;
+            }
+            byte [] valueByte=new byte[currentIndex-backwardIndex+1];
+            for(int i=backwardIndex,j=0;j<currentIndex-backwardIndex+1;i++,j++){
+                valueByte[j]=encodedBytes[i];
+            }
+            value=decode(valueByte);
+            backwardIndex--;
+            currentIndex=backwardIndex;
 
-            byte currentByte;
-            do {
-                currentByte = encodedBytes[currentIndex];
-                int value = currentByte & 0x7f;
-                decodedValue |= (value << shift);
-                shift += 7;
-                currentIndex++;
-            } while ((currentByte & 0x80) != 0); // Check for continuation byte.
-
-            decodedValues.add(decodedValue);
+            decodedValues.add(value);
         }
 
-        // Convert the ArrayList of decoded values to an array.
+        // Convert the List to an array.
         int[] result = new int[decodedValues.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = decodedValues.get(i);
+        for (int i = decodedValues.size()-1; i>=0; i--) {
+            result[i] = decodedValues.get(decodedValues.size()-i-1);
         }
 
         return result;
     }
+
+
+
+
 }

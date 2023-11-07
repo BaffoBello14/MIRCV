@@ -8,22 +8,18 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class CollectionStatistics {
 
-    // Class-level static variables to hold various collection statistics.
+public class CollectionStatistics {
     private static int documents;
     private static double avgDocLen;
     private static long totalLenDoc;
+    protected static long ENTRY_SIZE = 4 + 8 + 8+8;
     private static long terms;
-    protected static long ENTRY_SIZE = 4 + 8 + 8 + 8;  // Size of entry for writing to disk
-
     public static int getDocuments() {
         return documents;
     }
-
-    // Computes the average document length.
-    public static void computeAVGDOCLEN() {
-        avgDocLen = (double) totalLenDoc / documents;
+    public static  void computeAVGDOCLEN(){
+        avgDocLen= (double) totalLenDoc /documents;
     }
 
     public static void setDocuments(int documents1) {
@@ -50,57 +46,43 @@ public class CollectionStatistics {
         return totalLenDoc;
     }
 
-    public static void setTotalLenDoc(long totalLenDoc1) {
-        CollectionStatistics.totalLenDoc = totalLenDoc1;
+    public static void setTotalLenDoc(long totalLenDoc) {
+        CollectionStatistics.totalLenDoc = totalLenDoc;
     }
 
-    // Writes the collection statistics to disk.
-    public static boolean write2Disk() {
-        try {
-            // Open a file channel for both reading and writing.
-            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_COLLECTION_STAT), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-
-            // Map a portion of the file directly into memory for writing.
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
-
-            // Write statistics to the mapped byte buffer.
+    public static boolean write2Disk(){
+        try{
+            FileChannel fileChannel= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_COLLECTION_STAT), StandardOpenOption.READ,StandardOpenOption.WRITE,StandardOpenOption.CREATE);
+            MappedByteBuffer mappedByteBuffer= fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, ENTRY_SIZE);
             mappedByteBuffer.putInt(documents);
             mappedByteBuffer.putDouble(avgDocLen);
             mappedByteBuffer.putLong(terms);
             mappedByteBuffer.putLong(totalLenDoc);
-
-            // Close the file channel.
             fileChannel.close();
-
-            return true;  // Return true indicating success.
-        } catch (IOException e) {
+            return true;
+        }catch (IOException e){
             System.out.println("Problems with writing to collection statistics file");
-            return false;  // Return false indicating failure.
+            return false;
         }
-    }
 
-    // Reads the collection statistics from disk.
+    }
     public static boolean readFromDisk() {
         try {
-            // Open a file channel for reading.
-            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_COLLECTION_STAT), StandardOpenOption.READ);
-
-            // Map a portion of the file directly into memory for reading.
+            FileChannel fileChannel=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_COLLECTION_STAT),StandardOpenOption.READ);
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, ENTRY_SIZE);
 
-            // Read statistics from the mapped byte buffer.
+            // Read data from the MappedByteBuffer
             documents = mappedByteBuffer.getInt();
             avgDocLen = mappedByteBuffer.getDouble();
             terms = mappedByteBuffer.getLong();
-            totalLenDoc = mappedByteBuffer.getLong();
-
-            // Close the file channel.
+            totalLenDoc=mappedByteBuffer.getLong();
+            // Close the FileChannel and the FileInputStream
             fileChannel.close();
-
-            return true;  // Return true indicating success.
+            return true;
         } catch (IOException e) {
             System.out.println("Problems with reading from the collection statistics file");
-            return false;  // Return false indicating failure.
+            return false;
         }
     }
+
 }
