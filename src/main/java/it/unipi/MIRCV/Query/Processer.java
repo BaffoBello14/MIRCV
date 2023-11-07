@@ -34,7 +34,8 @@ public class Processer {
             cleaned=Preprocess.removeStopwords(cleaned);
             cleaned=Preprocess.applyStemming(cleaned);
         }
-        ArrayList<PostingIndex> queryPostings=getQueryPostingLists(new ArrayList<>(cleaned),conjunctive);
+        Set<String> queryDistinctWords = new HashSet<>(cleaned);
+        ArrayList<PostingIndex> queryPostings=getQueryPostingLists(new ArrayList<>(queryDistinctWords),conjunctive);
         if(queryPostings==null||queryPostings.isEmpty()){
             return null;
         }
@@ -42,10 +43,13 @@ public class Processer {
         if(PathAndFlags.DYNAMIC_PRUNING){
             priorityQueue= new TopKPriorityQueue<>(k,Comparator.comparing(Pair::getKey));
         }else{
-            priorityQueue=DAAT.scoreCollection(queryPostings,new ArrayList<>(cleaned),k,scoringFun);
+            priorityQueue=DAAT.scoreCollection(queryPostings,k,scoringFun,conjunctive);
         }
-
+        if (priorityQueue==null){
+            return null;
+        }
         ArrayList<Integer> list=new ArrayList<>();
+
         while(!priorityQueue.isEmpty()){
             Pair<Float,Integer> pair=priorityQueue.poll();
             list.add(pair.getValue());

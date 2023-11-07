@@ -65,20 +65,22 @@ public class Main {
         postingIndices.get(0).next();
         System.out.println(postingIndices.get(0).nextGEQ(1425508));
 */
-/*
+
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("what are the social determinants of health",10,false,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("heat capacity",10,true,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
         start=System.currentTimeMillis();
-        ret=Processer.processQuery("what are the social determinants of health",10,false,"tfidf");
+        ret=Processer.processQuery("heat capacity",10,true,"tfidf");
 
         end=System.currentTimeMillis();
         System.out.println(end-start);
-        System.out.println(ret);
+        for (int i:ret){
+            System.out.print(DocIndex.getInstance().getDoc_NO(i)+" ");
+        }
 
-
+/*
 
 Hello, how are you, bautiful?
 2	I love programming.                                     love, program
@@ -134,13 +136,14 @@ fox
 fun
 jump
  */
+        /*
         float tf= (float) (1+Math.log(1)); //tf
         float idf= (float) Math.log((double) 10 /1);// df
         float bm25= (float) (tf/(tf+1.5*(0.25+0.75*(2/2.8))));//dl
        System.out.println(idf);
 
        System.out.println(bm25*idf);
-
+*/
 
 
     }
