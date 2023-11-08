@@ -16,29 +16,12 @@ import it.unipi.MIRCV.Utils.Indexing.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        //CollectionStatistics.readFromDisk();
-        //PathAndFlags.readFlagsFromDisk();
-        /*
-        ArrayList<PostingIndex> postingIndices=new ArrayList<>();
-        String po="break";
-        System.out.println(Lexicon.getInstance().find(po));
-        LexiconEntry entry=Lexicon.getInstance().retrieveEntry(po);
-        postingIndices.add(new PostingIndex(entry.getTerm()));
-        postingIndices.get(0).openList();
-        postingIndices.get(0).next();
-        System.out.println(postingIndices.get(0).nextGEQ(1425508));
-*/
+        CollectionStatistics.readFromDisk();
+        PathAndFlags.readFlagsFromDisk();
 
 
-        LFUCache<Integer,Long>lfuCache=new LFUCache<>(2);
-        lfuCache.put(1,5L);
-        lfuCache.put(3,7L);
-        System.out.println(lfuCache.get(1));
-        lfuCache.put(50,4L);
-
-        System.exit(0);
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("which amendment protects a person from cruel or unusual punishment",10,false,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("aa",10,false,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
