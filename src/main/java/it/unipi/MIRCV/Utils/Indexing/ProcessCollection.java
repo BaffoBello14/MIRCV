@@ -22,9 +22,9 @@ public class ProcessCollection {
         }
 
         scanner.close();
-
-        PathAndFlags.writeFlagsToDisk();
         PathAndFlags.createDirectories();
+        PathAndFlags.writeFlagsToDisk();
+
 
         long start = System.currentTimeMillis();
         int indexes = SPIMI.execute();
