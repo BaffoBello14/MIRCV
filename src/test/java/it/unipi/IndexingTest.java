@@ -248,6 +248,7 @@ public class IndexingTest {
 
     }
 
+
     public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
         try (FileChannel fc1 = FileChannel.open(Paths.get(filePath1), StandardOpenOption.READ);
              FileChannel fc2 = FileChannel.open(Paths.get(filePath2), StandardOpenOption.READ)) {
