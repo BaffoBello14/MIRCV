@@ -1,7 +1,7 @@
 package it.unipi.MIRCV.Utils.Indexing;
 import java.util.*;
 
-class LFUCache<K, V> {
+public class LFUCache<K, V> {
     private final int capacity;
     private final Map<K, V> cache;
     private final Map<K, Integer> usageCounts;
@@ -53,6 +53,9 @@ class LFUCache<K, V> {
 
         cache.put(key, value);
         lfuItems.add(new LFUItem(key, 1));
+    }
+    public boolean containsKey(K key) {
+        return cache.containsKey(key);
     }
 
     private void removeLFU() {

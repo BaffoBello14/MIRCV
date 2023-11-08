@@ -16,7 +16,7 @@ public class PostingIndex {
     public void closeLists(){
         postings.clear();
         blocks.clear();
-        Lexicon.getInstance().remove(term);
+        //Lexicon.getInstance().remove(term);
 
     }
 /*

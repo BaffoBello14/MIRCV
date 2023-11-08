@@ -7,13 +7,13 @@ import java.nio.file.StandardOpenOption;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
-import org.junit.platform.commons.util.LruCache;
+
 
 
 public class Lexicon {
     private static Lexicon instance=new Lexicon();
     protected static final int MAX_LEN_OF_TERM = 32;
-    private final LruCache<String,LexiconEntry> lruCache= new LruCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
+    private final LFUCache<String,LexiconEntry> lruCache= new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
     private Lexicon(){}
     public static Lexicon getInstance(){
@@ -101,10 +101,6 @@ public class Lexicon {
         lruCache.put(term,lexiconEntry);
         return lruCache.get(term);
     }
-    public void remove(String term){
-        if(lruCache.containsKey(term)){
-            lruCache.remove(term);
-        }
-    }
+
 
 }

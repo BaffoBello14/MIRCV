@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-
+import it.unipi.MIRCV.Utils.Indexing.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -29,21 +29,12 @@ public class Main {
         System.out.println(postingIndices.get(0).nextGEQ(1425508));
 */
 
-        FileChannel fileChannel= FileChannel.open(Paths.get("./IndexDataTest/BlockInfo/BlockInfoGroundTrue.dat"), StandardOpenOption.READ);
-        long offset=0;
-        SkippingBlock skippingBlock=new SkippingBlock();
-        for(int i=0;i<100;i++){
-            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset,SkippingBlock.size_of_element);
-            skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
-            skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
-            skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
-            skippingBlock.setFreq_size(mappedByteBuffer.getInt());
-            skippingBlock.setDoc_id_max(mappedByteBuffer.getInt());
-            skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
-            System.out.println(skippingBlock);
-            offset+=SkippingBlock.size_of_element;
-        }
 
+        LFUCache<Integer,Long>lfuCache=new LFUCache<>(2);
+        lfuCache.put(1,5L);
+        lfuCache.put(3,7L);
+        System.out.println(lfuCache.get(1));
+        lfuCache.put(50,4L);
 
         System.exit(0);
         long start=System.currentTimeMillis();
