@@ -1,15 +1,23 @@
 package it.unipi.MIRCV;
 
+import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Query.Processer;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+
+import java.io.File;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        CollectionStatistics.readFromDisk();
-        PathAndFlags.readFlagsFromDisk();
+        //CollectionStatistics.readFromDisk();
+        //PathAndFlags.readFlagsFromDisk();
         /*
         ArrayList<PostingIndex> postingIndices=new ArrayList<>();
         String po="break";
@@ -21,6 +29,23 @@ public class Main {
         System.out.println(postingIndices.get(0).nextGEQ(1425508));
 */
 
+        FileChannel fileChannel= FileChannel.open(Paths.get("./IndexDataTest/BlockInfo/BlockInfoGroundTrue.dat"), StandardOpenOption.READ);
+        long offset=0;
+        SkippingBlock skippingBlock=new SkippingBlock();
+        for(int i=0;i<100;i++){
+            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset,SkippingBlock.size_of_element);
+            skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
+            skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
+            skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
+            skippingBlock.setFreq_size(mappedByteBuffer.getInt());
+            skippingBlock.setDoc_id_max(mappedByteBuffer.getInt());
+            skippingBlock.setNum_posting_of_block(mappedByteBuffer.getInt());
+            System.out.println(skippingBlock);
+            offset+=SkippingBlock.size_of_element;
+        }
+
+
+        System.exit(0);
         long start=System.currentTimeMillis();
         ArrayList<Integer>ret=Processer.processQuery("which amendment protects a person from cruel or unusual punishment",10,false,"tfidf");
         long end=System.currentTimeMillis();
