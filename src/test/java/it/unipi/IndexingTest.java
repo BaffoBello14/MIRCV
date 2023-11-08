@@ -58,7 +58,7 @@ public class IndexingTest {
     }
 
     private static void testLexicon(String outputPath) {
-        String FilePath = "indexing_test.txt";
+        String FilePath = "./test_file/indexing_test.txt";
 
         try {
             FileChannel fc = FileChannel.open(Paths.get(outputPath),
@@ -104,23 +104,38 @@ public class IndexingTest {
 
     @Test
     public void testLexiconComparison() throws Exception {
-        String groundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
+        String lexiconGroundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
         String lexiconPath = "./IndexDataTest/Final/Lexicon.dat";
 
-        initialize();
+        // Esegui il test per scrivere il file .dat
+        testLexicon(lexiconGroundTruePath);
 
-        SPIMI.path_setter("./test_collection.tar.gz");
-        SPIMI.threshold_setter(1);
-        int spimi = SPIMI.execute();
-        System.out.println(spimi);
-        SPIMIMerger.setNumIndex(spimi);
-        SPIMIMerger.execute();
+        // Confronta il file creato con il file di riferimento
+        assertTrue(compareFiles(lexiconGroundTruePath, lexiconPath));
+    }
+
+    @Test
+    public void testDocIDComparison() throws Exception {
+        String groundTruePath = "./IndexDataTest/Final/DocIDGroundTrue.dat";
+        String docIDPath = "./IndexDataTest/Final/DocID.dat";
 
         // Esegui il test per scrivere il file .dat
         testLexicon(groundTruePath);
 
         // Confronta il file creato con il file di riferimento
-        assertTrue(compareFiles(groundTruePath, lexiconPath));
+        assertTrue(compareFiles(groundTruePath, docIDPath));
+    }
+
+    @Test
+    public void testFreqComparison() throws Exception {
+        String freqGroundTruePath = "./IndexDataTest/Final/FreqGroundTrue.dat";
+        String FreqPath = "./IndexDataTest/Final/Freq.dat";
+
+        // Esegui il test per scrivere il file .dat
+        testLexicon(freqGroundTruePath);
+
+        // Confronta il file creato con il file di riferimento
+        assertTrue(compareFiles(freqGroundTruePath, FreqPath));
     }
 
     public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
@@ -151,6 +166,17 @@ public class IndexingTest {
 
     public static void main(String[] args) throws Exception {
         IndexingTest indexingTest = new IndexingTest();
+        initialize();
+
+        SPIMI.path_setter("./test_file/test_collection.tar.gz");
+        SPIMI.threshold_setter(1);
+        int spimi = SPIMI.execute();
+        System.out.println(spimi);
+        SPIMIMerger.setNumIndex(spimi);
+        SPIMIMerger.execute();
+
         indexingTest.testLexiconComparison();
+        indexingTest.testDocIDComparison();
+        indexingTest.testFreqComparison();
     }
 }

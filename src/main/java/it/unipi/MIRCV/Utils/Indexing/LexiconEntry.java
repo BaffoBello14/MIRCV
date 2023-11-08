@@ -1,3 +1,4 @@
+// This code defines the package of the LexiconEntry class.
 package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
