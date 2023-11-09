@@ -15,9 +15,10 @@ public class DAAT {
         return min_doc;
     }
     public static TopKPriorityQueue<Pair<Float, Integer>> scoreCollection(ArrayList<PostingIndex>postings, int k,String TFIDFOrBM25,boolean conjunctive){
-        for(PostingIndex postingIndex:postings){
-            postingIndex.openList();
-            postingIndex.next();
+
+        for (PostingIndex index : postings) {
+            index.openList();
+            index.next();
         }
         TopKPriorityQueue<Pair<Float,Integer>> topK=new TopKPriorityQueue<>(k,Comparator.comparing(Pair::getKey));
         int doc_id=conjunctive?get_doc_id(postings): getMinDocId(postings);
@@ -104,4 +105,5 @@ public class DAAT {
         }
         return 0;
     }
+
 }

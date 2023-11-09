@@ -21,7 +21,7 @@ public class Main {
 
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("aa",10,false,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("league",10,false,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
