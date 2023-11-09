@@ -21,7 +21,6 @@ target/
 *.war
 *.ear
 *.log
-*.tar.gz
 *.properties
 *.nar
 *.rar

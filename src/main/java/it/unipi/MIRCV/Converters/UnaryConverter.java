@@ -3,6 +3,10 @@ package it.unipi.MIRCV.Converters;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The UnaryConverter class provides methods for converting between an array of integers
+ * and its unary representation as an array of bytes.
+ */
 public class UnaryConverter {
 
     /**
