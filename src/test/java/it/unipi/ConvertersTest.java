@@ -1,26 +1,28 @@
 package it.unipi;
 
 import org.junit.jupiter.api.Test;
-
 import it.unipi.MIRCV.Converters.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * JUnit test class for Converters.
+ */
 public class ConvertersTest {
+
     @Test
     public void testConvertToUnary() {
         int[] input = {1, 5, 10, 15, 20};
         byte[] expected = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
-            (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11000000};
+                (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11000000};
         byte[] result = UnaryConverter.convertToUnary(input);
         assertArrayEquals(expected, result);
     }
 
-
     @Test
     public void testConvertFromUnary() {
         byte[] input = {(byte) 0b01111011, (byte) 0b11111110, (byte) 0b11111111,
-            (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11111110};
+                (byte) 0b11111101, (byte) 0b11111111, (byte) 0b11111111, (byte) 0b11111110};
         int[] expected = {1, 5, 10, 15, 25};
         int len = 5;
 
@@ -28,7 +30,6 @@ public class ConvertersTest {
 
         assertArrayEquals(expected, result);
     }
-
 
     @Test
     public void testEncode() {
@@ -48,7 +49,6 @@ public class ConvertersTest {
         }
     }
 
-
     @Test
     public void testDecode() {
         byte[][] input = {
@@ -67,10 +67,11 @@ public class ConvertersTest {
             assertEquals(expected[i], result);
         }
     }
+
     @Test
     public void testEncodeArray() {
         int[] originalValues = {42, 123, 999, 4567};
-        byte[] expectedEncodedBytes = {(byte)0x2A, (byte) 0x7B, (byte) 0x07,(byte)0xE7, (byte) 0x23, (byte)0xD7};
+        byte[] expectedEncodedBytes = {(byte) 0x2A, (byte) 0x7B, (byte) 0x07, (byte) 0xE7, (byte) 0x23, (byte) 0xD7};
 
         // Encode the original values.
         byte[] encodedBytes = VariableByteEncoder.encodeArray(originalValues);
@@ -78,9 +79,10 @@ public class ConvertersTest {
         // Check if the encoded bytes match the expected encoded bytes.
         assertArrayEquals(expectedEncodedBytes, encodedBytes);
     }
+
     @Test
     public void testDecodeArray() {
-        byte[] encodedBytes = {(byte)0x2A, (byte) 0x7B, (byte) 0x07,(byte)0xE7, (byte) 0x23, (byte)0xD7};
+        byte[] encodedBytes = {(byte) 0x2A, (byte) 0x7B, (byte) 0x07, (byte) 0xE7, (byte) 0x23, (byte) 0xD7};
         int[] expectedDecodedValues = {42, 123, 999, 4567};
 
         // Decode the encoded bytes.

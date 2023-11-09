@@ -8,7 +8,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+/**
+ * Utility class for managing file paths and configuration flags.
+ */
 public final class PathAndFlags {
+
     // Directory paths
     public static String PATH_TO_DOC_ID = "./IndexData/Doc_ids/";
     public static String PATH_TO_FINAL = "./IndexData/Final";
@@ -38,6 +42,9 @@ public final class PathAndFlags {
         throw new AssertionError("PathAndFlags is a utility class and should not be instantiated.");
     }
 
+    /**
+     * Writes configuration flags to disk.
+     */
     public static void writeFlagsToDisk() {
         try (FileChannel fileChannel = FileChannel.open(Paths.get(PATH_TO_FLAGS),
                 StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
@@ -53,6 +60,9 @@ public final class PathAndFlags {
         }
     }
 
+    /**
+     * Reads configuration flags from disk.
+     */
     public static void readFlagsFromDisk() {
         try (FileChannel fileChannel = FileChannel.open(Paths.get(PATH_TO_FLAGS), StandardOpenOption.READ)) {
             ByteBuffer buffer = ByteBuffer.allocate(3);
@@ -67,6 +77,9 @@ public final class PathAndFlags {
         }
     }
 
+    /**
+     * Creates necessary directories for the index.
+     */
     public static void createDirectories() {
         createDirectory("./IndexData/BlockInfo/");
         createDirectory("./IndexData/CollectionStatistics/");

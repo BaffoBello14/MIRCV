@@ -8,8 +8,11 @@ import it.unipi.MIRCV.Utils.Preprocessing.*;
 
 import java.util.List;
 
+/**
+ * JUnit test class for Preprocess.
+ */
 public class PreprocessTest {
-    
+
     @Test
     public void testPreprocess() {
         String[] inputLines = {

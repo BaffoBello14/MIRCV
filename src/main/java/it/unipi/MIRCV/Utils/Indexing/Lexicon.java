@@ -6,43 +6,51 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.io.*;
 import java.nio.channels.FileChannel;
-import org.junit.platform.commons.util.LruCache;
 
+/**
+ * Singleton class for managing the lexicon, which maps terms to their corresponding LexiconEntry.
+ */
 public class Lexicon {
-    // Singleton instance of the Lexicon class
     private static Lexicon instance = new Lexicon();
-    // Maximum length of a term in the lexicon
     protected static final int MAX_LEN_OF_TERM = 32;
-    // LRU cache for storing recently accessed lexicon entries
-    private final LruCache<String, LexiconEntry> lruCache = new LruCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
+    private final LFUCache<String, LexiconEntry> lruCache = new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
 
-    // Private constructor for the singleton instance
     private Lexicon() {
     }
 
-    // Returns the singleton instance of the Lexicon class
+    /**
+     * Retrieves the singleton instance of the Lexicon class.
+     *
+     * @return The Lexicon instance.
+     */
     public static Lexicon getInstance() {
         return instance;
     }
 
-    // Retrieves a lexicon entry for a given term
+    /**
+     * Retrieves the LexiconEntry for a given term.
+     *
+     * @param term The term to retrieve.
+     * @return The LexiconEntry for the term, or null if not found.
+     */
     public LexiconEntry retrieveEntry(String term) {
-        // Check if the entry is in the LRU cache
         if (lruCache.containsKey(term)) {
             return lruCache.get(term);
         }
-        // If not, search for the entry in the lexicon
         LexiconEntry lexiconEntry = find(term);
-        // If the entry is not found, return null
         if (lexiconEntry == null) {
             return null;
         }
-        // Add the entry to the LRU cache and return it
         lruCache.put(term, lexiconEntry);
         return lexiconEntry;
     }
 
-    // Searches for a lexicon entry for a given term
+    /**
+     * Finds the LexiconEntry for a given term using binary search in the lexicon file.
+     *
+     * @param term The term to find.
+     * @return The LexiconEntry for the term, or null if not found.
+     */
     public LexiconEntry find(String term) {
         try {
             long top = CollectionStatistics.getTerms() - 1;
@@ -50,8 +58,7 @@ public class Lexicon {
             long mid;
             LexiconEntry entry = new LexiconEntry();
 
-            try (FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON),
-                    StandardOpenOption.READ)) {
+            try (FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ)) {
 
                 while (bot <= top) {
                     mid = (bot + top) / 2;
@@ -83,7 +90,12 @@ public class Lexicon {
         }
     }
 
-    // Pads a string to the maximum length of a term in the lexicon
+    /**
+     * Pads a string to a specified length.
+     *
+     * @param input The input string.
+     * @return The padded string.
+     */
     public static String padStringToLength(String input) {
         if (input.length() >= MAX_LEN_OF_TERM) {
             return input.substring(0, MAX_LEN_OF_TERM);
@@ -92,36 +104,33 @@ public class Lexicon {
         }
     }
 
-    // Removes padding from a padded string
+    /**
+     * Removes padding from a padded string.
+     *
+     * @param paddedString The padded string.
+     * @return The string without padding.
+     */
     public static String removePadding(String paddedString) {
         String trimmed = paddedString.trim();
         int nullIndex = trimmed.indexOf(' ');
         return nullIndex >= 0 ? trimmed.substring(0, nullIndex) : trimmed;
     }
 
-    // Gets a lexicon entry for a given term
+    /**
+     * Gets the LexiconEntry for a given term, either from the cache or by retrieving it.
+     *
+     * @param term The term to get.
+     * @return The LexiconEntry for the term, or null if not found.
+     */
     public LexiconEntry get(String term) {
-        // Check if the entry is in the LRU cache
         if (lruCache.containsKey(term)) {
             return lruCache.get(term);
         }
-        // If not, retrieve the entry and add it to the LRU cache
         LexiconEntry lexiconEntry = retrieveEntry(term);
-        // If the entry is not found, return null
         if (lexiconEntry == null) {
             return null;
         }
-        // Add the entry to the LRU cache and return it
         lruCache.put(term, lexiconEntry);
         return lruCache.get(term);
     }
-
-// This is the end of the original code selection
-    
-    public void remove(String term){
-        if(lruCache.containsKey(term)){
-            lruCache.remove(term);
-        }
-    }
-
 }

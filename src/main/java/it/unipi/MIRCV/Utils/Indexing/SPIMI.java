@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * SPIMI (Single Pass In-Memory Indexing) class for creating an inverted index from a collection.
+ */
 public class SPIMI {
     private static String PATH_TO_ARCHIVE_COLLECTION = "./Collection/collection.tar.gz";
     private static int numIndex = 0;
@@ -21,14 +24,30 @@ public class SPIMI {
     private static long offsetDocIndex = 0;
     private static int threshold = 80;
 
+    /**
+     * Sets the path to the archive collection.
+     *
+     * @param path The path to the archive collection.
+     */
     public static void path_setter(String path) {
         PATH_TO_ARCHIVE_COLLECTION = path;
     }
 
+    /**
+     * Sets the threshold value.
+     *
+     * @param num The threshold value.
+     */
     public static void threshold_setter(int num) {
         threshold = num;
     }
 
+    /**
+     * Executes the SPIMI algorithm to create an inverted index from the collection.
+     *
+     * @return The number of indexes created.
+     * @throws Exception If an exception occurs during execution.
+     */
     public static int execute() throws Exception {
         int doc_id = 1;
         String[] lineofDoc;
@@ -94,7 +113,7 @@ public class SPIMI {
                 }
                 doc_id++;
 
-                if (((double)(runtime.totalMemory() - runtime.freeMemory()) / runtime.totalMemory()) * 100 > threshold) {
+                if (((double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.totalMemory()) * 100 > threshold) {
                     if (!write2Disk(index)) {
                         System.out.println("Problems with writing to disk of SPIMI");
                         return -1;
@@ -131,6 +150,12 @@ public class SPIMI {
         return numIndex;
     }
 
+    /**
+     * Writes the inverted index to disk.
+     *
+     * @param index The inverted index to write.
+     * @return True if writing is successful, false otherwise.
+     */
     private static boolean write2Disk(HashMap<String, PostingIndex> index) {
         System.out.println("Save index with size -> " + index.size() + " the num -> " + numIndex);
 
@@ -139,9 +164,9 @@ public class SPIMI {
         }
 
         index = index.entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
         try {
             FileChannel fileChannelLex = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_LEXICON + numIndex + ".dat"), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -179,6 +204,12 @@ public class SPIMI {
         }
     }
 
+    /**
+     * Adds a posting to the inverted index.
+     *
+     * @param doc_id       The document ID.
+     * @param postingIndex The posting index.
+     */
     protected static void addPosting(int doc_id, PostingIndex postingIndex) {
         if (!postingIndex.getPostings().isEmpty()) {
             Posting posting = postingIndex.getPostings().get(postingIndex.getPostings().size() - 1);

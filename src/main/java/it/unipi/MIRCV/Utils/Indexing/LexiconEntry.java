@@ -1,4 +1,3 @@
-// This code defines the package of the LexiconEntry class.
 package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
@@ -11,23 +10,28 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
-
+/**
+ * Represents an entry in the lexicon, containing information about a term.
+ */
 public class LexiconEntry {
     private String term;
     private long offset_doc_id = 0;
     private int upperTF = 0;
     private int df = 0;
     private float idf = 0;
-    private float upperTFIDF=0;
-    private float upperBM25=0;
+    private float upperTFIDF = 0;
+    private float upperBM25 = 0;
     private long offset_frequency = 0;
     private long offset_skip_pointer = 0;
-    //private int freqByteSize=0;
-    private int numBlocks=1;
-    //private int docidByteSize=0;
+    private int numBlocks = 1;
 
-    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM-16;
+    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM - 16;
 
+    /**
+     * Updates the maximum term frequency (TF) based on the postings in the given PostingIndex.
+     *
+     * @param index The PostingIndex containing postings for the term.
+     */
     public void updateTFMAX(PostingIndex index) {
         for (Posting posting : index.getPostings()) {
             if (posting.getFrequency() > this.upperTF) {
@@ -36,6 +40,8 @@ public class LexiconEntry {
             this.df++;
         }
     }
+
+    // Getter and Setter methods
 
     public String getTerm() {
         return term;
@@ -53,8 +59,6 @@ public class LexiconEntry {
         this.upperTFIDF = upperTFIDF;
     }
 
-
-
     public float getUpperBM25() {
         return upperBM25;
     }
@@ -62,15 +66,7 @@ public class LexiconEntry {
     public void setUpperBM25(float upperBM25) {
         this.upperBM25 = upperBM25;
     }
-/*
-    public int getFreqByteSize() {
-        return freqByteSize;
-    }
 
-    public void setFreqByteSize(int freqByteSize) {
-        this.freqByteSize = freqByteSize;
-    }
-*/
     public int getNumBlocks() {
         return numBlocks;
     }
@@ -78,39 +74,7 @@ public class LexiconEntry {
     public void setNumBlocks(int numBlocks) {
         this.numBlocks = numBlocks;
     }
-/*
-    public int getDocidByteSize() {
-        return docidByteSize;
-    }
 
-    public void setDocidByteSize(int docidByteSize) {
-        this.docidByteSize = docidByteSize;
-    }
-
-    public float calculateIDF() {
-        this.idf = (float) Math.log(CollectionStatistics.getDocuments() / (float) this.df);
-        return this.idf;
-    }
-*/
-    @Override
-    public String toString() {
-        return "Term: " + term + " " +
-                "Offset Doc ID: " + offset_doc_id + " " +
-                "Upper TF: " + upperTF + " " +
-                "DF: " + df + " " +
-                "IDF: " + idf + " " +
-                "Upper TF-IDF: " + upperTFIDF + " " +
-                "Upper BM25: " + upperBM25 + " " +
-                "Offset Frequency: " + offset_frequency + " " +
-                "Offset Skip Pointer: " + offset_skip_pointer + " " +
-//                "Freq Byte Size: " + freqByteSize + " " +
-                "Num Blocks: " + numBlocks + " " ;
-//                "DocID Byte Size: " + docidByteSize;
-    }
-
-
-
-    // Getter and Setter methods
     public long getOffset_doc_id() {
         return offset_doc_id;
     }
@@ -143,7 +107,6 @@ public class LexiconEntry {
         this.idf = idf;
     }
 
-
     public long getOffset_frequency() {
         return offset_frequency;
     }
@@ -159,9 +122,17 @@ public class LexiconEntry {
     public void setOffset_skip_pointer(long offset_skip_pointer) {
         this.offset_skip_pointer = offset_skip_pointer;
     }
+
+    /**
+     * Reads the LexiconEntry from the specified offset in the given FileChannel.
+     *
+     * @param offset      The offset in the FileChannel.
+     * @param fileChannel The FileChannel from which to read.
+     * @return The updated offset after reading the entry.
+     */
     public long readEntryFromDisk(long offset, FileChannel fileChannel) {
         try {
-            if(offset>=fileChannel.size()){
+            if (offset >= fileChannel.size()) {
                 return -1;
             }
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset, LexiconEntry.ENTRY_SIZE);
@@ -172,35 +143,39 @@ public class LexiconEntry {
 
             byte[] termBytes = new byte[Lexicon.MAX_LEN_OF_TERM];
             mappedByteBuffer.get(termBytes);
-            term=Lexicon.removePadding(new String(termBytes,StandardCharsets.UTF_8));
-            df=(mappedByteBuffer.getInt());
-            idf=(mappedByteBuffer.getFloat());
-            upperTF=(mappedByteBuffer.getInt());
-            upperTFIDF=(mappedByteBuffer.getFloat());
-            upperBM25=(mappedByteBuffer.getFloat());
-            offset_doc_id=(mappedByteBuffer.getLong());
-            offset_frequency=(mappedByteBuffer.getLong());
-            //docidByteSize=(mappedByteBuffer.getInt());
-            //freqByteSize=(mappedByteBuffer.getInt());
-            numBlocks=(mappedByteBuffer.getInt());
-            offset_skip_pointer=(mappedByteBuffer.getLong());
+            term = Lexicon.removePadding(new String(termBytes, StandardCharsets.UTF_8));
+            df = (mappedByteBuffer.getInt());
+            idf = (mappedByteBuffer.getFloat());
+            upperTF = (mappedByteBuffer.getInt());
+            upperTFIDF = (mappedByteBuffer.getFloat());
+            upperBM25 = (mappedByteBuffer.getFloat());
+            offset_doc_id = (mappedByteBuffer.getLong());
+            offset_frequency = (mappedByteBuffer.getLong());
+            numBlocks = (mappedByteBuffer.getInt());
+            offset_skip_pointer = (mappedByteBuffer.getLong());
 
-            return offset+ENTRY_SIZE;
+            return offset + ENTRY_SIZE;
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
         }
     }
-    public ArrayList<SkippingBlock> readBlocks(){
+
+    /**
+     * Reads the skipping blocks associated with the LexiconEntry from the block file.
+     *
+     * @return The list of SkippingBlocks.
+     */
+    public ArrayList<SkippingBlock> readBlocks() {
         try {
-            FileChannel fileChannel= FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
-            ArrayList<SkippingBlock>blocks=new ArrayList<>();
-            MappedByteBuffer mappedByteBuffer=fileChannel.map(FileChannel.MapMode.READ_ONLY,offset_skip_pointer, (long) numBlocks *SkippingBlock.size_of_element);
-            if(mappedByteBuffer==null){
+            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
+            ArrayList<SkippingBlock> blocks = new ArrayList<>();
+            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);
+            if (mappedByteBuffer == null) {
                 return null;
             }
-            for(int i=0;i<numBlocks;i++){
-                SkippingBlock skippingBlock=new SkippingBlock();
+            for (int i = 0; i < numBlocks; i++) {
+                SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());
                 skippingBlock.setDoc_id_size(mappedByteBuffer.getInt());
                 skippingBlock.setFreq_offset(mappedByteBuffer.getLong());
@@ -210,20 +185,28 @@ public class LexiconEntry {
                 blocks.add(skippingBlock);
             }
             return blocks;
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println("Problems with reading blocks in the lexicon entry");
             e.printStackTrace();
             return null;
         }
     }
 
+    /**
+     * Writes the LexiconEntry to the specified offset in the given FileChannel.
+     *
+     * @param term        The term associated with the LexiconEntry.
+     * @param offset      The offset in the FileChannel.
+     * @param fileChannel The FileChannel to which to write.
+     * @return The updated offset after writing the entry.
+     */
     public long writeEntryToDisk(String term, long offset, FileChannel fileChannel) {
         try {
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, offset, LexiconEntry.ENTRY_SIZE);
             if (mappedByteBuffer == null) {
                 return -1;
             }
-            //System.out.println(term+"\t"+ this);
+
             mappedByteBuffer.put(Lexicon.padStringToLength(term).getBytes(StandardCharsets.UTF_8));
             mappedByteBuffer.putInt(df);
             mappedByteBuffer.putFloat(idf);
@@ -232,8 +215,6 @@ public class LexiconEntry {
             mappedByteBuffer.putFloat(upperBM25);
             mappedByteBuffer.putLong(offset_doc_id);
             mappedByteBuffer.putLong(offset_frequency);
-            //mappedByteBuffer.putInt(docidByteSize);
-            //mappedByteBuffer.putInt(freqByteSize);
             mappedByteBuffer.putInt(numBlocks);
             mappedByteBuffer.putLong(offset_skip_pointer);
 
@@ -243,11 +224,33 @@ public class LexiconEntry {
             return -1;
         }
     }
-    public void calculateBlockNeed(){
-        this.offset_skip_pointer=SkippingBlock.getFile_offset();
-        if(df> PathAndFlags.POSTING_PER_BLOCK){
-            this.numBlocks= (int) Math.ceil(Math.sqrt(df));
+
+    /**
+     * Calculates the number of blocks needed for the LexiconEntry based on the term frequency.
+     */
+    public void calculateBlockNeed() {
+        this.offset_skip_pointer = SkippingBlock.getFile_offset();
+        if (df > PathAndFlags.POSTING_PER_BLOCK) {
+            this.numBlocks = (int) Math.ceil(Math.sqrt(df));
         }
     }
 
+    /**
+     * Returns a string representation of the LexiconEntry.
+     *
+     * @return The string representation.
+     */
+    @Override
+    public String toString() {
+        return "Term: " + term + " " +
+                "Offset Doc ID: " + offset_doc_id + " " +
+                "Upper TF: " + upperTF + " " +
+                "DF: " + df + " " +
+                "IDF: " + idf + " " +
+                "Upper TF-IDF: " + upperTFIDF + " " +
+                "Upper BM25: " + upperBM25 + " " +
+                "Offset Frequency: " + offset_frequency + " " +
+                "Offset Skip Pointer: " + offset_skip_pointer + " " +
+                "Num Blocks: " + numBlocks + " ";
+    }
 }

@@ -98,7 +98,4 @@ public class UnaryConverter {
         // Convert the list of integers to an array and return.
         return numbersList.stream().mapToInt(i -> i).toArray();
     }
-
-
-
 }

@@ -3,26 +3,17 @@ package it.unipi.MIRCV;
 import it.unipi.MIRCV.Query.Processer;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
-        /*
-        ArrayList<PostingIndex> postingIndices=new ArrayList<>();
-        String po="break";
-        System.out.println(Lexicon.getInstance().find(po));
-        LexiconEntry entry=Lexicon.getInstance().retrieveEntry(po);
-        postingIndices.add(new PostingIndex(entry.getTerm()));
-        postingIndices.get(0).openList();
-        postingIndices.get(0).next();
-        System.out.println(postingIndices.get(0).nextGEQ(1425508));
-*/
+
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("which amendment protects a person from cruel or unusual punishment",10,false,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("league",10,false,"tfidf");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);

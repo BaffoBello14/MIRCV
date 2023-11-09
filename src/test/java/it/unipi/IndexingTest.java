@@ -10,13 +10,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicLong;
 
+import it.unipi.MIRCV.Converters.UnaryConverter;
+import it.unipi.MIRCV.Converters.VariableByteEncoder;
+import it.unipi.MIRCV.Utils.Indexing.*;
 import org.junit.jupiter.api.Test;
 
-import it.unipi.MIRCV.Utils.Indexing.LexiconEntry;
-import it.unipi.MIRCV.Utils.Indexing.SPIMI;
-import it.unipi.MIRCV.Utils.Indexing.SPIMIMerger;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+/**
+ * JUnit test class for Indexing.
+ */
 public class IndexingTest {
 
     private static void createDirectoryIfNotExists(String directoryPath) {
@@ -97,45 +100,153 @@ public class IndexingTest {
                 }
             }
             reader.close();
+            fc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testDodId(String outputPath) {
+        String filePath = "./test_file/docId_test.txt";
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(outputPath),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            String line;
+            line = reader.readLine();
+            String[] fields = line.split(",");
+            MappedByteBuffer mappedByteBuffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, fields.length);
+            for (String num : fields) {
+                byte[] doc_id = VariableByteEncoder.encode(Integer.parseInt(num));
+                mappedByteBuffer.put(doc_id);
+            }
+            reader.close();
+            fc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testFreqs(String outputPath) {
+        String filePath = "./test_file/freq_test.txt";
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(outputPath),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+
+            String line;
+            long offset = 0;
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+
+                int[] freq = new int[fields.length];
+                for (int i = 0; i < fields.length; i++) {
+                    freq[i] = Integer.parseInt(fields[i]);
+                }
+                byte[] converted = UnaryConverter.convertToUnary(freq);
+                MappedByteBuffer mappedByteBuffer = fc.map(FileChannel.MapMode.READ_WRITE, offset, converted.length);
+                offset += converted.length;
+                mappedByteBuffer.put(converted);
+            }
+            reader.close();
+            fc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testBlockInfo(String outputPath) {
+        String FilePath = "./test_file/blockInfo_test.txt";
+
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(outputPath),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BufferedReader reader = new BufferedReader(new FileReader(FilePath));
+            String line;
+            SkippingBlock.setFile_offset(0);
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                System.out.println(fields[0]);
+                SkippingBlock skippingBlock;
+                if (fields.length == 6) {
+                    skippingBlock = new SkippingBlock();
+                    skippingBlock.setDoc_id_offset(Long.parseLong(fields[0]));
+                    skippingBlock.setDoc_id_size(Integer.parseInt(fields[1]));
+                    skippingBlock.setFreq_offset(Long.parseLong(fields[2]));
+                    skippingBlock.setFreq_size(Integer.parseInt(fields[3]));
+                    skippingBlock.setDoc_id_max(Integer.parseInt(fields[4]));
+                    skippingBlock.setNum_posting_of_block(Integer.parseInt(fields[5]));
+                    skippingBlock.writeOnDisk(fc);
+                }
+            }
+            reader.close();
+            fc.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testDocIndex(String outputPath) {
+        String FilePath = "./test_file/docIndex_test.txt";
+
+        try {
+            FileChannel fc = FileChannel.open(Paths.get(outputPath),
+                    StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+            BufferedReader reader = new BufferedReader(new FileReader(FilePath));
+            String line;
+            long offset = 0;
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                DocIndexEntry docIndexEntry;
+                if (fields.length == 3) {
+                    docIndexEntry = new DocIndexEntry(fields[1], Integer.parseInt(fields[2]));
+                    offset = docIndexEntry.write2Disk(fc, offset, Integer.parseInt(fields[0]));
+                }
+            }
+            reader.close();
+            fc.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void testLexiconComparison() throws Exception {
+    public void testIndexesComparison() throws Exception {
         String lexiconGroundTruePath = "./IndexDataTest/Final/LexiconGroundTrue.dat";
         String lexiconPath = "./IndexDataTest/Final/Lexicon.dat";
+        String docIdGroundTruePath = "./IndexDataTest/Final/DocIdGroundTrue.dat";
+        String docIdpath = "./indexDataTest/Final/DocId.dat";
+        String freqGroundTruePath = "./IndexDataTest/Final/FreqGroundTrue.dat";
+        String freqpath = "./indexDataTest/Final/Freq.dat";
+        String docIndexGroundTruePath = "./IndexDataTest/Doc_index/DocIndexGroundTrue.dat";
+        String docIndexpath = "./indexDataTest/Doc_index/DocIndex.dat";
+        String blockInfoGroundTruePath = "./IndexDataTest/BlockInfo/BlockInfoGroundTrue.dat";
+        String blockInfopath = "./indexDataTest/BlockInfo/BlockInfo.dat";
+        initialize();
+
+        SPIMI.path_setter("./test_file/test_collection.tar.gz");
+        SPIMI.threshold_setter(1);
+        int spimi = SPIMI.execute();
+        System.out.println(spimi);
+        SPIMIMerger.setNumIndex(spimi);
+        SPIMIMerger.execute();
 
         // Esegui il test per scrivere il file .dat
         testLexicon(lexiconGroundTruePath);
+        testDodId(docIdGroundTruePath);
+        testFreqs(freqGroundTruePath);
+        testDocIndex(docIndexGroundTruePath);
+        testBlockInfo(blockInfoGroundTruePath);
 
         // Confronta il file creato con il file di riferimento
         assertTrue(compareFiles(lexiconGroundTruePath, lexiconPath));
-    }
-
-    @Test
-    public void testDocIDComparison() throws Exception {
-        String groundTruePath = "./IndexDataTest/Final/DocIDGroundTrue.dat";
-        String docIDPath = "./IndexDataTest/Final/DocID.dat";
-
-        // Esegui il test per scrivere il file .dat
-        testLexicon(groundTruePath);
-
-        // Confronta il file creato con il file di riferimento
-        assertTrue(compareFiles(groundTruePath, docIDPath));
-    }
-
-    @Test
-    public void testFreqComparison() throws Exception {
-        String freqGroundTruePath = "./IndexDataTest/Final/FreqGroundTrue.dat";
-        String FreqPath = "./IndexDataTest/Final/Freq.dat";
-
-        // Esegui il test per scrivere il file .dat
-        testLexicon(freqGroundTruePath);
-
-        // Confronta il file creato con il file di riferimento
-        assertTrue(compareFiles(freqGroundTruePath, FreqPath));
+        assertTrue(compareFiles(docIdpath, docIdGroundTruePath));
+        assertTrue(compareFiles(freqpath, freqGroundTruePath));
+        assertTrue(compareFiles(docIndexGroundTruePath, docIndexpath));
+        assertTrue(compareFiles(blockInfopath, blockInfoGroundTruePath));
     }
 
     public static boolean compareFiles(String filePath1, String filePath2) throws IOException {
@@ -162,21 +273,5 @@ public class IndexingTest {
             // Se tutti i test sono passati e i due file hanno la stessa lunghezza e nessuna differenza
             return offset2.get() == fc2.size() || offset1.get() == fc1.size();
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        IndexingTest indexingTest = new IndexingTest();
-        initialize();
-
-        SPIMI.path_setter("./test_file/test_collection.tar.gz");
-        SPIMI.threshold_setter(1);
-        int spimi = SPIMI.execute();
-        System.out.println(spimi);
-        SPIMIMerger.setNumIndex(spimi);
-        SPIMIMerger.execute();
-
-        indexingTest.testLexiconComparison();
-        indexingTest.testDocIDComparison();
-        indexingTest.testFreqComparison();
     }
 }

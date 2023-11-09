@@ -10,6 +10,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Iterator;
 
+/**
+ * SPIMIMerger class for merging inverted indexes created by SPIMI.
+ */
 public class SPIMIMerger {
     private static long[] lexiconOffsets;
     private static long doc_id_offset = 0;
@@ -21,10 +24,22 @@ public class SPIMIMerger {
     private static FileChannel[] doc_id_File_channels;
     private static FileChannel[] freq_file_channels;
 
+    /**
+     * Sets the number of indexes produced by SPIMI.
+     *
+     * @param num_index The number of indexes produced by SPIMI.
+     */
     public static void setNumIndex(int num_index) {
         SPIMI_Index = num_index;
     }
 
+    /**
+     * Loads the inverted list from a specific lexicon entry.
+     *
+     * @param lexiconEntry The lexicon entry.
+     * @param index        The index of the lexicon entry.
+     * @return The loaded PostingIndex.
+     */
     private static PostingIndex loadList(LexiconEntry lexiconEntry, int index) {
         PostingIndex postingIndex;
         try {
@@ -45,6 +60,11 @@ public class SPIMIMerger {
         }
     }
 
+    /**
+     * Executes the SPIMI merging algorithm.
+     *
+     * @return True if the merging is successful, false otherwise.
+     */
     public static boolean execute() {
         if (SPIMI_Index == -1) {
             System.out.println("Set the index produced by SPIMI Splitter");
@@ -230,6 +250,11 @@ public class SPIMIMerger {
         }
     }
 
+    /**
+     * Gets the term to process in the merging algorithm.
+     *
+     * @return The term to process.
+     */
     private static String getTermToProcess() {
         String termToProcess, nextTerm;
         termToProcess = null;
@@ -254,6 +279,11 @@ public class SPIMIMerger {
         return termToProcess;
     }
 
+    /**
+     * Moves to the next term in the lexicon entries.
+     *
+     * @param term The current term.
+     */
     private static void moveToNextTermLexicon(String term) {
         for (int i = 0; i < SPIMI_Index; i++) {
             if (lexiconEntries[i] != null && lexiconEntries[i].getTerm().equals(term)) {
@@ -280,7 +310,14 @@ public class SPIMIMerger {
             }
         }
     }
-
+    
+    /**
+     * Processes a term during the merging algorithm.
+     *
+     * @param lexiconEntry     The lexicon entry for the term.
+     * @param termToProcess    The term to process.
+     * @return The merged PostingIndex.
+     */
     private static PostingIndex processTerm(LexiconEntry lexiconEntry, String termToProcess) {
         PostingIndex mergedPosting = new PostingIndex();
         mergedPosting.setTerm(termToProcess);
@@ -327,6 +364,13 @@ public class SPIMIMerger {
         return mergedPosting;
     }
 
+    /**
+     * Calculates BM25 without IDF for a given term frequency and document ID.
+     *
+     * @param tf    The term frequency.
+     * @param doc_id The document ID.
+     * @return The calculated BM25 score without IDF.
+     */
     private static float calculateBM25WithoutIDF(float tf, long doc_id) {
         try {
             FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
@@ -340,5 +384,4 @@ public class SPIMIMerger {
             return -1F;
         }
     }
-    
 }
