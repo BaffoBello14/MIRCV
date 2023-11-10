@@ -14,6 +14,24 @@ public class PostingIndex {
     private Posting postingActual;  // Currently active posting
     private Iterator<Posting> postingIterator;  // Iterator for postings
     private Iterator<SkippingBlock> skippingBlockIterator;  // Iterator for skipping blocks
+    private float upperBound;
+    private float idf;
+
+    public float getUpperBound() {
+        return upperBound;
+    }
+
+    public void setUpperBound(float upperBound) {
+        this.upperBound = upperBound;
+    }
+
+    public float getIdf() {
+        return idf;
+    }
+
+    public void setIdf(float idf) {
+        this.idf = idf;
+    }
 
     /**
      * Closes the posting and block lists associated with this term.

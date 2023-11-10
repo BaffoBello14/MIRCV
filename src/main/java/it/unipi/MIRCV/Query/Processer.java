@@ -20,8 +20,9 @@ public class Processer {
      * @param conjunctive Boolean flag indicating conjunctive (AND) or disjunctive (OR) operation.
      * @return ArrayList of PostingIndex objects representing the posting lists of the query terms.
      */
-    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive) {
+    public static ArrayList<PostingIndex> getQueryPostingLists(ArrayList<String> query, boolean conjunctive,String scoringFun) {
         ArrayList<PostingIndex> postingOfQuery = new ArrayList<>();
+        PostingIndex postingIndex;
         for (String term : query) {
             LexiconEntry lexiconEntry = Lexicon.getInstance().retrieveEntry(term);
             if (lexiconEntry == null) {
@@ -30,7 +31,16 @@ public class Processer {
                 }
                 continue;
             }
-            postingOfQuery.add(new PostingIndex(lexiconEntry.getTerm()));
+            postingIndex=new PostingIndex(lexiconEntry.getTerm());
+            postingIndex.setIdf(lexiconEntry.getIdf());
+            if(PathAndFlags.DYNAMIC_PRUNING){
+                if(scoringFun.equals("tfidf")){
+                    postingIndex.setUpperBound(lexiconEntry.getUpperTFIDF());
+                }else{
+                    postingIndex.setUpperBound(lexiconEntry.getUpperBM25());
+                }
+            }
+            postingOfQuery.add(postingIndex);
         }
         return postingOfQuery;
     }
@@ -65,7 +75,7 @@ public class Processer {
         Set<String> queryDistinctWords = new HashSet<>(cleaned);
 
         // Retrieve posting lists for the query terms.
-        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive);
+        ArrayList<PostingIndex> queryPostings = getQueryPostingLists(new ArrayList<>(queryDistinctWords), conjunctive,scoringFun);
 
         // Return null if no posting lists are retrieved.
         if (queryPostings == null || queryPostings.isEmpty()) {

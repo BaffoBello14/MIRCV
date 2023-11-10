@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class DynamicPrunerMaxScore {
     public static ArrayList<Integer> prune(ArrayList<String> query, int k) {
         // Ottenere l'elenco di posting per la query
-        ArrayList<PostingIndex> postingOfQuery = Processer.getQueryPostingLists(new ArrayList<>(query), false);
+        ArrayList<PostingIndex> postingOfQuery = Processer.getQueryPostingLists(new ArrayList<>(query), false,"tfidf");
 
         if (postingOfQuery == null || postingOfQuery.isEmpty()) {
             return null;

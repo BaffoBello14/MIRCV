@@ -13,7 +13,7 @@ public class Main {
 
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("league",10,false,"tfidf");
+        ArrayList<Integer>ret=Processer.processQuery("bro you are a meme",10,false,"bm25");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
@@ -25,7 +25,7 @@ public class Main {
         }
         System.out.println();
         start=System.currentTimeMillis();
-        ret=Processer.processQuery("which amendment protects a person from cruel or unusual punishment",10,true,"tfidf");
+        ret=Processer.processQuery("clown",10,true,"tfidf");
 
         end=System.currentTimeMillis();
         System.out.println(end-start);

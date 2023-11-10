@@ -66,7 +66,7 @@ public class DAAT {
                     if (posting.getDoc_id() == doc_id) {
                         score += Scorer.score(
                                 posting,
-                                Lexicon.getInstance().retrieveEntry(postingIndex.getTerm()).getIdf(),
+                                postingIndex.getIdf(),
                                 TFIDFOrBM25);
                         postingIndex.next();
                     }
