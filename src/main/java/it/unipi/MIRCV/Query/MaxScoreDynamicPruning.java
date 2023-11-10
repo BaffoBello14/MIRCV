@@ -10,5 +10,5 @@ public class MaxScoreDynamicPruning {
     public static void sortByUpperbound(ArrayList<PostingIndex> postingIndices){
         postingIndices.sort(Comparator.comparing(PostingIndex::getUpperBound));
     }
-    
+
 }
