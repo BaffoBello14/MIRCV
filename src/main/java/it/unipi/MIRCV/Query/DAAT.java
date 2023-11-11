@@ -56,6 +56,7 @@ public class DAAT {
 
         // Process each document and calculate the score.
         int doc_len = CollectionStatistics.getDocuments();
+
         while (doc_id != doc_len) {
             float score = 0.0F;
 
@@ -70,8 +71,11 @@ public class DAAT {
                                 TFIDFOrBM25);
                         postingIndex.next();
                     }
+                } else if (conjunctive) {
+                    return topK;
                 }
             }
+
 
             // Add the document ID and its score to the priority queue.
             topK.offer(new Pair<>(score, doc_id));
