@@ -14,7 +14,7 @@ public class Main {
         PathAndFlags.readFlagsFromDisk();
         PathAndFlags.DYNAMIC_PRUNING=true;
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("bro www.hp.com you're meme",10,false,"bm25");
+        ArrayList<Integer>ret=Processer.processQuery("bro meme",10,true,"bm25");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);

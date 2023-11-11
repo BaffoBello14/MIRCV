@@ -31,7 +31,10 @@ public class MaxScoreDynamicPruning {
         while (pivot< postings.size()&&!isFinished(postings,pivot, postings.size())){
             float score=0;
             skip=false;
-            current=getMinDocId(postings,pivot,postings.size());
+            current=conjunctive?get_doc_id(postings,pivot, postings.size()):getMinDocId(postings,pivot,postings.size());
+            if(current==0){
+                break;
+            }
             for(int i=pivot;i<postings.size();i++){
                 if(postings.get(i).getPostingActual()!=null&&postings.get(i).getPostingActual().getDoc_id()==current){
                     score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
@@ -44,6 +47,10 @@ public class MaxScoreDynamicPruning {
                     break;
                 }
                 Posting geq=postings.get(i).nextGEQ(current);
+                if(geq==null&&conjunctive||conjunctive&&geq.getDoc_id()!=current){
+                    skip=true;
+                    break;
+                }
                 if(geq!=null&&geq.getDoc_id()==current){
                     score+=Scorer.score(geq,postings.get(i).getIdf(),TFIDFOrBM25);
                 }
@@ -78,7 +85,33 @@ public class MaxScoreDynamicPruning {
         return min_doc;
     }
     public static int get_doc_id(ArrayList<PostingIndex>postings,int start,int end){
-        //todo
+        int doc_id=get_max_doc_id(postings,start,end);
+        if(doc_id==0){
+            return 0;
+        }
+        for(int i=start;i<end;i++){
+            if(areEquals(postings, start, end)){
+                return doc_id;
+            }
+            if(postings.get(i).getPostingActual()==null){
+                return 0;
+            }
+            if (postings.get(i).getPostingActual().getDoc_id() > doc_id) {
+                doc_id = postings.get(i).getPostingActual().getDoc_id();
+                i = -1; // Reset i to restart the loop.
+                continue;
+            }
+            if (postings.get(i).getPostingActual().getDoc_id() < doc_id) {
+                Posting geq = postings.get(i).nextGEQ(doc_id);
+                if (geq == null) {
+                    return 0;
+                }
+                if (geq.getDoc_id() > doc_id) {
+                    doc_id = geq.getDoc_id();
+                    i = -1; // Reset i to restart the loop.
+                }
+            }
+        }
         return 0;
     }
     public static boolean areEquals(ArrayList<PostingIndex>postings,int start,int end){
