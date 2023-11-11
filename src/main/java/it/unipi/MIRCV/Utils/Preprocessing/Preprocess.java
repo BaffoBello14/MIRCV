@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.*;
 
 public class Preprocess {
 
@@ -29,15 +30,15 @@ public class Preprocess {
             e.printStackTrace();
         }
     }
+    // Compiled patterns for text cleaning
+    private static final Pattern URL_PATTERN = Pattern.compile("[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)");
+    private static final Pattern HTML_TAGS_PATTERN = Pattern.compile("<[^>]+>");
+    private static final Pattern NON_LETTER_PATTERN = Pattern.compile("[^a-zA-Z ]");
+    private static final Pattern MULTIPLE_SPACES_PATTERN = Pattern.compile(" +");
+    private static final Pattern CONSECUTIVE_LETTERS_PATTERN = Pattern.compile("(.)\\1{2,}");
+    private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("(?<=[a-z])(?=[A-Z])");
+    private static final Pattern NO_STANDARD_ASCII_PATTERN = Pattern.compile("[^\\x00-\\x7f]");
 
-    // Regular expressions for text cleaning
-    private static final String URL_REGEX = "[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)";
-    private static final String HTML_TAGS_REGEX = "<[^>]+>";
-    private static final String NON_LETTER_REGEX = "[^a-zA-Z ]";
-    private static final String MULTIPLE_SPACES_REGEX = " +";
-    private static final String CONSECUTIVE_LETTERS_REGEX = "(.)\\1{2,}";
-    private static final String CAMEL_CASE_REGEX = "(?<=[a-z])(?=[A-Z])";
-    private static final String NO_STANDARD_ASCII_FOR_7_BITS_REGEX="[^\\x00-\\x7f]";
 
     /**
      * Splits the TSV file lines into columns.
@@ -47,17 +48,21 @@ public class Preprocess {
     }
 
     /**
-     * Cleans the text by removing URLs, HTML tags, non-letter characters, 
+     * Cleans the text by removing URLs, HTML tags, non-letter characters,
      * consecutive letters, and multiple spaces.
      */
     public static String cleanText(String text) {
-        return text.replaceAll(URL_REGEX, " ")
-                   .replaceAll(HTML_TAGS_REGEX, " ")
-                   .replaceAll(NON_LETTER_REGEX, " ")
-                   .replaceAll(MULTIPLE_SPACES_REGEX, " ")
-                   .replaceAll(CONSECUTIVE_LETTERS_REGEX, "$1$1")
-                   .replaceAll(NO_STANDARD_ASCII_FOR_7_BITS_REGEX," ")
-                   .trim();
+        return NO_STANDARD_ASCII_PATTERN.matcher(
+                CONSECUTIVE_LETTERS_PATTERN.matcher(
+                        MULTIPLE_SPACES_PATTERN.matcher(
+                                NON_LETTER_PATTERN.matcher(
+                                        HTML_TAGS_PATTERN.matcher(
+                                                URL_PATTERN.matcher(text).replaceAll(" ")
+                                        ).replaceAll(" ")
+                                ).replaceAll(" ")
+                        ).replaceAll(" ")
+                ).replaceAll("$1$1")
+        ).replaceAll(" ").trim();
     }
 
     /**
@@ -67,7 +72,7 @@ public class Preprocess {
         List<String> tokens = new ArrayList<>();
         String[] words = text.split(" ");
         for (String word : words) {
-            String[] withoutCamelCase = word.split(CAMEL_CASE_REGEX);
+            String[] withoutCamelCase = CAMEL_CASE_PATTERN.split(word);
             for (String token : withoutCamelCase) {
                 if(token.trim().isEmpty()||token.isEmpty()){
                     continue;
