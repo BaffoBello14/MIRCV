@@ -5,15 +5,17 @@ import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
+        PathAndFlags.DYNAMIC_PRUNING=true;
 
 
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("bro you are a meme",10,false,"bm25");
+        ArrayList<Integer>ret=Processer.processQuery("break",10,false,"bm25");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);

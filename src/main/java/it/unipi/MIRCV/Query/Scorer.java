@@ -49,6 +49,6 @@ public class Scorer {
     public static float calculateBM25(Posting posting, float idf) {
         long doc_len = DocIndex.getInstance().getDoc_len(posting.getDoc_id());
         float tf = (float) (1 + Math.log(posting.getFrequency()));
-        return (tf * idf) / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * doc_len / CollectionStatistics.getTotalLenDoc()));
+        return (float) ((tf * idf) / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doc_len / CollectionStatistics.getAvgDocLen()))));
     }
 }
