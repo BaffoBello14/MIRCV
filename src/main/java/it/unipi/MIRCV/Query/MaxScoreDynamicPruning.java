@@ -39,7 +39,14 @@ public class MaxScoreDynamicPruning {
                 if(postings.get(i).getPostingActual()!=null&&postings.get(i).getPostingActual().getDoc_id()==current){
                     score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
                     postings.get(i).next();
+                } else if (postings.get(i).getPostingActual()==null) {
+                    skip=true;
+                    break;
                 }
+
+            }
+            if(skip){
+                break;
             }
             for(int i=pivot-1;i>=0;i--){
                 if(score+ub[i]<threshold){
@@ -98,7 +105,7 @@ public class MaxScoreDynamicPruning {
             }
             if (postings.get(i).getPostingActual().getDoc_id() > doc_id) {
                 doc_id = postings.get(i).getPostingActual().getDoc_id();
-                i = -1; // Reset i to restart the loop.
+                i = start-1; // Reset i to restart the loop.
                 continue;
             }
             if (postings.get(i).getPostingActual().getDoc_id() < doc_id) {
@@ -108,7 +115,7 @@ public class MaxScoreDynamicPruning {
                 }
                 if (geq.getDoc_id() > doc_id) {
                     doc_id = geq.getDoc_id();
-                    i = -1; // Reset i to restart the loop.
+                    i = start-1; // Reset i to restart the loop.
                 }
             }
         }
