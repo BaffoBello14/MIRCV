@@ -170,6 +170,13 @@ public class DAAT {
                 if (geq.getDoc_id() > doc_id) {
                     doc_id = geq.getDoc_id();
                     i = -1; // Reset i to restart the loop.
+                    continue;
+                }
+                if(geq.getDoc_id()==doc_id){
+                    if(areEquals(postingIndices)){
+                        return doc_id;
+                    }
+                    i=-1;
                 }
             }
         }

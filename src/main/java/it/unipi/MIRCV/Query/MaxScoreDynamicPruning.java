@@ -123,6 +123,15 @@ public class MaxScoreDynamicPruning {
                 if (geq.getDoc_id() > doc_id) {
                     doc_id = geq.getDoc_id();
                     i = start-1; // Reset i to restart the loop.
+                    continue;
+                }
+                if(geq.getDoc_id()==doc_id){
+                    if(areEquals(postings,start,end)){
+                        return doc_id;
+                    }
+                    i=start-1;
+
+
                 }
             }
         }

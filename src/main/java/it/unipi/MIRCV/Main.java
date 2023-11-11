@@ -1,17 +1,21 @@
 package it.unipi.MIRCV;
 
+import it.unipi.MIRCV.Query.DAAT;
 import it.unipi.MIRCV.Query.Processer;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
+import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
+        
         PathAndFlags.DYNAMIC_PRUNING=true;
         long start=System.currentTimeMillis();
         ArrayList<Integer>ret=Processer.processQuery("do goldfish grow",10,true,"bm25");
