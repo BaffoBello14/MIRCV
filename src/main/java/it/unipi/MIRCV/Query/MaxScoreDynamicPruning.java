@@ -78,9 +78,26 @@ public class MaxScoreDynamicPruning {
         return min_doc;
     }
     public static int get_doc_id(ArrayList<PostingIndex>postings,int start,int end){
+        //todo
         return 0;
     }
     public static boolean areEquals(ArrayList<PostingIndex>postings,int start,int end){
+        if(start+1==end||start==end){
+            return true;
+        }
+        if(postings.get(0).getPostingActual()==null){
+            return false;
+        }
+        int doc_id=postings.get(0).getPostingActual().getDoc_id();
+        for(int i=start+1;i<end;i++){
+            if(postings.get(i).getPostingActual()!=null){
+                if(postings.get(i).getPostingActual().getDoc_id()!=doc_id){
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
         return true;
     }
     public static int get_max_doc_id(ArrayList<PostingIndex>postings,int start,int end){
