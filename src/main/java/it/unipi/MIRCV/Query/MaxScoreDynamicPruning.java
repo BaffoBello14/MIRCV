@@ -24,12 +24,12 @@ public class MaxScoreDynamicPruning {
         for(int i=1;i< postings.size();i++){
             ub[i]=ub[i-1]+postings.get(i).getUpperBound();
         }
-        float threshold=0;
+        float threshold=0.0F;
         int pivot=0;
         int current;
         boolean skip;
         while (pivot< postings.size()&&!isFinished(postings,pivot, postings.size())){
-            float score=0;
+            float score=0.0F;
             skip=false;
             current=conjunctive?get_doc_id(postings,pivot, postings.size()):getMinDocId(postings,pivot,postings.size());
             if(current==0){
@@ -39,13 +39,13 @@ public class MaxScoreDynamicPruning {
                 if(postings.get(i).getPostingActual()!=null&&postings.get(i).getPostingActual().getDoc_id()==current){
                     score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
                     postings.get(i).next();
-                } else if (postings.get(i).getPostingActual()==null) {
+                } else if (conjunctive&&postings.get(i).getPostingActual()==null) {
                     skip=true;
                     break;
                 }
 
             }
-            if(skip){
+            if(conjunctive&&skip){
                 break;
             }
             for(int i=pivot-1;i>=0;i--){
@@ -53,16 +53,23 @@ public class MaxScoreDynamicPruning {
                     skip=true;
                     break;
                 }
-                Posting geq=postings.get(i).nextGEQ(current);
-                if(geq==null&&conjunctive||conjunctive&&geq.getDoc_id()!=current){
+                if(postings.get(i).getPostingActual().getDoc_id()<current){
+                    Posting geq=postings.get(i).nextGEQ(current);
+                    if(geq==null&&conjunctive||conjunctive&&geq.getDoc_id()!=current){
+                        skip=true;
+                        break;
+                    }
+                    if(geq!=null&&geq.getDoc_id()==current){
+                        score+=Scorer.score(geq,postings.get(i).getIdf(),TFIDFOrBM25);
+                    }
+                } else if (postings.get(i).getPostingActual().getDoc_id()>current&&conjunctive) {
                     skip=true;
                     break;
-                }
-                if(geq!=null&&geq.getDoc_id()==current){
-                    score+=Scorer.score(geq,postings.get(i).getIdf(),TFIDFOrBM25);
+                } else if (postings.get(i).getPostingActual().getDoc_id()==current) {
+                    score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
                 }
             }
-            if(skip){
+            if(skip&&conjunctive){
                 continue;
             }
             if(topKPriorityQueue.offer(new Pair<>(score,current))){
