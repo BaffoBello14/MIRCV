@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
-        
+
         PathAndFlags.DYNAMIC_PRUNING=true;
         long start=System.currentTimeMillis();
         ArrayList<Integer>ret=Processer.processQuery("do goldfish grow",10,true,"bm25");
