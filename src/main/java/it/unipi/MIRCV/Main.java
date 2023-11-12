@@ -18,7 +18,7 @@ public class Main {
 
         PathAndFlags.DYNAMIC_PRUNING=true;
         long start=System.currentTimeMillis();
-        ArrayList<Integer>ret=Processer.processQuery("do goldfish grow",10,true,"bm25");
+        ArrayList<Integer>ret=Processer.processQuery("do goldfish grow",10,false,"bm25");
         long end=System.currentTimeMillis();
         System.out.println(end-start);
         System.out.println(ret);
@@ -31,7 +31,7 @@ public class Main {
         System.out.println();
         start=System.currentTimeMillis();
         PathAndFlags.DYNAMIC_PRUNING=false;
-        ret=Processer.processQuery("do goldfish grow",10,true,"bm25");
+        ret=Processer.processQuery("do goldfish grow",10,false,"bm25");
 
         end=System.currentTimeMillis();
         System.out.println(end-start);
