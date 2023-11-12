@@ -14,7 +14,7 @@ public class DAAT {
      * @param postings List of PostingIndex objects.
      * @return Minimum document ID.
      */
-    public static int getMinDocId(ArrayList<PostingIndex> postings) {
+    private static int getMinDocId(ArrayList<PostingIndex> postings) {
         int min_doc = CollectionStatistics.getDocuments();
         for (PostingIndex postingIndex : postings) {
             if (postingIndex.getPostingActual() != null) {
@@ -98,7 +98,7 @@ public class DAAT {
      * @param postingIndices List of PostingIndex objects.
      * @return Maximum document ID.
      */
-    public static int get_max_doc_id(ArrayList<PostingIndex> postingIndices) {
+    private static int get_max_doc_id(ArrayList<PostingIndex> postingIndices) {
         int max_doc = 0;
         for (PostingIndex postingIndex : postingIndices) {
             if (postingIndex.getPostingActual() != null) {
@@ -116,7 +116,7 @@ public class DAAT {
      * @param postingIndices List of PostingIndex objects.
      * @return True if document IDs are equal, false otherwise.
      */
-    public static boolean areEquals(ArrayList<PostingIndex> postingIndices) {
+    private static boolean areEquals(ArrayList<PostingIndex> postingIndices) {
         if (postingIndices.get(0).getPostingActual() == null) {
             return false;
         }
@@ -138,7 +138,7 @@ public class DAAT {
      * @param postingIndices List of PostingIndex objects.
      * @return Document ID.
      */
-    public static int get_doc_id(ArrayList<PostingIndex> postingIndices) {
+    private static int get_doc_id(ArrayList<PostingIndex> postingIndices) {
         int doc_id = get_max_doc_id(postingIndices);
         if (doc_id == 0) {
             return 0;

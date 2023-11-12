@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class MaxScoreDynamicPruning {
-    public static void sortByUpperbound(ArrayList<PostingIndex> postingIndices){
+    private static void sortByUpperbound(ArrayList<PostingIndex> postingIndices){
         postingIndices.sort(Comparator.comparing(PostingIndex::getUpperBound));
     }
     public static TopKPriorityQueue<Pair<Float,Integer>>maxScore(ArrayList<PostingIndex>postings,int k, String TFIDFOrBM25, boolean conjunctive){
@@ -40,33 +40,34 @@ public class MaxScoreDynamicPruning {
                     score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
                     postings.get(i).next();
                 } else if (conjunctive&&postings.get(i).getPostingActual()==null) {
-                    skip=true;
-                    break;
+                    return topKPriorityQueue;
                 }
 
-            }
-            if(conjunctive&&skip){
-                break;
             }
             for(int i=pivot-1;i>=0;i--){
                 if(score+ub[i]<threshold){
                     skip=true;
                     break;
                 }
-                if(postings.get(i).getPostingActual().getDoc_id()<current){
-                    Posting geq=postings.get(i).nextGEQ(current);
-                    if(geq==null&&conjunctive||conjunctive&&geq.getDoc_id()!=current){
+
+                if(postings.get(i).getPostingActual()!=null){
+                    if(postings.get(i).getPostingActual().getDoc_id()<current){
+                        Posting geq=postings.get(i).nextGEQ(current);
+                        if(geq==null&&conjunctive||conjunctive&&geq.getDoc_id()!=current){
+                            skip=true;
+                            break;
+                        }
+                        if(geq!=null&&geq.getDoc_id()==current){
+                            score+=Scorer.score(geq,postings.get(i).getIdf(),TFIDFOrBM25);
+                        }
+                    } else if (postings.get(i).getPostingActual().getDoc_id()>current&&conjunctive) {
                         skip=true;
                         break;
+                    } else if (postings.get(i).getPostingActual().getDoc_id()==current) {
+                        score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
                     }
-                    if(geq!=null&&geq.getDoc_id()==current){
-                        score+=Scorer.score(geq,postings.get(i).getIdf(),TFIDFOrBM25);
-                    }
-                } else if (postings.get(i).getPostingActual().getDoc_id()>current&&conjunctive) {
-                    skip=true;
-                    break;
-                } else if (postings.get(i).getPostingActual().getDoc_id()==current) {
-                    score+=Scorer.score(postings.get(i).getPostingActual(),postings.get(i).getIdf(),TFIDFOrBM25);
+                } else if (postings.get(i).getPostingActual()==null&&conjunctive) {
+                    return topKPriorityQueue;
                 }
             }
             if(skip&&conjunctive){
@@ -89,7 +90,7 @@ public class MaxScoreDynamicPruning {
         }
         return true;
     }
-    public static int getMinDocId(ArrayList<PostingIndex> postings,int start,int end) {
+    private static int getMinDocId(ArrayList<PostingIndex> postings,int start,int end) {
         int min_doc = CollectionStatistics.getDocuments();
         for (int i=start;i<end;i++) {
             if (postings.get(i).getPostingActual() != null) {
@@ -98,7 +99,7 @@ public class MaxScoreDynamicPruning {
         }
         return min_doc;
     }
-    public static int get_doc_id(ArrayList<PostingIndex>postings,int start,int end){
+    private static int get_doc_id(ArrayList<PostingIndex>postings,int start,int end){
         int doc_id=get_max_doc_id(postings,start,end);
         if(doc_id==0){
             return 0;
@@ -137,7 +138,7 @@ public class MaxScoreDynamicPruning {
         }
         return 0;
     }
-    public static boolean areEquals(ArrayList<PostingIndex>postings,int start,int end){
+    private static boolean areEquals(ArrayList<PostingIndex>postings,int start,int end){
         if(start+1==end||start==end){
             return true;
         }
@@ -156,7 +157,7 @@ public class MaxScoreDynamicPruning {
         }
         return true;
     }
-    public static int get_max_doc_id(ArrayList<PostingIndex>postings,int start,int end){
+    private static int get_max_doc_id(ArrayList<PostingIndex>postings,int start,int end){
         int doc_id=0;
         for(int i=start;i<end;i++){
             if(postings.get(i).getPostingActual()!=null){
