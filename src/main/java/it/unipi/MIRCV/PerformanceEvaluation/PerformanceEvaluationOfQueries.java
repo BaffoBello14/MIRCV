@@ -73,11 +73,12 @@ public class PerformanceEvaluationOfQueries {
             }
         }catch (IOException e){
             e.printStackTrace();
-            System.out.println("Problems with opening the query file to perform a performance evaluationin the write method");
+            System.out.println("Problems with opening the query file to perform a performance evaluation in the write method");
         }
     }
 
     public static void main(String[] args) {
         execute();
+
     }
 }
