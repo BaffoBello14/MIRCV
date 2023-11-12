@@ -9,13 +9,60 @@ import it.unipi.MIRCV.Utils.Preprocessing.Preprocess;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
+        Scanner scanner= new Scanner(System.in);
+        long timerStart,timerEnd;
+        ArrayList<Integer>queryResult;
+        String query,scoreFun;
+        do {
 
+            System.out.print("Query-> ");
+            query=scanner.nextLine();
+            if(query.trim().isEmpty()){
+                System.out.println("empty query");
+                continue;
+            }
+            System.out.print("Daat(1) or Dynamic Pruning(2) or exit(3)?");
+            int chose=Integer.parseInt(scanner.nextLine());
+            if(chose!=1&&chose!=2&&chose!=3){
+                System.out.println("no good chose then repeat");
+                continue;
+            } else if (chose==3) {
+                break;
+            }
+            System.out.print("Conjunctive(1) or Disjunctive(2)?");
+            int chose1=Integer.parseInt(scanner.nextLine());
+            if(chose1!=1&&chose1!=2){
+                System.out.println("no conj nor disj");
+                continue;
+            }
+            System.out.println("score fun bm25 or tfidf");
+            scoreFun=scanner.nextLine();
+            if(!scoreFun.equals("bm25")&&!scoreFun.equals("tfidf")){
+                System.out.println("no tfidf or bm25");
+                continue;
+            }
+            PathAndFlags.DYNAMIC_PRUNING= chose != 1;
+            timerStart=System.currentTimeMillis();
+            queryResult=Processer.processQuery(query,10,chose1==1,scoreFun);
+            timerEnd=System.currentTimeMillis();
+            if(queryResult==null){
+                System.out.println("no docs for the query");
+            }else{
+                System.out.print("Results of DocNos-> ");
+                for(int i:queryResult){
+                    System.out.print(DocIndex.getInstance().getDoc_NO(i)+" ");
+                }
+                System.out.println("with time->"+(timerEnd-timerStart)+"ms");
+            }
+        }while(true);
+        System.exit(0);
         PathAndFlags.DYNAMIC_PRUNING=true;
         long start=System.currentTimeMillis();
         ArrayList<Integer>ret=Processer.processQuery("do goldfish grow",10,true,"bm25");
