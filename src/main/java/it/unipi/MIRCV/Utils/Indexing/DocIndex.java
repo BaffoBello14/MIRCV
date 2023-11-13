@@ -2,6 +2,7 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
@@ -13,8 +14,19 @@ import java.nio.file.StandardOpenOption;
 public class DocIndex {
     private static DocIndex instance = new DocIndex();
     private final LFUCache<Integer, DocIndexEntry> lruCache = new LFUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
-
     private static String Path_To_DocIndex = PathAndFlags.PATH_TO_DOC_INDEX;
+    private static FileChannel fileChannel=null;
+    static {
+        try {
+            fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
+
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("problems with opening the file channel of doc index");
+        }
+    }
+
+
 
     private DocIndex() {
     }
@@ -29,8 +41,8 @@ public class DocIndex {
         if (lruCache.containsKey(doc_id)) {
             return lruCache.get(doc_id).getDoc_size();
         }
-        try {
-            FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
+        //try {
+            //FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
             DocIndexEntry docIndexEntry = new DocIndexEntry();
             int ret = docIndexEntry.readFromDisk((long) (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE, fileChannel);
             if (ret > 0 && ret == doc_id) {
@@ -38,11 +50,11 @@ public class DocIndex {
                 return docIndexEntry.getDoc_size();
             }
             return -1;
-        } catch (IOException e) {
-            System.out.println("Problems with reading from disk of the doc index ");
-            e.printStackTrace();
-            return -1;
-        }
+        //} catch (IOException e) {
+        //    System.out.println("Problems with reading from disk of the doc index ");
+        //    e.printStackTrace();
+        //    return -1;
+        //}
     }
 
     /**
@@ -55,8 +67,8 @@ public class DocIndex {
         if (lruCache.containsKey(doc_id)) {
             return lruCache.get(doc_id).getDoc_no();
         }
-        try {
-            FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
+        //try {
+            //FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
             DocIndexEntry docIndexEntry = new DocIndexEntry();
             int ret = docIndexEntry.readFromDisk((long) (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE, fileChannel);
             if (ret > 0 && ret == doc_id) {
@@ -64,11 +76,11 @@ public class DocIndex {
                 return docIndexEntry.getDoc_no();
             }
             return null;
-        } catch (IOException e) {
-            System.out.println("Problems with reading from disk of the doc index ");
-            e.printStackTrace();
-            return null;
-        }
+        //} catch (IOException e) {
+        //    System.out.println("Problems with reading from disk of the doc index ");
+        //    e.printStackTrace();
+        //    return null;
+        //}
     }
 
     /**

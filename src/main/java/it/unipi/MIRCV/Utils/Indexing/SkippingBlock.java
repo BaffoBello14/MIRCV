@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Class representing a block of postings with skipping information for an index term.
@@ -23,6 +24,19 @@ public class SkippingBlock {
     private int num_posting_of_block;
     private static long file_offset = 0;
     public static final int size_of_element = (8 + 4) * 2 + 4 + 4;
+    private static MappedByteBuffer bufferDocId = null;
+    private static MappedByteBuffer bufferFreq=null;
+    static {
+        try {
+            FileChannel fileChannel=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID),StandardOpenOption.READ);
+            FileChannel fileChannel1=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ),StandardOpenOption.READ);
+            bufferDocId= fileChannel.map(FileChannel.MapMode.READ_ONLY,0,fileChannel.size());
+            bufferFreq=fileChannel1.map(FileChannel.MapMode.READ_ONLY,0,fileChannel1.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("problems with opening the file channel");
+        }
+    }
 
     /**
      * Writes the skipping block information to disk.
@@ -54,33 +68,21 @@ public class SkippingBlock {
     }
 
     // Getters and setters...
-    public long getDoc_id_offset() {
-        return doc_id_offset;
-    }
 
     public void setDoc_id_offset(long doc_id_offset) {
         this.doc_id_offset = doc_id_offset;
     }
 
-    public long getDoc_id_size() {
-        return doc_id_size;
-    }
 
     public void setDoc_id_size(int doc_id_size) {
         this.doc_id_size = doc_id_size;
     }
 
-    public long getFreq_offset() {
-        return freq_offset;
-    }
 
     public void setFreq_offset(long freq_offset) {
         this.freq_offset = freq_offset;
     }
 
-    public long getFreq_size() {
-        return freq_size;
-    }
 
     public void setFreq_size(int freq_size) {
         this.freq_size = freq_size;
@@ -94,9 +96,6 @@ public class SkippingBlock {
         this.doc_id_max = doc_id_max;
     }
 
-    public int getNum_posting_of_block() {
-        return num_posting_of_block;
-    }
 
     public void setNum_posting_of_block(int num_posting_of_block) {
         this.num_posting_of_block = num_posting_of_block;
@@ -116,23 +115,25 @@ public class SkippingBlock {
      * @return ArrayList of Posting objects representing the postings in the skipping block.
      */
     public ArrayList<Posting> getSkippingBlockPostings() {
-        try {
-            FileChannel fileChannelDocID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
-            FileChannel fileChannelFreqs = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
-            MappedByteBuffer mappedByteBufferDocID = fileChannelDocID.map(FileChannel.MapMode.READ_ONLY, doc_id_offset, doc_id_size);
-            MappedByteBuffer mappedByteBufferFreq = fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY, freq_offset, freq_size);
+        //try {
+            //FileChannel fileChannelDocID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
+            //FileChannel fileChannelFreqs = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
+            //MappedByteBuffer mappedByteBufferDocID = fileChannelDocID.map(FileChannel.MapMode.READ_ONLY, doc_id_offset, doc_id_size);
+            //MappedByteBuffer mappedByteBufferFreq = fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY, freq_offset, freq_size);
 
-            if (mappedByteBufferFreq == null || mappedByteBufferDocID == null) {
+            if (bufferDocId == null || bufferFreq == null) {
                 return null;
             }
+            bufferDocId.position((int) doc_id_offset);
+            bufferFreq.position((int) freq_offset);
 
             ArrayList<Posting> postings = new ArrayList<>();
 
             if (PathAndFlags.COMPRESSION_ENABLED) {
                 byte[] doc_ids = new byte[doc_id_size];
                 byte[] freqs = new byte[freq_size];
-                mappedByteBufferDocID.get(doc_ids, 0, doc_id_size);
-                mappedByteBufferFreq.get(freqs, 0, freq_size);
+                bufferDocId.get(doc_ids, 0, doc_id_size);
+                bufferFreq.get(freqs, 0, freq_size);
 
                 int[] freqs_decompressed = UnaryConverter.convertFromUnary(freqs, num_posting_of_block);
                 int[] doc_ids_decompressed = VariableByteEncoder.decodeArray(doc_ids);
@@ -143,16 +144,16 @@ public class SkippingBlock {
                 }
             } else {
                 for (int i = 0; i < num_posting_of_block; i++) {
-                    Posting posting = new Posting(mappedByteBufferDocID.getInt(), mappedByteBufferFreq.getInt());
+                    Posting posting = new Posting(bufferDocId.getInt(), bufferFreq.getInt());
                     postings.add(posting);
                 }
             }
             return postings;
-        } catch (IOException e) {
-            System.out.println("Problems with reading from the file of the block descriptor.");
-            e.printStackTrace();
-            return null;
-        }
+        //} catch (IOException e) {
+          //  System.out.println("Problems with reading from the file of the block descriptor.");
+           // e.printStackTrace();
+            //return null;
+        //}
     }
 
     @Override

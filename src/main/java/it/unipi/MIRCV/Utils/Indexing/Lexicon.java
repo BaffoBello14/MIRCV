@@ -14,6 +14,15 @@ public class Lexicon {
     private static Lexicon instance = new Lexicon();
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LFUCache<String, LexiconEntry> lruCache = new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
+    private static FileChannel fileChannel=null;
+    static {
+        try {
+            fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("problems with opening the file channel of lexicon");
+        }
+    }
 
     private Lexicon() {
     }
@@ -52,13 +61,13 @@ public class Lexicon {
      * @return The LexiconEntry for the term, or null if not found.
      */
     public LexiconEntry find(String term) {
-        try {
+        //try {
             long top = CollectionStatistics.getTerms() - 1;
             long bot = 0;
             long mid;
             LexiconEntry entry = new LexiconEntry();
 
-            try (FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ)) {
+            //try (FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ)) {
 
                 while (bot <= top) {
                     mid = (bot + top) / 2;
@@ -80,14 +89,14 @@ public class Lexicon {
                         top = mid - 1;
                     }
                 }
-            }
+            //}
 
             return null;
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        //} catch (IOException e) {
+        //    e.printStackTrace();
+        //    return null;
+        //}
     }
 
     /**
