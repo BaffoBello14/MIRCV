@@ -14,11 +14,12 @@ public class Lexicon {
     private static Lexicon instance = new Lexicon();
     protected static final int MAX_LEN_OF_TERM = 32;
     private final LFUCache<String, LexiconEntry> lruCache = new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
-    private static FileChannel fileChannel=null;
+    private static FileChannel fileChannel = null;
+
     static {
         try {
             fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.out.println("problems with opening the file channel of lexicon");
         }
