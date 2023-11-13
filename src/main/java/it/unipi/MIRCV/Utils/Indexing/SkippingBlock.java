@@ -25,16 +25,17 @@ public class SkippingBlock {
     private static long file_offset = 0;
     public static final int size_of_element = (8 + 4) * 2 + 4 + 4;
     private static MappedByteBuffer bufferDocId = null;
-    private static MappedByteBuffer bufferFreq=null;
+    private static MappedByteBuffer bufferFreq = null;
+
     static {
         try {
-            FileChannel fileChannel=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID),StandardOpenOption.READ);
-            FileChannel fileChannel1=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ),StandardOpenOption.READ);
-            bufferDocId= fileChannel.map(FileChannel.MapMode.READ_ONLY,0,fileChannel.size());
-            bufferFreq=fileChannel1.map(FileChannel.MapMode.READ_ONLY,0,fileChannel1.size());
+            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
+            FileChannel fileChannel1 = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
+            bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+            bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("problems with opening the file channel");
+            System.out.println("Problems with opening the file channel");
         }
     }
 

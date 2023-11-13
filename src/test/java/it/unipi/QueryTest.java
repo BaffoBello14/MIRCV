@@ -1,4 +1,5 @@
 package it.unipi;
+
 import it.unipi.MIRCV.Query.Processer;
 import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
@@ -9,12 +10,18 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * The QueryTest class contains unit tests for the query processing functionality.
+ */
 public class QueryTest {
 
     static boolean conjunctive = false;
     static String scoringFunction = "tfidf";
-    static void initialize() {
 
+    /**
+     * Initializes the necessary paths and flags for the test.
+     */
+    static void initialize() {
         PathAndFlags.PATH_TO_DOC_ID = "./IndexDataTest/Doc_ids/";
         PathAndFlags.PATH_TO_FINAL = "./IndexDataTest/Final";
         PathAndFlags.PATH_TO_FREQ = "./IndexDataTest/Freqs/";
@@ -29,7 +36,9 @@ public class QueryTest {
         CollectionStatistics.readFromDisk();
     }
 
-
+    /**
+     * Tests the query processing functionality.
+     */
     @Test
     public void testQuery() {
         initialize();
@@ -83,25 +92,22 @@ public class QueryTest {
                 new ArrayList<>(Arrays.asList(8)),
                 new ArrayList<>(Arrays.asList(8))
         ));
-        ArrayList<ArrayList<Integer>> allResults = new ArrayList<>(); // Contenitore di tutti i risultati
+        ArrayList<ArrayList<Integer>> allResults = new ArrayList<>(); // Container for all results
 
         for (String query : queryList) {
             for (int i = 0; i < 2; i++) {
                 for (int j = 0; j < 2; j++) {
-                    for(int k=0;k<2;k++){
-                        PathAndFlags.DYNAMIC_PRUNING=(k==1);
+                    for(int k = 0; k < 2; k++) {
+                        PathAndFlags.DYNAMIC_PRUNING = (k == 1);
                         conjunctive = (i == 1);
                         scoringFunction = (j == 1) ? "bm25" : "tfidf";
 
-                        allResults.add(Processer.processQuery(query,2,conjunctive,scoringFunction));
+                        allResults.add(Processer.processQuery(query, 2, conjunctive, scoringFunction));
                     }
-
                 }
             }
         }
-        System.out.println(allResults);
 
         assertEquals(groundTruth, allResults);
     }
-
 }

@@ -15,18 +15,16 @@ public class DocIndex {
     private static DocIndex instance = new DocIndex();
     private final LFUCache<Integer, DocIndexEntry> lruCache = new LFUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
     private static String Path_To_DocIndex = PathAndFlags.PATH_TO_DOC_INDEX;
-    private static FileChannel fileChannel=null;
+    private static FileChannel fileChannel = null;
+
     static {
         try {
             fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
-
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.out.println("problems with opening the file channel of doc index");
         }
     }
-
-
 
     private DocIndex() {
     }
