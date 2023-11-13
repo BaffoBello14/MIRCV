@@ -41,26 +41,6 @@ public class PostingIndex {
         blocks.clear();
         // Lexicon.getInstance().remove(term);
     }
-
-    /*
-    public void updateBM25Values(int tf, int doc_len){
-        float ratio=(float)this.tf_BM25/(float)(this.doc_len_BM25+this.tf_BM25);
-        float newRatio=(float)tf/(float)(doc_len+tf);
-        if(newRatio>ratio){
-            this.tf_BM25=tf;
-            this.doc_len_BM25=doc_len;
-        }
-    }
-
-    public int getDoc_len_BM25() {
-        return doc_len_BM25;
-    }
-
-    public int getTf_BM25() {
-        return tf_BM25;
-    }
-    */
-
     /**
      * Initializes a new instance of the PostingIndex class.
      */
