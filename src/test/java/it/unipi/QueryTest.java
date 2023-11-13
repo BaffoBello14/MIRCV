@@ -1,5 +1,6 @@
 package it.unipi;
 import it.unipi.MIRCV.Query.Processer;
+import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,32 +11,7 @@ public class QueryTest {
 
     static boolean conjunctive = false;
     static String scoringFunction = "tfidf";
-
-    private static void createDirectoryIfNotExists(String directoryPath) {
-        try {
-            if (!Files.exists(Paths.get(directoryPath))) {
-                Files.createDirectories(Paths.get(directoryPath));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     static void initialize() {
-        String[] directories = {
-                "./IndexDataTest/BlockInfo/",
-                "./IndexDataTest/CollectionStatistics/",
-                "./IndexDataTest/Doc_ids/",
-                "./IndexDataTest/Doc_index/",
-                "./IndexDataTest/Final/",
-                "./IndexDataTest/Flags/",
-                "./IndexDataTest/Freqs/",
-                "./IndexDataTest/Lexicons/"
-        };
-
-        for (String directory : directories) {
-            createDirectoryIfNotExists(directory);
-        }
 
         PathAndFlags.PATH_TO_DOC_ID = "./IndexDataTest/Doc_ids/";
         PathAndFlags.PATH_TO_FINAL = "./IndexDataTest/Final";
@@ -48,6 +24,7 @@ public class QueryTest {
         PathAndFlags.PATH_TO_COLLECTION_STAT = "./IndexDataTest/CollectionStatistics/CollectionStat.dat";
         PathAndFlags.PATH_TO_BLOCK_FILE = "./IndexDataTest/BlockInfo/BlockInfo.dat";
         PathAndFlags.PATH_TO_FLAGS = "./IndexDataTest/Flags/Flags.dat";
+        CollectionStatistics.readFromDisk();
     }
 
     public static void testQuery() {
@@ -73,17 +50,18 @@ public class QueryTest {
                     scoringFunction = (j == 1) ? "bm25" : "tfidf";
                     PathAndFlags.DYNAMIC_PRUNING = (k == 1);
 
-                    System.out.println(Processer.processQuery(query, 3, conjunctive, scoringFunction));
+                    result=Processer.processQuery(query, 3, conjunctive, scoringFunction);
 
-                    //printQueryResult(query, conjunctive, scoringFunction, result);
+                    printQueryResult(query, conjunctive, scoringFunction, result);
                 }
             }
         }
     }
 
     private static void printQueryResult(String query, boolean conjunctive, String scoringFunction, ArrayList<Integer> result) {
-        System.out.println("Query: " + query + "\nParameters:\tconjunctive:" + conjunctive + "\tScoring function: " + scoringFunction);
-        System.out.println("Result: " + result);
+        System.out.println("Query: " + query + "\nParameters:\tconjunctive:" + conjunctive + "\tScoring function: " + scoringFunction+
+                "\tApproach: "+(PathAndFlags.DYNAMIC_PRUNING ? "DAAT":"MaxScore"));
+        System.out.println(result);
     }
 
     public static void main(String[] args) {
