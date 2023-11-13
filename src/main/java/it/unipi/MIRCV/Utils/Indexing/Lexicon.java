@@ -18,7 +18,11 @@ public class Lexicon {
 
     static {
         try {
-            fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
+            File file= new File(PathAndFlags.PATH_TO_FINAL_LEXICON);
+            if(file.exists()){
+                fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("problems with opening the file channel of lexicon");

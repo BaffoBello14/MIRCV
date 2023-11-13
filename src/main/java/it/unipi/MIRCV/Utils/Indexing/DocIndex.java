@@ -19,7 +19,10 @@ public class DocIndex {
 
     static {
         try {
-            fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
+            File file= new File(Path_To_DocIndex);
+            if(file.exists()){
+                fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("problems with opening the file channel of doc index");

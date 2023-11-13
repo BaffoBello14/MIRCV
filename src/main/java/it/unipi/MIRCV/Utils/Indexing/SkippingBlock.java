@@ -4,6 +4,7 @@ import it.unipi.MIRCV.Converters.UnaryConverter;
 import it.unipi.MIRCV.Converters.VariableByteEncoder;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -29,10 +30,15 @@ public class SkippingBlock {
 
     static {
         try {
-            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
-            FileChannel fileChannel1 = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
-            bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-            bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
+            File file= new File(PathAndFlags.PATH_TO_FINAL_DOC_ID);
+            File file1=new File(PathAndFlags.PATH_TO_FINAL_FREQ);
+            if(file.exists()&&file1.exists()){
+                FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_DOC_ID), StandardOpenOption.READ);
+                FileChannel fileChannel1 = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_FREQ), StandardOpenOption.READ);
+                bufferDocId = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+                bufferFreq = fileChannel1.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel1.size());
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Problems with opening the file channel");
