@@ -28,7 +28,7 @@ public class PerformanceEvaluationOfQueries {
         PathAndFlags.readFlagsFromDisk();
         String[] lineofDoc;
         String qno;
-        List<String> tokens;
+        
         try {
             InputStream file = Files.newInputStream(Paths.get(PATH_TO_ARCHIVE_COLLECTION));
             InputStream gzip = new GZIPInputStream(file);
