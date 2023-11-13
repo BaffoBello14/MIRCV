@@ -122,6 +122,7 @@ public class SkippingBlock {
             //MappedByteBuffer mappedByteBufferFreq = fileChannelFreqs.map(FileChannel.MapMode.READ_ONLY, freq_offset, freq_size);
 
             if (bufferDocId == null || bufferFreq == null) {
+                System.out.println("problems with file channels");
                 return null;
             }
             bufferDocId.position((int) doc_id_offset);
