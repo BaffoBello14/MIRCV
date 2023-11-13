@@ -2,10 +2,12 @@ package it.unipi;
 import it.unipi.MIRCV.Query.Processer;
 import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryTest {
 
@@ -27,46 +29,79 @@ public class QueryTest {
         CollectionStatistics.readFromDisk();
     }
 
-    public static void testQuery() {
-        ArrayList<String> queryList = new ArrayList<>();
-        queryList.add("Python programming language");
-        queryList.add("passion for coding");
-        queryList.add("quick brown fox lazy dog");
-        queryList.add("versatile programming");
-        queryList.add("enjoy reading books");
+
+    @Test
+    public void testQuery() {
+        initialize();
+        ArrayList<String> queryList = new ArrayList<>(Arrays.asList(
+                "Python programming language",
+                "passion for coding",
+                "quick brown fox lazy dog",
+                "versatile programming",
+                "enjoy reading books"
+        ));
+
+        ArrayList<ArrayList<Integer>> groundTruth = new ArrayList<>(Arrays.asList(
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(9)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(3)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4, 2)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(4)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8)),
+                new ArrayList<>(Arrays.asList(8))
+        ));
+        ArrayList<ArrayList<Integer>> allResults = new ArrayList<>(); // Contenitore di tutti i risultati
 
         for (String query : queryList) {
-            testQueryWithOptions(query);
-        }
-    }
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 2; j++) {
+                    for(int k=0;k<2;k++){
+                        PathAndFlags.DYNAMIC_PRUNING=(k==1);
+                        conjunctive = (i == 1);
+                        scoringFunction = (j == 1) ? "bm25" : "tfidf";
 
-    private static void testQueryWithOptions(String query) {
-        ArrayList<Integer> result;
+                        allResults.add(Processer.processQuery(query,2,conjunctive,scoringFunction));
+                    }
 
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 2; j++) {
-                for (int k = 0; k < 2; k++) {
-                    conjunctive = (i == 1);
-                    scoringFunction = (j == 1) ? "bm25" : "tfidf";
-                    PathAndFlags.DYNAMIC_PRUNING = (k == 1);
-
-                    result=Processer.processQuery(query, 3, conjunctive, scoringFunction);
-
-                    printQueryResult(query, conjunctive, scoringFunction, result);
                 }
             }
         }
-    }
+        System.out.println(allResults);
 
-    private static void printQueryResult(String query, boolean conjunctive, String scoringFunction, ArrayList<Integer> result) {
-        System.out.println("Query: " + query + "\nParameters:\tconjunctive:" + conjunctive + "\tScoring function: " + scoringFunction+
-                "\tApproach: "+(PathAndFlags.DYNAMIC_PRUNING ? "DAAT":"MaxScore"));
-        System.out.println(result);
-    }
-
-    public static void main(String[] args) {
-        QueryTest.initialize(); // Inizializzazione dei percorsi
-        QueryTest.testQuery(); // Esecuzione dei test
+        assertEquals(groundTruth, allResults);
     }
 
 }
