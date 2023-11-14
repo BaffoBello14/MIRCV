@@ -2,10 +2,12 @@ package it.unipi.MIRCV.Utils.Indexing;
 
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -26,6 +28,19 @@ public class LexiconEntry {
     private int numBlocks = 1;
 
     protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM - 16;
+    private static FileChannel fileChannel =null;
+
+    static{
+        try {
+            File file=new File(PathAndFlags.PATH_TO_BLOCK_FILE);
+            if(file.exists()) {
+                fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("problems with opening file with lexicon entry with block file");
+        }
+    }
 
     /**
      * Updates the maximum term frequency (TF) based on the postings in the given PostingIndex.
@@ -83,9 +98,6 @@ public class LexiconEntry {
         this.offset_doc_id = offset_doc_id;
     }
 
-    public int getUpperTF() {
-        return upperTF;
-    }
 
     public void setUpperTF(int upperTF) {
         this.upperTF = upperTF;
@@ -115,9 +127,6 @@ public class LexiconEntry {
         this.offset_frequency = offset_frequency;
     }
 
-    public long getOffset_skip_pointer() {
-        return offset_skip_pointer;
-    }
 
     public void setOffset_skip_pointer(long offset_skip_pointer) {
         this.offset_skip_pointer = offset_skip_pointer;
@@ -168,12 +177,13 @@ public class LexiconEntry {
      */
     public ArrayList<SkippingBlock> readBlocks() {
         try {
-            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
+            //FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
             ArrayList<SkippingBlock> blocks = new ArrayList<>();
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);
             if (mappedByteBuffer == null) {
                 return null;
             }
+
             for (int i = 0; i < numBlocks; i++) {
                 SkippingBlock skippingBlock = new SkippingBlock();
                 skippingBlock.setDoc_id_offset(mappedByteBuffer.getLong());

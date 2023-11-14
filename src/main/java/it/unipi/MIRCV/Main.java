@@ -1,8 +1,7 @@
 package it.unipi.MIRCV;
 
 import it.unipi.MIRCV.Query.Processer;
-import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
-import it.unipi.MIRCV.Utils.Indexing.DocIndex;
+import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 import java.util.ArrayList;
@@ -12,6 +11,10 @@ public class Main {
     public static void main(String[] args){
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
+        Lexicon.getInstance();
+        DocIndex.getInstance();
+        LexiconEntry entry=new LexiconEntry();
+        SkippingBlock skippingBlock=new SkippingBlock();
         Scanner scanner= new Scanner(System.in);
         long timerStart,timerEnd;
         ArrayList<Integer>queryResult;
