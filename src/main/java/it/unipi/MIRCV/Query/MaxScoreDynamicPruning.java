@@ -103,7 +103,7 @@ public class MaxScoreDynamicPruning {
                 continue;
             }
 
-            if (topKPriorityQueue.offer(new Pair<>(score, current))) {
+            if (topKPriorityQueue.offer(new Pair<>(score, current))&&topKPriorityQueue.size()==k) {
                 threshold = topKPriorityQueue.peek().getKey();
                 while (pivot < postings.size() && ub[pivot] < threshold) {
                     pivot++;
