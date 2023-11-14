@@ -147,4 +147,7 @@ public class Lexicon {
         lruCache.put(term, lexiconEntry);
         return lruCache.get(term);
     }
+    public void clear(){
+        lruCache.clear();
+    }
 }

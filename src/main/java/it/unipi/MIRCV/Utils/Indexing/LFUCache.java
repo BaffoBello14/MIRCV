@@ -55,6 +55,15 @@ public class LFUCache<K, V> {
 
         return cache.get(key);
     }
+    /**
+     * Clears the cache, removing all entries.
+     */
+    public void clear() {
+        cache.clear();
+        usageCounts.clear();
+        frequencyLists.clear();
+        lfuItems.clear();
+    }
 
     /**
      * Puts the specified key-value pair into the cache.
@@ -134,5 +143,6 @@ public class LFUCache<K, V> {
             }
             return frequencyComparison;
         }
+
     }
 }
