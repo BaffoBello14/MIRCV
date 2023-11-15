@@ -17,15 +17,15 @@ def read_data(file_path):
     return data_dict
 
 # File paths
-your_scores_file_path = './PerformanceEvaluatedFile/cleaned-qrel-msmarco-2019.txt'
+scores_file_path = './PerformanceEvaluatedFile/cleaned-qrel-msmarco-2019.txt'
 output_file_path = './PerformanceEvaluatedFile/ordered-qrel-msmarco-2019.txt'
 
 # Step 1: Create a dictionary from your scores
-your_scores = read_data(your_scores_file_path)
+scores = read_data(scores_file_path)
 
 # Step 2: Write the sorted data to the output file
 with open(output_file_path, 'w') as output_file:
-    for qid, doc_list in your_scores.items():
+    for qid, doc_list in scores.items():
         for doc_id, relevance in doc_list:
             output_file.write(f"{qid} Q0 {doc_id} {relevance}\n")
 
