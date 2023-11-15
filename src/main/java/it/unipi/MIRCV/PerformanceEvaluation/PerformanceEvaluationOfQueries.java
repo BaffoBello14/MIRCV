@@ -41,15 +41,15 @@ public class PerformanceEvaluationOfQueries {
             BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DAATBM25.txt"));
             BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DYNAMICPRUNINGTFIDF.txt"));
             BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DYNAMICPRUNINGBM25.txt"));
-            long start,end;
-            ArrayList<Long> withCacheTFIDFDAAT=new ArrayList<>();
-            ArrayList<Long> withCacheTFIDFDP=new ArrayList<>();
-            ArrayList<Long> withoutCacheTFIDFDAAT=new ArrayList<>();
-            ArrayList<Long> withoutCacheTFIDFDP=new ArrayList<>();
-            ArrayList<Long> withCacheBM25DP=new ArrayList<>();
-            ArrayList<Long> withCacheBM25DAAT=new ArrayList<>();
-            ArrayList<Long> withoutCacheBM25DAAT=new ArrayList<>();
-            ArrayList<Long> withoutCacheBM25DP=new ArrayList<>();
+            long start, end;
+            ArrayList<Long> withCacheTFIDFDAAT = new ArrayList<>();
+            ArrayList<Long> withCacheTFIDFDP = new ArrayList<>();
+            ArrayList<Long> withoutCacheTFIDFDAAT = new ArrayList<>();
+            ArrayList<Long> withoutCacheTFIDFDP = new ArrayList<>();
+            ArrayList<Long> withCacheBM25DP = new ArrayList<>();
+            ArrayList<Long> withCacheBM25DAAT = new ArrayList<>();
+            ArrayList<Long> withoutCacheBM25DAAT = new ArrayList<>();
+            ArrayList<Long> withoutCacheBM25DP = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) {
@@ -62,56 +62,55 @@ public class PerformanceEvaluationOfQueries {
 
                 qno = lineofDoc[0];
                 Lexicon.getInstance().clear();
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 ArrayList<Integer> answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
-                end=System.currentTimeMillis();
-                withoutCacheTFIDFDAAT.add(end-start);
+                end = System.currentTimeMillis();
+                withoutCacheTFIDFDAAT.add(end - start);
                 write2File(bufferedWriterDAATTFIDF, answerOfSearchEngine, qno);
 
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
-                end=System.currentTimeMillis();
-                withCacheTFIDFDAAT.add(end-start);
-
+                end = System.currentTimeMillis();
+                withCacheTFIDFDAAT.add(end - start);
 
                 Lexicon.getInstance().clear();
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "bm25");
-                end=System.currentTimeMillis();
-                withoutCacheBM25DAAT.add(end-start);
+                end = System.currentTimeMillis();
+                withoutCacheBM25DAAT.add(end - start);
                 write2File(bufferedWriterDAATBM25, answerOfSearchEngine, qno);
 
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 Processer.processQuery(lineofDoc[1], 10, false, "bm25");
-                end=System.currentTimeMillis();
-                withCacheBM25DAAT.add(end-start);
+                end = System.currentTimeMillis();
+                withCacheBM25DAAT.add(end - start);
                 Lexicon.getInstance().clear();
 
                 PathAndFlags.DYNAMIC_PRUNING = true;
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
-                end=System.currentTimeMillis();
-                withoutCacheTFIDFDP.add(end-start);
+                end = System.currentTimeMillis();
+                withoutCacheTFIDFDP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGTFIDF, answerOfSearchEngine, qno);
 
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
-                end=System.currentTimeMillis();
-                withCacheTFIDFDP.add(end-start);
+                end = System.currentTimeMillis();
+                withCacheTFIDFDP.add(end - start);
 
                 Lexicon.getInstance().clear();
 
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "bm25");
-                end=System.currentTimeMillis();
-                withoutCacheBM25DP.add(end-start);
+                end = System.currentTimeMillis();
+                withoutCacheBM25DP.add(end - start);
                 write2File(bufferedWriterDYNAMICPRUNINGBM25, answerOfSearchEngine, qno);
 
 
-                start=System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 Processer.processQuery(lineofDoc[1], 10, false, "bm25");
-                end=System.currentTimeMillis();
-                withCacheBM25DP.add(end-start);
+                end = System.currentTimeMillis();
+                withCacheBM25DP.add(end - start);
 
             }
             printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
