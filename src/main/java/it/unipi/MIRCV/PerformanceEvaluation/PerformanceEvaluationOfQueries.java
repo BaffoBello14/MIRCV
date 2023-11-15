@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
@@ -113,14 +114,14 @@ public class PerformanceEvaluationOfQueries {
                 withCacheBM25DP.add(end-start);
 
             }
-            printAverage("withCacheTFIDFDAAT", averageOfTime(withCacheTFIDFDAAT));
-            printAverage("withCacheTFIDFDP", averageOfTime(withCacheTFIDFDP));
-            printAverage("withoutCacheTFIDFDAAT", averageOfTime(withoutCacheTFIDFDAAT));
-            printAverage("withoutCacheTFIDFDP", averageOfTime(withoutCacheTFIDFDP));
-            printAverage("withCacheBM25DP", averageOfTime(withCacheBM25DP));
-            printAverage("withCacheBM25DAAT", averageOfTime(withCacheBM25DAAT));
-            printAverage("withoutCacheBM25DAAT", averageOfTime(withoutCacheBM25DAAT));
-            printAverage("withoutCacheBM25DP", averageOfTime(withoutCacheBM25DP));
+            printStats("withoutCacheTFIDFDAAT", withoutCacheTFIDFDAAT);
+            printStats("withCacheTFIDFDAAT", withCacheTFIDFDAAT);
+            printStats("withoutCacheBM25DAAT", withoutCacheBM25DAAT);
+            printStats("withCacheBM25DAAT", withCacheBM25DAAT);
+            printStats("withoutCacheTFIDFDP", withoutCacheTFIDFDP);
+            printStats("withCacheTFIDFDP", withCacheTFIDFDP);
+            printStats("withoutCacheBM25DP", withoutCacheBM25DP);
+            printStats("withCacheBM25DP", withCacheBM25DP);
             bufferedWriterDAATBM25.close();
             bufferedWriterDAATTFIDF.close();
             bufferedWriterDYNAMICPRUNINGBM25.close();
@@ -133,15 +134,45 @@ public class PerformanceEvaluationOfQueries {
 
         }
     }
-    private static void printAverage(String label, double average) {
-        System.out.println(label + " -> " + average);
-    }
-    private static double averageOfTime(ArrayList<Long> list){
-        long sum=0;
-        for(long l:list){
-            sum+=l;
+
+    private static void printStats(String label, ArrayList<Long> list) {
+        if (list.isEmpty()) {
+            System.out.println(label + " -> No data available");
+            return;
         }
-        return (double) sum /list.size();
+
+        long min = minimumOfTime(list);
+        long max = maximumOfTime(list);
+        double mean = averageOfTime(list);
+        double stdDev = standardDeviationOfTime(list, mean);
+
+        System.out.println(label + " -> Min: " + min + ", Max: " + max + ", Mean: " + mean + ", StdDev: " + stdDev);
+    }
+
+    private static long minimumOfTime(ArrayList<Long> list) {
+        return Collections.min(list);
+    }
+
+    private static long maximumOfTime(ArrayList<Long> list) {
+        return Collections.max(list);
+    }
+
+    private static double averageOfTime(ArrayList<Long> list) {
+        long sum = 0;
+        for (long l : list) {
+            sum += l;
+        }
+        return (double) sum / list.size();
+    }
+
+    private static double standardDeviationOfTime(ArrayList<Long> list, double mean) {
+        double sumSquaredDiff = 0;
+        for (long value : list) {
+            double diff = value - mean;
+            sumSquaredDiff += diff * diff;
+        }
+        double variance = sumSquaredDiff / list.size();
+        return Math.sqrt(variance);
     }
 
     private static void write2File(BufferedWriter bufferedWriter, ArrayList<Integer> answerOfSearchEngine, String qno) {
