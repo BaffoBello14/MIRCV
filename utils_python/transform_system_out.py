@@ -26,8 +26,8 @@ def read_data(file_path):
 
 # File paths
 your_file_path = './PerformanceEvaluatedFile/DAATBM25.txt'
-qrel_file_path = './PerformanceEvaluatedFile/cleaned-qrel-msmarco-2019.txt'
-output_file_path = './PerformanceEvaluatedFile/DAATBM25withRelevance.txt'
+qrel_file_path = './qrel_file/cleaned-qrel-msmarco-2019.txt'
+output_file_path = './relevance_file/DAATBM25withRelevance.txt'
 
 # Step 1: Read data from your file and qrel file
 your_data = read_data(your_file_path)

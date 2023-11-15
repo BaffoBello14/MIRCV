@@ -17,8 +17,8 @@ def read_data(file_path):
     return data_dict
 
 # File paths
-scores_file_path = './PerformanceEvaluatedFile/cleaned-qrel-msmarco-2019.txt'
-output_file_path = './PerformanceEvaluatedFile/ordered-qrel-msmarco-2019.txt'
+scores_file_path = './qrel_file/cleaned-qrel-msmarco-2019.txt'
+output_file_path = './qrel_file/ordered-qrel-msmarco-2019.txt'
 
 # Step 1: Create a dictionary from your scores
 scores = read_data(scores_file_path)

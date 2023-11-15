@@ -1,5 +1,5 @@
-input_file_path = './PerformanceEvaluatedFile/qrel-msmarco-2019.txt'
-output_file_path = './PerformanceEvaluatedFile/cleaned-qrel-msmarco-2019.txt'
+input_file_path = './qrel_file/qrel-msmarco-2019.txt'
+output_file_path = './qrel_file/cleaned-qrel-msmarco-2019.txt'
 
 with open(input_file_path, 'r') as input_file, open(output_file_path, 'w') as output_file:
     for line in input_file:
