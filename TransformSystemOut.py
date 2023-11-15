@@ -41,7 +41,7 @@ for common in qrel_relevance_data.keys() & your_data.keys():
 
 
 with open(output_file_path, 'w') as output_file:
-    for qid in your_data.keys():
+    for qid in your_data.keys()&qrel_relevance_data.keys():
         doc_list=your_data[qid]
         for doc_id, relevance in doc_list.items():
             output_file.write(f"{qid} Q0 {doc_id} {relevance}\n")
