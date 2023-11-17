@@ -25,9 +25,9 @@ def read_data(file_path):
     return data_dict
 
 # File paths
-your_file_path = './PerformanceEvaluatedFile/DAATBM25.txt'
+your_file_path = './PerformanceEvaluatedFile/DYNAMICPRUNINGTFIDF.txt'
 qrel_file_path = './qrel_file/cleaned-qrel-msmarco-2019.txt'
-output_file_path = './relevance_file/DAATBM25withRelevance.txt'
+output_file_path = './relevance_file/DYNAMICPRUNINGTFIDFwithRelevance.txt'
 
 # Step 1: Read data from your file and qrel file
 your_data = read_data(your_file_path)
