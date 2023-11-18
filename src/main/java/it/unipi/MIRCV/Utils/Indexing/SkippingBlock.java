@@ -11,7 +11,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Class representing a block of postings with skipping information for an index term.
