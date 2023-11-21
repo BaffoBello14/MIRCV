@@ -14,6 +14,9 @@ public class Main {
         Lexicon.getInstance();
         DocIndex.getInstance();
         
+        LexiconEntry entry = new LexiconEntry();
+        SkippingBlock skippingBlock = new SkippingBlock();
+
         Scanner scanner = new Scanner(System.in);
         long timerStart, timerEnd;
         ArrayList<Integer> queryResult;
