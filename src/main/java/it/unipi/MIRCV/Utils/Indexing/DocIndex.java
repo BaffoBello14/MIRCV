@@ -12,9 +12,9 @@ import java.nio.file.StandardOpenOption;
  * Singleton class for managing document index information.
  */
 public class DocIndex {
-    private static DocIndex instance = new DocIndex();
-    private final LFUCache<Integer, DocIndexEntry> lruCache = new LFUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
-    private static String Path_To_DocIndex = PathAndFlags.PATH_TO_DOC_INDEX;
+    private static final DocIndex instance = new DocIndex();
+    private final LFUCache<Integer, Long> lruCache = new LFUCache<>(PathAndFlags.DOC_INDEX_CACHE_SIZE);
+    private static final String Path_To_DocIndex = PathAndFlags.PATH_TO_DOC_INDEX;
     private static FileChannel fileChannel = null;
 
     static {
@@ -40,14 +40,14 @@ public class DocIndex {
      */
     public long getDoc_len(int doc_id) {
         if (lruCache.containsKey(doc_id)) {
-            return lruCache.get(doc_id).getDoc_size();
+            return lruCache.get(doc_id);
         }
         //try {
             //FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
             DocIndexEntry docIndexEntry = new DocIndexEntry();
             int ret = docIndexEntry.readFromDisk((long) (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE, fileChannel);
             if (ret > 0 && ret == doc_id) {
-                lruCache.put(doc_id, docIndexEntry);
+                lruCache.put(doc_id, docIndexEntry.getDoc_size());
                 return docIndexEntry.getDoc_size();
             }
             return -1;
@@ -65,15 +65,11 @@ public class DocIndex {
      * @return The document number, or null if an error occurs.
      */
     public String getDoc_NO(int doc_id) {
-        if (lruCache.containsKey(doc_id)) {
-            return lruCache.get(doc_id).getDoc_no();
-        }
         //try {
             //FileChannel fileChannel = FileChannel.open(Paths.get(Path_To_DocIndex), StandardOpenOption.READ);
             DocIndexEntry docIndexEntry = new DocIndexEntry();
             int ret = docIndexEntry.readFromDisk((long) (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE, fileChannel);
             if (ret > 0 && ret == doc_id) {
-                lruCache.put(doc_id, docIndexEntry);
                 return docIndexEntry.getDoc_no();
             }
             return null;
