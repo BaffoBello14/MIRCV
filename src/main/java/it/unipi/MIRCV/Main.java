@@ -52,7 +52,7 @@ public class Main {
                 System.out.println("no tfidf or bm25");
                 continue;
             }
-
+            
             PathAndFlags.DYNAMIC_PRUNING = chose != 1;
             timerStart = System.currentTimeMillis();
             queryResult = Processer.processQuery(query, 10, chose1 == 1, scoreFun);
