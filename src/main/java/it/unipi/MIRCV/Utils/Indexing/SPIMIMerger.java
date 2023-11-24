@@ -23,6 +23,16 @@ public class SPIMIMerger {
     private static LexiconEntry[] lexiconEntries;
     private static FileChannel[] doc_id_File_channels;
     private static FileChannel[] freq_file_channels;
+    private static FileChannel fileChannelDOCID =null;
+    static {
+        try {
+            fileChannelDOCID=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
+        }catch (IOException e){
+            e.printStackTrace();
+            System.out.println("Problems with opening the docindex file in the spimi merger");
+        }
+    }
+
 
     /**
      * Sets the number of indexes produced by SPIMI.
@@ -373,10 +383,8 @@ public class SPIMIMerger {
      */
     private static float calculateBM25WithoutIDF(float tf, long doc_id) {
         try {
-            FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
-            MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);
+            MappedByteBuffer mappedByteBuffer = fileChannelDOCID.map(FileChannel.MapMode.READ_ONLY, (doc_id - 1) * DocIndexEntry.DOC_INDEX_ENTRY_SIZE + DocIndexEntry.DOC_NO_LENGTH + 4, 8);
             long doclen = mappedByteBuffer.getLong();
-            fileChannel.close();
             return (float) ((tf / (tf + PathAndFlags.BM25_k1 * (1 - PathAndFlags.BM25_b + PathAndFlags.BM25_b * (doclen / CollectionStatistics.getAvgDocLen())))));
         } catch (IOException e) {
             System.out.println("Problems with opening the file channel of doc id in calculate BM25 in merger");
