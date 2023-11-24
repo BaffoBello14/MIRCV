@@ -1,9 +1,12 @@
 package it.unipi.MIRCV;
 
+import it.unipi.MIRCV.Query.Pair;
 import it.unipi.MIRCV.Query.Processer;
+import it.unipi.MIRCV.Query.TopKPriorityQueue;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -19,6 +22,7 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         long timerStart, timerEnd;
+        TopKPriorityQueue<Pair<Float,Integer>> topKPriorityQueue;
         ArrayList<Integer> queryResult;
         String query, scoreFun;
 
@@ -55,8 +59,9 @@ public class Main {
             
             PathAndFlags.DYNAMIC_PRUNING = chose != 1;
             timerStart = System.currentTimeMillis();
-            queryResult = Processer.getRankedQuery(Processer.processQuery(query, 10, chose1 == 1, scoreFun));
+            topKPriorityQueue =(Processer.processQuery(query, 10, chose1 == 1, scoreFun));
             timerEnd = System.currentTimeMillis();
+            queryResult=Processer.getRankedQuery(topKPriorityQueue);
 
             if (queryResult == null) {
                 System.out.println("no docs for the query");
