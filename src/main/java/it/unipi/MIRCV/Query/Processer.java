@@ -54,7 +54,7 @@ public class Processer {
      * @param scoringFun   The scoring function to be used.
      * @return ArrayList of document IDs matching the query.
      */
-    public static ArrayList<Integer> processQuery(String query, int k, boolean conjunctive, String scoringFun) {
+    public static TopKPriorityQueue<Pair<Float,Integer>> processQuery(String query, int k, boolean conjunctive, String scoringFun) {
         // Clean and preprocess the query.
         String cleanedQuery = Preprocess.cleanText(query);
         List<String> cleaned = Preprocess.tokenize(cleanedQuery);
@@ -92,6 +92,10 @@ public class Processer {
             priorityQueue = DAAT.scoreCollection(queryPostings, k, scoringFun, conjunctive);
         }
 
+        return priorityQueue;
+
+    }
+    public static ArrayList<Integer> getRankedQuery(TopKPriorityQueue<Pair<Float,Integer>>priorityQueue){
         // Return null if the priority queue is null.
         if (priorityQueue == null) {
             return null;

@@ -102,7 +102,7 @@ public class QueryTest {
                         conjunctive = (i == 1);
                         scoringFunction = (j == 1) ? "bm25" : "tfidf";
 
-                        allResults.add(Processer.processQuery(query, 2, conjunctive, scoringFunction));
+                        allResults.add(Processer.getRankedQuery(Processer.processQuery(query, 2, conjunctive, scoringFunction)));
                     }
                 }
             }

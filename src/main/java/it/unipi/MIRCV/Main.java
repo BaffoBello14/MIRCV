@@ -55,7 +55,7 @@ public class Main {
             
             PathAndFlags.DYNAMIC_PRUNING = chose != 1;
             timerStart = System.currentTimeMillis();
-            queryResult = Processer.processQuery(query, 10, chose1 == 1, scoreFun);
+            queryResult = Processer.getRankedQuery(Processer.processQuery(query, 10, chose1 == 1, scoreFun));
             timerEnd = System.currentTimeMillis();
 
             if (queryResult == null) {

@@ -1,6 +1,8 @@
 package it.unipi.MIRCV.PerformanceEvaluation;
 
+import it.unipi.MIRCV.Query.Pair;
 import it.unipi.MIRCV.Query.Processer;
+import it.unipi.MIRCV.Query.TopKPriorityQueue;
 import it.unipi.MIRCV.Utils.Indexing.CollectionStatistics;
 import it.unipi.MIRCV.Utils.Indexing.DocIndex;
 import it.unipi.MIRCV.Utils.Indexing.Lexicon;
@@ -61,7 +63,7 @@ public class PerformanceEvaluationOfQueries {
                 qno = lineofDoc[0];
                 Lexicon.getInstance().clear();
                 start = System.currentTimeMillis();
-                ArrayList<Integer> answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
+                TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine = Processer.processQuery(lineofDoc[1], 10, false, "tfidf");
                 end = System.currentTimeMillis();
                 withoutCacheTFIDFDAAT.add(end - start);
                 write2File(bufferedWriterDAATTFIDF, answerOfSearchEngine, qno);
@@ -172,13 +174,16 @@ public class PerformanceEvaluationOfQueries {
         return Math.sqrt(variance);
     }
 
-    private static void write2File(BufferedWriter bufferedWriter, ArrayList<Integer> answerOfSearchEngine, String qno) {
+    private static void write2File(BufferedWriter bufferedWriter, TopKPriorityQueue<Pair<Float,Integer>> answerOfSearchEngine, String qno) {
+        ArrayList<Pair<Float,Integer>> pair=new ArrayList<>();
         try {
-            if (answerOfSearchEngine == null) {
-                bufferedWriter.write(qno + " Q0 null\n");
-            } else {
-                for (int i : answerOfSearchEngine) {
-                    bufferedWriter.write(qno + " Q0 " + DocIndex.getInstance().getDoc_NO(i) + "\n");
+            if (answerOfSearchEngine != null) {
+                while (!answerOfSearchEngine.isEmpty()) {
+                    pair.add(answerOfSearchEngine.poll());
+                }
+                Collections.reverse(pair);
+                for (int i=0;i< pair.size();i++) {
+                    bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) +" "+pair.get(i).getKey()+"CHANG0"+ "\n");
                 }
             }
         } catch (IOException e) {
