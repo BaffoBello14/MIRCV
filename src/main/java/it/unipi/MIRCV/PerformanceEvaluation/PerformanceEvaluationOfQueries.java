@@ -183,7 +183,7 @@ public class PerformanceEvaluationOfQueries {
                 }
                 Collections.reverse(pair);
                 for (int i=0;i< pair.size();i++) {
-                    bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) +" "+pair.get(i).getKey()+"CHANG0"+ "\n");
+                    bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) +" "+pair.get(i).getKey()+" CHANG0"+ "\n");
                 }
             }
         } catch (IOException e) {
