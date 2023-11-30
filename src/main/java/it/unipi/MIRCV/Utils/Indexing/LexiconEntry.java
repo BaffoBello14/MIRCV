@@ -26,12 +26,12 @@ public class LexiconEntry {
     private long offset_skip_pointer = 0;
     private int numBlocks = 1;
 
-    protected static final long ENTRY_SIZE = 68 + Lexicon.MAX_LEN_OF_TERM - 16;
-    private static FileChannel fileChannel =null;
+    protected static final long ENTRY_SIZE = 48 + Lexicon.MAX_LEN_OF_TERM;
+    private static FileChannel fileChannel = null;
 
     static{
         try {
-            File file=new File(PathAndFlags.PATH_TO_BLOCK_FILE);
+            File file = new File(PathAndFlags.PATH_TO_BLOCK_FILE);
             if(file.exists()) {
                 fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
             }

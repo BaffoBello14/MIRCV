@@ -13,12 +13,12 @@ import java.nio.channels.FileChannel;
 public class Lexicon {
     private static Lexicon instance = new Lexicon();
     protected static final int MAX_LEN_OF_TERM = 32;
-    private final LFUCache<String, LexiconEntry> lruCache = new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
+    private final LFUCache<String, LexiconEntry> lfuCache = new LFUCache<>(PathAndFlags.LEXICON_CACHE_SIZE);
     private static FileChannel fileChannel = null;
 
     static {
         try {
-            File file= new File(PathAndFlags.PATH_TO_FINAL_LEXICON);
+            File file = new File(PathAndFlags.PATH_TO_FINAL_LEXICON);
             if(file.exists()){
                 fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ);
             }
@@ -48,14 +48,14 @@ public class Lexicon {
      * @return The LexiconEntry for the term, or null if not found.
      */
     public LexiconEntry retrieveEntry(String term) {
-        if (lruCache.containsKey(term)) {
-            return lruCache.get(term);
+        if (lfuCache.containsKey(term)) {
+            return lfuCache.get(term);
         }
         LexiconEntry lexiconEntry = find(term);
         if (lexiconEntry == null) {
             return null;
         }
-        lruCache.put(term, lexiconEntry);
+        lfuCache.put(term, lexiconEntry);
         return lexiconEntry;
     }
 
@@ -66,42 +66,33 @@ public class Lexicon {
      * @return The LexiconEntry for the term, or null if not found.
      */
     public LexiconEntry find(String term) {
-        //try {
-            long top = CollectionStatistics.getTerms() - 1;
-            long bot = 0;
-            long mid;
-            LexiconEntry entry = new LexiconEntry();
+        long top = CollectionStatistics.getTerms() - 1;
+        long bot = 0;
+        long mid;
+        LexiconEntry entry = new LexiconEntry();
 
-            //try (FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_FINAL_LEXICON), StandardOpenOption.READ)) {
 
-                while (bot <= top) {
-                    mid = (bot + top) / 2;
-                    entry.readEntryFromDisk(mid * LexiconEntry.ENTRY_SIZE, fileChannel);
+            while (bot <= top) {
+                mid = (bot + top) / 2;
+                entry.readEntryFromDisk(mid * LexiconEntry.ENTRY_SIZE, fileChannel);
 
-                    if (entry.getTerm().isEmpty()) {
-                        return null;
-                    }
-
-                    String termFound = entry.getTerm();
-
-                    int comparisonResult = term.compareTo(termFound);
-
-                    if (comparisonResult == 0) {
-                        return entry;
-                    } else if (comparisonResult > 0) {
-                        bot = mid + 1;
-                    } else {
-                        top = mid - 1;
-                    }
+                if (entry.getTerm().isEmpty()) {
+                    return null;
                 }
-            //}
 
-            return null;
+                String termFound = entry.getTerm();
 
-        //} catch (IOException e) {
-        //    e.printStackTrace();
-        //    return null;
-        //}
+                int comparisonResult = term.compareTo(termFound);
+
+                if (comparisonResult == 0) {
+                    return entry;
+                } else if (comparisonResult > 0) {
+                    bot = mid + 1;
+                } else {
+                    top = mid - 1;
+                }
+            }
+        return null;
     }
 
     /**
@@ -137,17 +128,21 @@ public class Lexicon {
      * @return The LexiconEntry for the term, or null if not found.
      */
     public LexiconEntry get(String term) {
-        if (lruCache.containsKey(term)) {
-            return lruCache.get(term);
+        if (lfuCache.containsKey(term)) {
+            return lfuCache.get(term);
         }
         LexiconEntry lexiconEntry = retrieveEntry(term);
         if (lexiconEntry == null) {
             return null;
         }
-        lruCache.put(term, lexiconEntry);
-        return lruCache.get(term);
+        lfuCache.put(term, lexiconEntry);
+        return lfuCache.get(term);
     }
+
+    /**
+     * Clears the cache.
+     */
     public void clear(){
-        lruCache.clear();
+        lfuCache.clear();
     }
 }
