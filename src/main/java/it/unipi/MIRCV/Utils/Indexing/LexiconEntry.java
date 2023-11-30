@@ -26,7 +26,7 @@ public class LexiconEntry {
     private long offset_skip_pointer = 0;
     private int numBlocks = 1;
 
-    protected static final long ENTRY_SIZE = 52 + Lexicon.MAX_LEN_OF_TERM;
+    protected static final long ENTRY_SIZE = 48 + Lexicon.MAX_LEN_OF_TERM;
     private static FileChannel fileChannel = null;
 
     static{
