@@ -176,7 +176,6 @@ public class LexiconEntry {
      */
     public ArrayList<SkippingBlock> readBlocks() {
         try {
-            //FileChannel fileChannel = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_BLOCK_FILE), StandardOpenOption.READ);
             ArrayList<SkippingBlock> blocks = new ArrayList<>();
             MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, offset_skip_pointer, (long) numBlocks * SkippingBlock.size_of_element);
             if (mappedByteBuffer == null) {
