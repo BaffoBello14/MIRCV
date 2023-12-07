@@ -7,7 +7,6 @@ import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
 import java.io.File;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
