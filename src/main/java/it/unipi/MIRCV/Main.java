@@ -17,7 +17,7 @@ public class Main {
         
         if (!indexDataFolder.exists() || !indexDataFolder.isDirectory()) {
             // If the index data folder does not exist, we need to create it and start the indexing process
-            System.out.println("La cartella 'indexdata' non esiste. Avvio del processo di indicizzazione...");
+            System.out.println("The index data folder does not exist, we need to create it and start the indexing process...");
             try {
                 ProcessCollection.main(new String[0]);
             } catch (Exception e) {
