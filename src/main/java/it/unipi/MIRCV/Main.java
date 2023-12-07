@@ -72,7 +72,7 @@ public class Main {
             
             PathAndFlags.DYNAMIC_PRUNING = chose != 1;
             timerStart = System.currentTimeMillis();
-            topKPriorityQueue =(Processer.processQuery(query, 10, chose1 == 1, scoreFun));
+            topKPriorityQueue = (Processer.processQuery(query, 10, chose1 == 1, scoreFun));
             timerEnd = System.currentTimeMillis();
             queryResult=Processer.getRankedQuery(topKPriorityQueue);
 

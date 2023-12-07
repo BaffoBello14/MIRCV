@@ -174,16 +174,16 @@ public class PerformanceEvaluationOfQueries {
         return Math.sqrt(variance);
     }
 
-    private static void write2File(BufferedWriter bufferedWriter, TopKPriorityQueue<Pair<Float,Integer>> answerOfSearchEngine, String qno) {
-        ArrayList<Pair<Float,Integer>> pair=new ArrayList<>();
+    private static void write2File(BufferedWriter bufferedWriter, TopKPriorityQueue<Pair<Float, Integer>> answerOfSearchEngine, String qno) {
+        ArrayList<Pair<Float, Integer>> pair = new ArrayList<>();
         try {
             if (answerOfSearchEngine != null) {
                 while (!answerOfSearchEngine.isEmpty()) {
                     pair.add(answerOfSearchEngine.poll());
                 }
                 Collections.reverse(pair);
-                for (int i=0;i< pair.size();i++) {
-                    bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) +" "+(i+1)+" "+pair.get(i).getKey()+" CHANG0"+ "\n");
+                for (int i = 0; i < pair.size(); i++) {
+                    bufferedWriter.write(qno + " Q0 " + Integer.parseInt(DocIndex.getInstance().getDoc_NO(pair.get(i).getValue())) + " " + (i + 1) + " " + pair.get(i).getKey() + " CHANG0" + "\n");
                 }
             }
         } catch (IOException e) {
