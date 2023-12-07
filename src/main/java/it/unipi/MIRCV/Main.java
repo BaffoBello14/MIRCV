@@ -6,12 +6,26 @@ import it.unipi.MIRCV.Query.TopKPriorityQueue;
 import it.unipi.MIRCV.Utils.Indexing.*;
 import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 
+import java.io.File;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+
+        File indexDataFolder = new File("IndexData");
+        
+        if (!indexDataFolder.exists() || !indexDataFolder.isDirectory()) {
+            // If the index data folder does not exist, we need to create it and start the indexing process
+            System.out.println("La cartella 'indexdata' non esiste. Avvio del processo di indicizzazione...");
+            try {
+                ProcessCollection.main(new String[0]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         CollectionStatistics.readFromDisk();
         PathAndFlags.readFlagsFromDisk();
         Lexicon.getInstance();
