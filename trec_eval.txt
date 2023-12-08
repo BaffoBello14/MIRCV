@@ -1,0 +1,120 @@
+compressione disabilitata stemming/stopword removal disabilitati
+
+DAAT BM25
+
+P_10           0.5488
+recall_10      0.1240
+ndcg_cut_10    0.4177
+map_cut_10     0.1010
+
+DAAT TFIDF
+
+P_10           0.4814
+recall_10      0.0908
+ndcg_cut_10    0.3801
+map_cut_10     0.0648
+
+DYNAMICPRUNING BM25
+
+P_10           0.5488
+recall_10      0.1240
+ndcg_cut_10    0.4177
+map_cut_10     0.1010
+
+DYNAMICPRUNING TFIDF
+
+P_10           0.4814
+recall_10      0.0908
+ndcg_cut_10    0.3801
+map_cut_10     0.0648
+
+compressione disabilitata stemming/stopword removal abilitati
+
+DAAT BM25
+
+P_10           0.5349
+recall_10      0.1124
+ndcg_cut_10    0.4099
+map_cut_10     0.0890
+
+DAAT TFIDF
+
+P_10           0.5070
+recall_10      0.0987
+ndcg_cut_10    0.4053
+map_cut_10     0.0790
+
+DYNAMICPRUNING BM25
+
+P_10           0.5349
+recall_10      0.1124
+ndcg_cut_10    0.4099
+map_cut_10     0.0890
+
+DYNAMICPRUNING TFIDF
+
+P_10           0.5070
+recall_10      0.0987
+ndcg_cut_10    0.4053
+map_cut_10     0.0790
+
+compressione abilitata stemming/stopword removal disabilitati
+
+DAAT BM25
+
+P_10           0.5488
+recall_10      0.1240
+ndcg_cut_10    0.4177
+map_cut_10     0.1010
+
+DAAT TFIDF
+
+P_10           0.4814
+recall_10      0.0908
+ndcg_cut_10    0.3801
+map_cut_10     0.0648
+
+
+DYNAMICPRUNING BM25
+
+P_10           0.5488
+recall_10      0.1240
+ndcg_cut_10    0.4177
+map_cut_10     0.1010
+
+DYNAMICPRUNING TFIDF
+
+P_10           0.4814
+recall_10      0.0908
+ndcg_cut_10    0.3801
+map_cut_10     0.0648
+
+compressione abilitata stemming/stopword removal abilitati
+
+DAAT BM25
+
+P_10           0.5349
+recall_10      0.1124
+ndcg_cut_10    0.4099
+map_cut_10     0.0890
+
+DAAT TFIDF
+
+P_10           0.5070
+recall_10      0.0987
+ndcg_cut_10    0.4053
+map_cut_10     0.0790
+
+DYNAMICPRUNING BM25
+
+P_10           0.5349
+recall_10      0.1124
+ndcg_cut_10    0.4099
+map_cut_10     0.0890
+
+DYNAMICPRUNING TFIDF
+
+P_10           0.5070
+recall_10      0.0987
+ndcg_cut_10    0.4053
+map_cut_10     0.0790

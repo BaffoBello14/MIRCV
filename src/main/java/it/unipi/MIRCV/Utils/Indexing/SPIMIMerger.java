@@ -23,16 +23,16 @@ public class SPIMIMerger {
     private static LexiconEntry[] lexiconEntries;
     private static FileChannel[] doc_id_File_channels;
     private static FileChannel[] freq_file_channels;
-    private static FileChannel fileChannelDOCID =null;
+    private static FileChannel fileChannelDOCID = null;
+
     static {
         try {
-            fileChannelDOCID=FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
+            fileChannelDOCID = FileChannel.open(Paths.get(PathAndFlags.PATH_TO_DOC_INDEX), StandardOpenOption.READ);
         }catch (IOException e){
             e.printStackTrace();
             System.out.println("Problems with opening the docindex file in the spimi merger");
         }
     }
-
 
     /**
      * Sets the number of indexes produced by SPIMI.
