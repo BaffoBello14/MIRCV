@@ -20,7 +20,7 @@ import it.unipi.MIRCV.Utils.PathAndFlags.PathAndFlags;
 /**
  * JUnit test class for Indexing.
  */
-public class IndexingTest {
+public class AIndexingTest {
 
     private static void createDirectoryIfNotExists(String directoryPath) {
         if (directoryPath != null && !directoryPath.isEmpty()) {
