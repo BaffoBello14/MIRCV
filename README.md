@@ -1,4 +1,4 @@
-# Multimedia Information Retrieval and Computer Vision System
+# Multimedia Information Retrieval and Computer Vision Project
 
 This repository contains the source code for the project developed as part of the Multimedia Information Retrieval and Computer Vision course, within the Master's Degree in Artificial Intelligence and Data Engineering at the University of Pisa for the academic year 2023/2024.
 
