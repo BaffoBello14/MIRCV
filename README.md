@@ -29,15 +29,22 @@ Ensure you have the following software installed:
 To set up the project, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/BaffoBello14/SearchEngine`
-2. Build the project with Maven: `mvn clean install`
-3. Execute: `java -jar target/SearchEngine-1.0-SNAPSHOT.jar`
+2. Create a folder named "Collection" and insert the "collection.tar.gz" file
+3. Build the project with Maven: `mvn clean install`
+4. Execute: `java -jar target/SearchEngine-1.0-SNAPSHOT.jar`
 
    **Note:**
    If it's the first time running the application, it will prompt you to create the index. Follow the on-screen instructions.
+   If you want to change the type of indexing just delete the "IndexData" folder.
 
 ### Testing
 
 Run the automated tests for this system using: `mvn test`
+
+### Performance Evaluation
+
+1. Insert in the "Collection" folder the "msmarco-test2019-queries.tsv.gz" file
+2. Execute: `java -cp target/SearchEngine-1.0-SNAPSHOT.jar it.unipi.MIRCV.PerformanceEvaluation.PerformanceEvaluationOfQueries`
 
 ### Authors
 

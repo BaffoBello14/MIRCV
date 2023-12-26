@@ -31,16 +31,22 @@ public class PerformanceEvaluationOfQueries {
         PathAndFlags.readFlagsFromDisk();
         String[] lineofDoc;
         String qno;
+        String directoryPath = "./PerformanceEvaluatedFile";
 
         try {
+            // Create the directory if it doesn't exist
+            if (!Files.exists(Paths.get(directoryPath))) {
+                Files.createDirectories(Paths.get(directoryPath));
+            }
+
             InputStream file = Files.newInputStream(Paths.get(PATH_TO_ARCHIVE_COLLECTION));
             InputStream gzip = new GZIPInputStream(file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(gzip, StandardCharsets.UTF_8));
             String line;
-            BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DAATTFIDF.txt"));
-            BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DAATBM25.txt"));
-            BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DYNAMICPRUNINGTFIDF.txt"));
-            BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter("./PerformanceEvaluatedFile/DYNAMICPRUNINGBM25.txt"));
+            BufferedWriter bufferedWriterDAATTFIDF = new BufferedWriter(new FileWriter(directoryPath + "/DAATTFIDF.txt"));
+            BufferedWriter bufferedWriterDAATBM25 = new BufferedWriter(new FileWriter(directoryPath + "/DAATBM25.txt"));
+            BufferedWriter bufferedWriterDYNAMICPRUNINGTFIDF = new BufferedWriter(new FileWriter(directoryPath + "/DYNAMICPRUNINGTFIDF.txt"));
+            BufferedWriter bufferedWriterDYNAMICPRUNINGBM25 = new BufferedWriter(new FileWriter(directoryPath + "/DYNAMICPRUNINGBM25.txt"));
             long start, end;
             ArrayList<Long> withCacheTFIDFDAAT = new ArrayList<>();
             ArrayList<Long> withCacheTFIDFDP = new ArrayList<>();
