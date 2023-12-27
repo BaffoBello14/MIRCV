@@ -104,7 +104,6 @@ data.dat
 prova.tsv
 IndexData
 Collection
-IndexDataTest
 test_collection.tsv
 trec_eval
 utils_python
